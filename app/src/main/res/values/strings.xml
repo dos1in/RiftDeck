@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">RiftDeck</string>
+    <string name="status_local">LOCAL LIBRARY</string>
+    <string name="status_ready">READY</string>
+    <string name="platform_gba">Game Boy Advance</string>
+    <string name="platform_gba_short">GBA</string>
+    <string name="home_continue_title">Continue playing</string>
+    <string name="home_continue_subtitle">Pick up from the exact shelf you left.</string>
+    <string name="recent_title">Recent</string>
+    <string name="favorites_title">Favorites</string>
+    <string name="recent_summary">%1$s · %2$s</string>
+    <string name="platform_screen_summary">All installed Game Boy Advance titles</string>
+    <string name="game_detail_title">Game details</string>
+    <string name="play_game">Play</string>
+    <string name="add_favorite">Add favorite</string>
+    <string name="remove_favorite">Remove favorite</string>
+    <string name="release_year">Year</string>
+    <string name="developer">Developer</string>
+    <string name="genre">Genre</string>
+    <string name="playtime">Playtime</string>
+    <string name="last_played">Last played</string>
+    <string name="hours_minutes">%1$d h %2$d min</string>
+    <string name="not_played">Not played yet</string>
+    <string name="emulator_missing_title">Emulator not configured</string>
+    <string name="emulator_missing_message">Choose an emulator before launching this game.</string>
+    <string name="choose_emulator">Choose emulator</string>
+    <string name="settings_title">Settings</string>
+    <string name="settings_summary">Controller-friendly system setup</string>
+    <string name="settings_library">Library</string>
+    <string name="settings_emulators">Emulators</string>
+    <string name="settings_appearance">Appearance</string>
+    <string name="settings_input">Input</string>
+    <string name="settings_video">Video preview</string>
+    <string name="settings_performance">Performance</string>
+    <string name="settings_coming_soon">Available in the next milestone</string>
+    <string name="hint_confirm">Confirm</string>
+    <string name="hint_back">Back</string>
+    <string name="hint_details">Details</string>
+    <string name="hint_favorite">Favorite</string>
+    <string name="hint_menu">Menu</string>
+    <string name="hint_navigate">Navigate</string>
+    <string name="accessibility_favorite">Favorite</string>
+    <string name="mock_library_label">DEMO LIBRARY</string>
+    <string name="artwork_description">Geometric cover art for %1$s</string>
+    <string name="platform_position">01 / 01</string>
+    <string name="settings_selected">Selected: %1$s</string>
+    <string name="empty_library_title">No games found</string>
+    <string name="empty_library_message">Add a ROM folder to build your local library.</string>
+    <string name="add_rom_folder">Add ROM folder</string>
+    <plurals name="library_count">
+        <item quantity="one">%1$d game</item>
+        <item quantity="other">%1$d games</item>
+    </plurals>
+    <plurals name="favorites_summary">
+        <item quantity="one">%1$d saved game</item>
+        <item quantity="other">%1$d saved games</item>
+    </plurals>
+</resources>

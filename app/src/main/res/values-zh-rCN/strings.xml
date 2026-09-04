@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">RiftDeck</string>
+    <string name="status_local">本地游戏库</string>
+    <string name="status_ready">就绪</string>
+    <string name="platform_gba">Game Boy Advance</string>
+    <string name="platform_gba_short">GBA</string>
+    <string name="home_continue_title">继续游戏</string>
+    <string name="home_continue_subtitle">回到上次离开时的游戏位置。</string>
+    <string name="recent_title">最近游玩</string>
+    <string name="favorites_title">收藏</string>
+    <string name="recent_summary">%1$s · %2$s</string>
+    <string name="platform_screen_summary">所有已安装的 Game Boy Advance 游戏</string>
+    <string name="game_detail_title">游戏详情</string>
+    <string name="play_game">开始游戏</string>
+    <string name="add_favorite">添加收藏</string>
+    <string name="remove_favorite">取消收藏</string>
+    <string name="release_year">发行年份</string>
+    <string name="developer">开发商</string>
+    <string name="genre">类型</string>
+    <string name="playtime">游玩时长</string>
+    <string name="last_played">上次游玩</string>
+    <string name="hours_minutes">%1$d 小时 %2$d 分钟</string>
+    <string name="not_played">尚未游玩</string>
+    <string name="emulator_missing_title">尚未配置模拟器</string>
+    <string name="emulator_missing_message">启动游戏前，请先选择模拟器。</string>
+    <string name="choose_emulator">选择模拟器</string>
+    <string name="settings_title">设置</string>
+    <string name="settings_summary">适配手柄操作的系统设置</string>
+    <string name="settings_library">游戏库</string>
+    <string name="settings_emulators">模拟器</string>
+    <string name="settings_appearance">外观</string>
+    <string name="settings_input">输入</string>
+    <string name="settings_video">视频预览</string>
+    <string name="settings_performance">性能</string>
+    <string name="settings_coming_soon">将在后续里程碑开放</string>
+    <string name="hint_confirm">确认</string>
+    <string name="hint_back">返回</string>
+    <string name="hint_details">详情</string>
+    <string name="hint_favorite">收藏</string>
+    <string name="hint_menu">菜单</string>
+    <string name="hint_navigate">移动焦点</string>
+    <string name="accessibility_favorite">已收藏</string>
+    <string name="mock_library_label">演示游戏库</string>
+    <string name="artwork_description">%1$s 的几何封面图</string>
+    <string name="platform_position">01 / 01</string>
+    <string name="settings_selected">当前选择：%1$s</string>
+    <string name="empty_library_title">未找到游戏</string>
+    <string name="empty_library_message">添加 ROM 文件夹以建立本地游戏库。</string>
+    <string name="add_rom_folder">添加 ROM 文件夹</string>
+    <plurals name="library_count">
+        <item quantity="other">%1$d 个游戏</item>
+    </plurals>
+    <plurals name="favorites_summary">
+        <item quantity="other">已收藏 %1$d 个游戏</item>
+    </plurals>
+</resources>
