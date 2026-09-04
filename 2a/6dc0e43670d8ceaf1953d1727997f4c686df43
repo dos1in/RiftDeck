@@ -1,0 +1,103 @@
+app/src/main/java/com/riftdeck/core/ui/theme/RiftDeckTheme.kt
+  e7f7972c3e4c277f 1-127
+app/src/main/java/com/riftdeck/feature/home/HomeViewModel.kt
+  e7f7972c3e4c277f 1-51
+app/src/main/java/com/riftdeck/core/input/GameAction.kt
+  e7f7972c3e4c277f 1-23
+app/src/main/java/com/riftdeck/feature/platform/PlatformScreen.kt
+  e7f7972c3e4c277f 1-235
+app/src/main/java/com/riftdeck/core/ui/components/EmptyLibraryState.kt
+  e7f7972c3e4c277f 1-74
+app/src/main/res/values/strings.xml
+  e7f7972c3e4c277f 1-59
+app/src/main/java/com/riftdeck/core/model/Game.kt
+  e7f7972c3e4c277f 1-28
+settings.gradle.kts
+  e7f7972c3e4c277f 1-19
+app/src/main/java/com/riftdeck/core/ui/components/ControllerHintBar.kt
+  e7f7972c3e4c277f 1-92
+app/src/main/java/com/riftdeck/domain/repository/GameRepository.kt
+  e7f7972c3e4c277f 1-11
+app/src/main/java/com/riftdeck/core/ui/components/NeonActionButton.kt
+  e7f7972c3e4c277f 1-84
+gradlew
+  e7f7972c3e4c277f 1-251
+app/src/main/java/com/riftdeck/feature/settings/SettingsScreen.kt
+  e7f7972c3e4c277f 1-246
+gradle.properties
+  e7f7972c3e4c277f 1-7
+app/src/main/res/drawable/ic_launcher.xml
+  e7f7972c3e4c277f 1-16
+app/src/main/res/values/themes.xml
+  e7f7972c3e4c277f 1-13
+build.gradle.kts
+  e7f7972c3e4c277f 1-6
+app/proguard-rules.pro
+  e7f7972c3e4c277f 1-2
+app/src/main/java/com/riftdeck/core/ui/components/GameCard.kt
+  e7f7972c3e4c277f 1-139
+gradle/libs.versions.toml
+  e7f7972c3e4c277f 1-32
+app/src/test/java/com/riftdeck/core/input/GamepadKeyMapperTest.kt
+  e7f7972c3e4c277f 1-34
+app/src/test/java/com/riftdeck/data/repository/MockGameRepositoryTest.kt
+  e7f7972c3e4c277f 1-24
+app/src/main/AndroidManifest.xml
+  e7f7972c3e4c277f 1-28
+app/build.gradle.kts
+  e7f7972c3e4c277f 1-68
+app/src/main/java/com/riftdeck/feature/game/GameDetailScreen.kt
+  e7f7972c3e4c277f 1-348
+app/src/main/java/com/riftdeck/app/navigation/RiftDeckApp.kt
+  e7f7972c3e4c277f 1-129
+gradle/wrapper/gradle-wrapper.properties
+  e7f7972c3e4c277f 1-7
+gradlew.bat
+  e7f7972c3e4c277f 1-94
+app/src/main/java/com/riftdeck/feature/home/HomeScreen.kt
+  e7f7972c3e4c277f 1-395
+app/src/main/java/com/riftdeck/core/input/GamepadInput.kt
+  e7f7972c3e4c277f 1-141
+app/src/main/java/com/riftdeck/core/ui/components/GameArtwork.kt
+  e7f7972c3e4c277f 1-82
+app/src/main/java/com/riftdeck/core/ui/components/TerminalHeader.kt
+  e7f7972c3e4c277f 1-75
+app/src/main/java/com/riftdeck/data/repository/MockGameRepository.kt
+  e7f7972c3e4c277f 1-66
+app/src/main/java/com/riftdeck/feature/home/HomeUiState.kt
+  e7f7972c3e4c277f 1-23
+app/src/main/java/com/riftdeck/app/MainActivity.kt
+  e7f7972c3e4c277f 1-44
+.gitignore
+  e7f7972c3e4c277f 1-8,10
+  h_26bc2624df64e5 9
+app/src/main/res/values-zh-rCN/strings.xml
+  e7f7972c3e4c277f 1-57
+app/src/main/java/com/riftdeck/app/LauncherApplication.kt
+  e7f7972c3e4c277f 1-10
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "2a6dc0e43670d8ceaf1953d1727997f4c686df43",
+  "prompts": {
+    "e7f7972c3e4c277f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a06bc5-0139-7d02-8765-638b5b6fdf85",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "doslin",
+      "messages": [],
+      "total_additions": 3163,
+      "total_deletions": 5,
+      "accepted_lines": 3158,
+      "overriden_lines": 0
+    }
+  },
+  "humans": {
+    "h_26bc2624df64e5": {
+      "author": "doslin"
+    }
+  }
+}
