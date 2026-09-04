@@ -1,0 +1,1 @@
+Brand assets are subject to TRADEMARKS.md and are not licensed under MPL-2.0.
