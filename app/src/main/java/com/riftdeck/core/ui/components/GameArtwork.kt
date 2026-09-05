@@ -10,6 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -18,6 +19,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import com.riftdeck.R
 import com.riftdeck.core.model.Game
 import com.riftdeck.core.ui.theme.LocalFrontendTheme
 
@@ -26,6 +29,7 @@ fun GameArtwork(
     game: Game,
     contentDescription: String,
     modifier: Modifier = Modifier,
+    showLabel: Boolean = true,
 ) {
     val colors = LocalFrontendTheme.current
     val accent = when ((game.id % 3).toInt()) {
@@ -36,10 +40,12 @@ fun GameArtwork(
 
     Box(
         modifier = modifier
+            .clipToBounds()
             .background(colors.surfaceElevated)
             .semantics { this.contentDescription = contentDescription },
     ) {
         Canvas(Modifier.fillMaxSize()) {
+            if (size.minDimension <= 0f) return@Canvas
             val gridColor = colors.outline.copy(alpha = 0.46f)
             val step = size.minDimension / 6f
             var position = step
@@ -66,8 +72,8 @@ fun GameArtwork(
                 strokeWidth = size.minDimension * 0.035f,
             )
         }
-        Text(
-            text = game.title.uppercase(),
+        if (showLabel) Text(
+            text = stringResource(R.string.demo_cover),
             modifier = Modifier
                 .align(Alignment.BottomStart)
                 .padding(12.dp),
@@ -79,4 +85,3 @@ fun GameArtwork(
         )
     }
 }
-

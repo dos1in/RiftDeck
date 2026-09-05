@@ -1,4 +1,3 @@
-/* Hallmark · pre-emit critique: P5 H5 E4 S5 R5 V5 · macrostructure: Workbench · tone: technical atmospheric · anchor hue: neon yellow · theme: Terminal */
 package com.riftdeck.core.ui.theme
 
 import androidx.compose.material3.MaterialTheme
@@ -45,6 +44,7 @@ private val NeonFrontendTheme = FrontendTheme(
 )
 
 val LocalFrontendTheme = staticCompositionLocalOf { NeonFrontendTheme }
+val LocalReducedMotion = staticCompositionLocalOf { false }
 
 private val RiftDeckTypography = Typography(
     displayLarge = TextStyle(
@@ -73,6 +73,12 @@ private val RiftDeckTypography = Typography(
         fontSize = 18.sp,
         lineHeight = 22.sp,
     ),
+    titleSmall = TextStyle(
+        fontFamily = FontFamily.SansSerif,
+        fontWeight = FontWeight.Medium,
+        fontSize = 15.sp,
+        lineHeight = 19.sp,
+    ),
     bodyLarge = TextStyle(
         fontFamily = FontFamily.SansSerif,
         fontWeight = FontWeight.Normal,
@@ -95,8 +101,8 @@ private val RiftDeckTypography = Typography(
     labelMedium = TextStyle(
         fontFamily = FontFamily.Monospace,
         fontWeight = FontWeight.Normal,
-        fontSize = 11.sp,
-        lineHeight = 14.sp,
+        fontSize = 12.sp,
+        lineHeight = 16.sp,
         letterSpacing = 0.4.sp,
     ),
 )

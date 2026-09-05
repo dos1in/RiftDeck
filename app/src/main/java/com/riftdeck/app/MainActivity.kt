@@ -8,6 +8,9 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.remember
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import com.riftdeck.app.navigation.RiftDeckApp
 import com.riftdeck.core.input.GamepadInputManager
 import com.riftdeck.core.ui.theme.RiftDeckTheme
@@ -23,10 +26,15 @@ class MainActivity : ComponentActivity() {
             statusBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
             navigationBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
         )
+        WindowCompat.getInsetsController(window, window.decorView).apply {
+            systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            hide(WindowInsetsCompat.Type.systemBars())
+        }
 
         setContent {
-            val repository = (application as LauncherApplication).gameRepository
-            val factory = remember(repository) { HomeViewModelFactory(repository) }
+            val launcher = application as LauncherApplication
+            val repository = launcher.gameRepository
+            val factory = remember(repository) { HomeViewModelFactory(repository, launcher.uiPreferencesRepository) }
             val homeViewModel: HomeViewModel = viewModel(factory = factory)
 
             RiftDeckTheme {

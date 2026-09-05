@@ -26,6 +26,7 @@ fun EmptyLibraryState(
     focusRequester: FocusRequester,
     onAction: () -> Unit,
     modifier: Modifier = Modifier,
+    left: FocusRequester = FocusRequester.Cancel,
 ) {
     val colors = LocalFrontendTheme.current
     Column(
@@ -69,6 +70,7 @@ fun EmptyLibraryState(
             onClick = onAction,
             focusRequester = focusRequester,
             primary = true,
+            left = left,
         )
     }
 }
