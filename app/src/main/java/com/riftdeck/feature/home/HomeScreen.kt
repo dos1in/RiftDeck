@@ -11,6 +11,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -34,6 +35,7 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalFrontendTheme.current
+    val fontScale = LocalDensity.current.fontScale.coerceAtLeast(1f)
     val keys = remember { listOf("cover", "play", "details", "favorite", "previous", "next", "recent", "favorites", "all", "empty") }
     val focus = remember { keys.associateWith { FocusRequester() } }
     var focusedKey by rememberSaveable { mutableStateOf("cover") }
@@ -75,7 +77,7 @@ fun HomeScreen(
                     BoxWithConstraints(Modifier.weight(0.85f).fillMaxHeight(), contentAlignment = Alignment.Center) {
                         val coverHeight = (maxHeight - 52.dp).coerceAtLeast(40.dp).coerceAtMost(350.dp)
                         val coverWidth = (coverHeight * 0.83f).coerceAtMost(maxWidth - 8.dp)
-                        val controlsWidth = coverWidth.coerceAtLeast(160.dp).coerceAtMost(maxWidth)
+                        val controlsWidth = coverWidth.coerceAtLeast(160.dp * fontScale).coerceAtMost(maxWidth)
                         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
                             GameStageCover(game, Modifier.size(coverWidth, coverHeight), focus.getValue("cover"),
                                 left = rail, right = focus.getValue("play"), down = focus.getValue(when { index > 0 -> "previous"; index < uiState.games.lastIndex -> "next"; else -> "recent" }),

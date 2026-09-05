@@ -2,7 +2,7 @@
 
 ## 输入与边界
 
-仓库是 Kotlin / Jetpack Compose Android 掌机前端，当前 main / 2a6dc0e，开始时工作区干净。此次先输出三份可以双击打开的 HTML 高保真交互初稿，供用户选择视觉方向；这不是把 Android 应用改成 Web，也不声称初稿等于已完成原生代码、真机验证或真实模拟器启动。用户选择后再进入 Compose 落地阶段。三方向未选择前不创建 direction-approved.md，不修改 app 源码。
+RiftDeck 是 Kotlin / Jetpack Compose Android 掌机前端。本文记录最初三份 HTML 交互原型的共同设计规格，用于比较不同布局。当前已选择 C，确认记录见 [direction-approved.md](direction-approved.md)；后续品牌更新以 [brand-spec.md](brand-spec.md) 为准，原生实现与验证另行记录。
 
 ## 产品、受众与使用场景
 
@@ -10,7 +10,7 @@ RiftDeck 面向用实体按键操作 Android 掌机的复古游戏玩家。核�
 
 ## 相同内容与资产
 
-三版只能使用 assets/mock-data.json 中同一组真实仓库示例数据：Golden Circuit（动作，2003，Northstar Lab，2 小时 12 分，收藏）、Neon Rally（竞速，2002，Vector House，54 分）、Pocket Tactics（策略，2004，Tiny Forge，3 小时 31 分，收藏）、Skyline Drift（街机，2001，Mono Works，31 分）、Astral Garden（冒险，2005，Soft Reset，1 小时 32 分）。这是五款虚构示例游戏，不要包装成真实商业游戏；游戏总数 5，初始收藏数 2，最近游玩 3。最近时间是 mock repository 的相对时间展示，不是假装实时读取。
+三份原型使用 assets/mock-data.json 中同一组仓库示例数据：Golden Circuit（动作，2003，Northstar Lab，2 小时 12 分，收藏）、Neon Rally（竞速，2002，Vector House，54 分）、Pocket Tactics（策略，2004，Tiny Forge，3 小时 31 分，收藏）、Skyline Drift（街机，2001，Mono Works，31 分）、Astral Garden（冒险，2005，Soft Reset，1 小时 32 分）。这是五款虚构示例游戏，不要包装成真实商业游戏；游戏总数 5，初始收藏数 2，最近游玩 3。最近时间是 mock repository 的相对时间展示，不是假装实时读取。
 
 品牌图标来自现有 ic_launcher.xml 的完整路径，已准确转成 assets/riftdeck.svg 与 JSON 内 data URL。封面不是现实游戏截图：现有 GameArtwork.kt 本就用网格、方块、圆环、斜线绘制占位；本轮使用其同源 SVG 资产，显式标「示例封面」，不得另造角色、风景、游戏剧情或借真实游戏图。只在封面外排游戏名，不篡改共享封面。单文件 HTML 内嵌 data URL，不能 fetch 本地 JSON，不能依赖 CDN、下载字体、外部脚本。GBA 沿用现有文字标识，不重造官方 logo。没有真实 ROM、目录、模拟器配置，点击启动应出现「尚未配置模拟器」并可进入设置，不能冒充成功启动。
 
@@ -22,14 +22,14 @@ RiftDeck 面向用实体按键操作 Android 掌机的复古游戏玩家。核�
 
 ## 统一尺寸、排版、颜色与约束
 
-每份 HTML 的主应用画面以 1280×800（16:10）作为相同比较基准，不是设备规格声明；截图仅截应用本身，不包含说明网页边框。同时布局在 960×720（4:3）、1280×720（16:9）、800×500（紧凑16:10）与 640×480（紧凑4:3）可用，不用把整屏 transform 缩小导致文字过小。默认 full viewport、overflow 控制在内部内容区，无手机模型、无设备外框。四屏通过真正导航切换，不要求平铺手机屏；本项目规范是掌机优先，覆盖 skill 通用手机 mockup 默认。
+每份 HTML 的主应用画面以 1280×800（16:10）作为相同比较基准，不是设备规格声明；截图仅截应用本身，不包含说明网页边框。同时布局在 960×720（4:3）、1280×720（16:9）、800×500（紧凑16:10）与 640×480（紧凑4:3）可用，不用把整屏 transform 缩小导致文字过小。默认 full viewport、overflow 控制在内部内容区，无手机模型、无设备外框。四屏通过导航切换，布局以横屏掌机操作为主。
 
 颜色严格沿用 theme：background #10120E、surface #171A15、surfaceElevated #20241D、primary/focus #E7FF4F、secondary #54DDEA、tertiary #FF4FA3、text #F1F3EB、secondaryText #B7BEAE、outline #46503F、error #FF746C、success #70E2A0。正文通常 16–20 px，小屏不低于 14 px，标签不低于 12 px；大标题 32–52 px，但不牺牲游戏内容。沿用项目等宽字标题气质，可以 Monaco / Menlo 作显示字，正文中文 PingFang SC 等本地字体。锐利几何、细规则线、明确层级，减少重复卡片容器。静态细网格可少量使用，禁止重模糊、全屏持续动画、视频背景。焦点边框 2–3 px，缩放最多 1.03–1.04 且不产生布局跳动，短暂反馈服从 prefers-reduced-motion。
 
-## Form 推导
+## 布局思路
 
-叙事角色是每天反复进入的操作台；观众距离是双手握持掌机的近距离；视觉温度兴奋但清楚；容量优先当前游戏与邻近内容、把配置留到二级；母题来自实体卡带书架、D-pad 的离散相邻关系、RiftDeck R 字图标的折线与切角。设计要说明自己将哪一个母题用于结构。三版的导航位置、主内容构图或浏览结构必须真正不同，不能只换颜色。不要参考其他方向文件；同一 spec、同一资产独立探索。
+界面优先呈现当前游戏与邻近内容，配置放在二级页面。卡带书架用于组织游戏封面，D-pad 的相邻关系用于安排导航，RiftDeck 图标的折线与切角用于构建边框。A 强调模块与规则线，B 强调连续封面书架，C 强调当前游戏与主操作。
 
 ## 验证与交付
 
-每份文件少于 1000 行，开头有 assumptions / reasoning / placeholders 注释。命名 A/B/C 对应清晰描述，在根部 body 标 data-screen="home"（导航时更新），每个游戏交互元素标 data-game-id，方便统一测试。交付主 HTML 与简短说明，父任务统一截图和交互 QA。必须处理页面异常、浏览器刷新以及自定义 localStorage 异常，离线双击可用。初稿不新增 Android 依赖；没有 native 构建或硬件验收结论。
+交付包含独立 HTML、说明、截图和交互验证记录。页面通过 data-screen 标识当前页面，通过 data-game-id 标识游戏，方便测试。原型需处理页面异常、浏览器刷新及 localStorage 异常，并支持离线打开。浏览器验证见 [verification.md](verification.md)，原生构建和设备验证见 [native-verification.md](native-verification.md)。

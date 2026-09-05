@@ -3,14 +3,14 @@ package com.riftdeck.core.ui.components
 import android.text.format.DateUtils
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.*
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
@@ -46,9 +46,10 @@ fun GameStageCover(
         .onFocusChanged { focused = it.isFocused; if (it.isFocused) onFocused() }
         .controllerClickable(onClick = onClick)
     Box(modifier.graphicsLayer { scaleX = scale; scaleY = scale }.then(interactive)
-        .border(if (focused) 3.dp else 1.dp, if (focused) colors.primary else colors.outline).padding(6.dp)) {
-        GameArtwork(game, stringResource(R.string.artwork_description, game.title), Modifier.fillMaxSize(), showLabel = showLabel)
-        Box(Modifier.width(26.dp).height(3.dp).background(colors.primary))
+        .clip(CutCornerShape(topEnd = 16.dp, bottomStart = 16.dp))
+        .riftFrame(colors.outline, colors.primary, colors.secondary, focused, cut = 16.dp).padding(6.dp)) {
+        GameArtwork(game, stringResource(R.string.artwork_description, game.title), Modifier.fillMaxSize()
+            .clip(CutCornerShape(topEnd = 12.dp, bottomStart = 12.dp)), showLabel = showLabel)
     }
 }
 

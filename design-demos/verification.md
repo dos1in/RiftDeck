@@ -25,4 +25,4 @@
 
 这里只验证浏览器键盘与点击交互，不等于实体手柄、摇杆、Android 焦点系统或 KONKR 真机通过。没有真实扫描、模拟器启动、SD 卡、性能测量或进程重建验收。Android app 源码与 Gradle 配置未修改，因此本轮没有运行原生构建或单元测试；也没有提交或推送。
 
-阶段状态：三版已可评审，等待用户选择方向后再落实 Compose。
+本记录覆盖最初三份 HTML 原型。后续已选择 C 并落实到 Compose，见 [方向确认](direction-approved.md) 和 [原生验证](native-verification.md)。

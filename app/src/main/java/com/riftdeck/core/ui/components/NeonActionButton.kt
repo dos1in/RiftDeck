@@ -10,6 +10,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.*
 import androidx.compose.ui.semantics.*
 import androidx.compose.ui.text.style.TextOverflow
@@ -35,8 +36,9 @@ fun NeonActionButton(
 ) {
     val colors = LocalFrontendTheme.current
     var focused by remember { mutableStateOf(false) }
-    val shape = CutCornerShape(topEnd = if (primary) 12.dp else 0.dp)
-    val contentColor = if (primary) colors.background else if (selected) colors.primary else colors.textPrimary
+    val cut = if (primary) 12.dp else 4.dp
+    val shape = CutCornerShape(topEnd = cut, bottomStart = cut)
+    val contentColor = if (primary) colors.background else if (selected) colors.secondary else colors.textPrimary
     Row(
         modifier = modifier
             .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier)
@@ -47,8 +49,11 @@ fun NeonActionButton(
                 this.right = right ?: FocusRequester.Cancel
             }
             .onFocusChanged { focused = it.isFocused; if (it.isFocused) onFocused() }
+            .clip(shape)
             .background(when { primary -> colors.primary; focused || selected -> colors.surfaceElevated; else -> colors.background }, shape)
-            .border(if (focused) 2.dp else 1.dp, when { focused && primary -> colors.textPrimary; focused -> colors.focusBorder; primary -> colors.primary; else -> colors.outline }, shape)
+            .riftFrame(if (primary) colors.primary else colors.outline,
+                if (primary && focused) colors.textPrimary else colors.focusBorder,
+                colors.secondary, focused, cut, accents = primary || focused)
             .heightIn(min = 42.dp)
             .alpha(if (enabled) 1f else 0.4f)
             .semantics { this.selected = selected; if (!enabled) disabled() }

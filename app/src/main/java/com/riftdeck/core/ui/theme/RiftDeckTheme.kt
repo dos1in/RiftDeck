@@ -29,16 +29,16 @@ data class FrontendTheme(
 )
 
 private val NeonFrontendTheme = FrontendTheme(
-    background = Color(0xFF10120E),
-    surface = Color(0xFF171A15),
-    surfaceElevated = Color(0xFF20241D),
-    primary = Color(0xFFE7FF4F),
-    secondary = Color(0xFF54DDEA),
+    background = Color(0xFF000000),
+    surface = Color(0xFF090D0F),
+    surfaceElevated = Color(0xFF142023),
+    primary = Color(0xFFF8F800),
+    secondary = Color(0xFF00F0F0),
     tertiary = Color(0xFFFF4FA3),
-    textPrimary = Color(0xFFF1F3EB),
-    textSecondary = Color(0xFFB7BEAE),
-    focusBorder = Color(0xFFE7FF4F),
-    outline = Color(0xFF46503F),
+    textPrimary = Color(0xFFEEF5F3),
+    textSecondary = Color(0xFFA5B6B8),
+    focusBorder = Color(0xFFF8F800),
+    outline = Color(0xFF34484B),
     error = Color(0xFFFF746C),
     success = Color(0xFF70E2A0),
 )
@@ -110,6 +110,7 @@ private val RiftDeckTypography = Typography(
 @Composable
 fun RiftDeckTheme(content: @Composable () -> Unit) {
     val colors = NeonFrontendTheme
+    val brandArtwork = rememberBrandArtwork()
     val materialColors = darkColorScheme(
         primary = colors.primary,
         onPrimary = colors.background,
@@ -123,7 +124,10 @@ fun RiftDeckTheme(content: @Composable () -> Unit) {
         error = colors.error,
     )
 
-    androidx.compose.runtime.CompositionLocalProvider(LocalFrontendTheme provides colors) {
+    androidx.compose.runtime.CompositionLocalProvider(
+        LocalFrontendTheme provides colors,
+        LocalBrandArtwork provides brandArtwork,
+    ) {
         MaterialTheme(
             colorScheme = materialColors,
             typography = RiftDeckTypography,

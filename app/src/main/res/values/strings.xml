@@ -41,7 +41,6 @@
     </plurals>
     <string name="nav_home">Home</string>
     <string name="loading_library">Loading library…</string>
-    <string name="brand_stacked">RIFT\nDECK</string>
     <string name="hint_categories">Switch category</string>
     <string name="hint_games">Switch game</string>
     <string name="home_eyebrow">YOUR NEXT SESSION</string>
@@ -65,7 +64,7 @@
     <string name="library_source">Library source</string>
     <string name="not_configured">Not configured</string>
     <string name="current_theme">Current theme</string>
-    <string name="theme_focus_stage">Focus Stage · Neon</string>
+    <string name="theme_focus_stage">Focus Stage · Rift</string>
     <string name="reduce_motion">Reduce motion</string>
     <string name="setting_on">On</string>
     <string name="setting_off">Off</string>

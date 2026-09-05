@@ -1,18 +1,19 @@
 package com.riftdeck.core.ui.components
 
 import androidx.annotation.StringRes
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.*
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
@@ -43,21 +44,20 @@ fun DeckScaffold(
     content: @Composable (railFocus: FocusRequester, compact: Boolean) -> Unit,
 ) {
     val colors = LocalFrontendTheme.current
+    val fontScale = LocalDensity.current.fontScale.coerceAtLeast(1f)
     val requesters = remember { DeckSection.entries.associateWith { FocusRequester() } }
     val navItems = DeckSection.entries.filter { hasGame || it != DeckSection.Detail }
     ControllerInput(onAction, modifier.fillMaxSize()) {
         BoxWithConstraints(Modifier.fillMaxSize().background(colors.background)) {
             val compact = maxHeight < 520.dp || maxWidth < 900.dp
-            val railWidth = (maxWidth * 0.12f).coerceIn(76.dp, 148.dp)
+            val railWidth = (maxWidth * 0.12f).coerceAtLeast(76.dp * fontScale).coerceAtMost(148.dp)
             Row(Modifier.fillMaxSize()) {
                 Column(
-                    Modifier.width(railWidth).fillMaxHeight().background(colors.surface)
+                    Modifier.width(railWidth).fillMaxHeight().background(colors.background)
                         .padding(horizontal = if (compact) 8.dp else 14.dp, vertical = if (compact) 12.dp else 24.dp),
                 ) {
-                    Image(painterResource(R.drawable.ic_launcher), stringResource(R.string.app_name),
-                        Modifier.size(if (compact) 36.dp else 48.dp).align(Alignment.CenterHorizontally))
-                    if (!compact) Text(stringResource(R.string.brand_stacked), color = colors.textPrimary,
-                        style = MaterialTheme.typography.headlineMedium, modifier = Modifier.padding(top = 6.dp))
+                    RiftDeckEmblem(Modifier.width((railWidth - 16.dp).coerceAtMost(72.dp))
+                        .align(Alignment.CenterHorizontally))
                     Spacer(Modifier.weight(0.35f))
                     navItems.forEachIndexed { index, item ->
                         var focused by remember(item) { mutableStateOf(false) }
@@ -69,8 +69,10 @@ fun DeckScaffold(
                                     left = FocusRequester.Cancel; right = entryFocus
                                 }
                                 .onFocusChanged { focused = it.isFocused; if (it.isFocused) onRailFocused() }
-                                .background(if (focused) colors.surfaceElevated else colors.surface)
-                                .border(if (focused) 2.dp else 0.dp, if (focused) colors.primary else colors.surface)
+                                .clip(CutCornerShape(topEnd = 6.dp, bottomStart = 6.dp))
+                                .background(if (focused) colors.surfaceElevated else colors.background)
+                                .riftFrame(if (item == section) colors.outline else Color.Transparent,
+                                    colors.primary, colors.secondary, focused, cut = 6.dp, accents = focused)
                                 .semantics { selected = item == section }
                                 .controllerClickable { onNavigate(item) }
                                 .padding(horizontal = 6.dp, vertical = if (compact) 10.dp else 14.dp),
@@ -100,16 +102,16 @@ fun DeckScaffold(
                         horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         Text(String.format(Locale.ROOT, "%02d", section.ordinal + 1), color = colors.secondary,
                             style = MaterialTheme.typography.labelMedium)
-                        Text(stringResource(R.string.app_name), color = colors.textPrimary, style = MaterialTheme.typography.labelLarge)
+                        RiftDeckWordmark()
                         Text("/", color = colors.outline)
                         Text(stringResource(section.title), color = colors.textSecondary, style = MaterialTheme.typography.labelMedium)
                         Spacer(Modifier.weight(1f))
                         if (!compact) Text(stringResource(R.string.mock_library_label), color = colors.textSecondary,
                             style = MaterialTheme.typography.labelMedium)
                     }
-                    HorizontalDivider(color = colors.outline)
+                    DeckDivider()
                     Box(Modifier.weight(1f).fillMaxWidth()) { content(requesters.getValue(section), compact) }
-                    HorizontalDivider(color = colors.outline)
+                    DeckDivider()
                     Row(Modifier.fillMaxWidth().height(if (compact) 36.dp else 44.dp)
                         .padding(horizontal = if (compact) 12.dp else 30.dp),
                         horizontalArrangement = Arrangement.spacedBy(if (compact) 12.dp else 22.dp),
@@ -126,6 +128,16 @@ fun DeckScaffold(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun DeckDivider() {
+    val colors = LocalFrontendTheme.current
+    Row(Modifier.fillMaxWidth().height(1.dp)) {
+        Box(Modifier.width(24.dp).fillMaxHeight().background(colors.primary))
+        Box(Modifier.weight(1f).fillMaxHeight().background(colors.outline))
+        Box(Modifier.width(24.dp).fillMaxHeight().background(colors.secondary))
     }
 }
 

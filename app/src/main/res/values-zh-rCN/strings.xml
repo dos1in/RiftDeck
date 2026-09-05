@@ -40,7 +40,6 @@
     </plurals>
     <string name="nav_home">首页</string>
     <string name="loading_library">正在载入游戏库…</string>
-    <string name="brand_stacked">RIFT\nDECK</string>
     <string name="hint_categories">切换分类</string>
     <string name="hint_games">切换游戏</string>
     <string name="home_eyebrow">回到你的游戏世界</string>
@@ -64,7 +63,7 @@
     <string name="library_source">游戏库来源</string>
     <string name="not_configured">未配置</string>
     <string name="current_theme">当前主题</string>
-    <string name="theme_focus_stage">聚焦舞台 · 霓虹</string>
+    <string name="theme_focus_stage">聚焦舞台 · 裂隙</string>
     <string name="reduce_motion">减少动效</string>
     <string name="setting_on">开</string>
     <string name="setting_off">关</string>
