@@ -8,7 +8,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
@@ -16,6 +16,15 @@ import androidx.compose.ui.unit.dp
 import com.riftdeck.R
 import com.riftdeck.core.ui.theme.LocalBrandArtwork
 import com.riftdeck.core.ui.theme.LocalFrontendTheme
+
+// A neutral, high-contrast ink treatment removes olive/teal casts while retaining the white backing.
+private val LightBrandFilter = ColorFilter.colorMatrix(ColorMatrix().apply {
+    setToSaturation(0f)
+    for (row in 0..2) {
+        for (column in 0..2) this[row, column] *= 1.5f
+        this[row, 4] = -127.5f
+    }
+})
 
 @Composable
 fun RiftDeckEmblem(modifier: Modifier = Modifier) {
@@ -25,7 +34,7 @@ fun RiftDeckEmblem(modifier: Modifier = Modifier) {
     if (artwork != null) {
         Image(if (colors.isDark) artwork.darkEmblem else artwork.lightEmblem, stringResource(R.string.app_name), bounds,
             contentScale = ContentScale.Fit,
-            colorFilter = if (colors.isDark) null else ColorFilter.tint(colors.background, BlendMode.Multiply))
+            colorFilter = if (colors.isDark) null else LightBrandFilter)
     } else {
         Box(bounds)
     }
@@ -39,9 +48,9 @@ fun RiftDeckWordmark(modifier: Modifier = Modifier) {
     if (artwork != null) {
         Image(if (colors.isDark) artwork.darkWordmark else artwork.lightWordmark, stringResource(R.string.app_name), bounds,
             contentScale = ContentScale.Crop,
-            colorFilter = if (colors.isDark) null else ColorFilter.tint(colors.background, BlendMode.Multiply))
+            colorFilter = if (colors.isDark) null else LightBrandFilter)
     } else {
         Text(stringResource(R.string.app_name), modifier = bounds,
-            style = MaterialTheme.typography.titleLarge, color = LocalFrontendTheme.current.primary)
+            style = MaterialTheme.typography.titleLarge, color = LocalFrontendTheme.current.accentText)
     }
 }

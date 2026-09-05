@@ -217,7 +217,7 @@ private fun LibraryRow(game: Game, position: Int, selected: Boolean, requester: 
             Text(listOfNotNull(game.releaseYear?.toString(), game.genre).joinToString(" · "), color = colors.textSecondary,
                 style = MaterialTheme.typography.labelMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
-        Text(if (game.favorite) "★" else position.toString(), color = if (game.favorite) colors.primary else colors.textSecondary,
+        Text(if (game.favorite) "★" else position.toString(), color = if (game.favorite) colors.accentText else colors.textSecondary,
             style = MaterialTheme.typography.labelMedium)
     }
 }

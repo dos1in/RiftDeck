@@ -47,7 +47,7 @@ fun EmptyLibraryState(
                 style = Stroke(width = 3.dp.toPx()),
             )
             drawLine(
-                color = colors.primary,
+                color = colors.accentText,
                 start = Offset(size.width * 0.28f, size.height * 0.5f),
                 end = Offset(size.width * 0.72f, size.height * 0.5f),
                 strokeWidth = 3.dp.toPx(),

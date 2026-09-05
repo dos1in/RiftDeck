@@ -39,7 +39,7 @@ fun NeonActionButton(
     var focused by remember { mutableStateOf(false) }
     val cut = if (primary) 12.dp else 4.dp
     val shape = CutCornerShape(topEnd = cut, bottomStart = cut)
-    val contentColor = if (primary) colors.onAccent else if (selected) colors.secondary else colors.textPrimary
+    val contentColor = if (primary) colors.onPrimary else if (selected) colors.secondary else colors.textPrimary
     Row(
         modifier = modifier
             .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier)

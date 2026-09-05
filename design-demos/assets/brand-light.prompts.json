@@ -14,5 +14,5 @@
       "design_brief": "Create the light-theme RiftDeck wordmark. Preserve exact text, italic angular letter shapes, split cuts, spacing, baseline, proportions and framing. Make Rift deep yellow-olive and Deck deep teal, with no glow. No slogan, controller emblem, border or badge."
     }
   ],
-  "integration": "Light assets use a white backing, blended with the app background using Multiply. Both theme variants are decoded off the UI thread at display size. The Android adaptive launcher icon uses a smaller copy of the original neon emblem and a separate monochrome vector."
+  "integration": "Light assets retain their generated white backing. In the app, a neutral high-contrast color filter turns the olive/teal artwork into graphite on white. Both theme variants are decoded off the UI thread at display size. The Android adaptive launcher icon uses a smaller copy of the original neon emblem and a separate monochrome vector."
 }

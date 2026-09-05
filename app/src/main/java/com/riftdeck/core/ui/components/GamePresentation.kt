@@ -47,7 +47,7 @@ fun GameStageCover(
         .controllerClickable(onClick = onClick)
     Box(modifier.graphicsLayer { scaleX = scale; scaleY = scale }.then(interactive)
         .clip(CutCornerShape(topEnd = 16.dp, bottomStart = 16.dp))
-        .riftFrame(colors.outline, colors.primary, colors.secondary, focused, cut = 16.dp).padding(6.dp)) {
+        .riftFrame(colors.outline, colors.focusBorder, colors.secondary, focused, cut = 16.dp).padding(6.dp)) {
         GameArtwork(game, stringResource(R.string.artwork_description, game.title), Modifier.fillMaxSize()
             .clip(CutCornerShape(topEnd = 12.dp, bottomStart = 12.dp)), showLabel = showLabel)
     }

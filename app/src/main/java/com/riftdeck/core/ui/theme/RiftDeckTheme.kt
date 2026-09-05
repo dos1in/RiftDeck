@@ -92,7 +92,7 @@ fun RiftDeckTheme(
         val base = if (isDark) darkColorScheme() else lightColorScheme()
         base.copy(
             primary = colors.primary,
-            onPrimary = colors.onAccent,
+            onPrimary = colors.onPrimary,
             secondary = colors.secondary,
             onSecondary = colors.onAccent,
             tertiary = colors.tertiary,

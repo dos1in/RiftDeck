@@ -72,7 +72,7 @@ fun DeckScaffold(
                                 .clip(CutCornerShape(topEnd = 6.dp, bottomStart = 6.dp))
                                 .background(if (focused) colors.surfaceElevated else colors.background)
                                 .riftFrame(if (item == section) colors.outline else Color.Transparent,
-                                    colors.primary, colors.secondary, focused, cut = 6.dp, accents = focused)
+                                    colors.focusBorder, colors.secondary, focused, cut = 6.dp, accents = focused)
                                 .semantics { selected = item == section }
                                 .controllerClickable { onNavigate(item) }
                                 .padding(horizontal = 6.dp, vertical = if (compact) 10.dp else 14.dp),
@@ -81,10 +81,10 @@ fun DeckScaffold(
                         ) {
                             if (!compact) Text(String.format(Locale.ROOT, "%02d", item.ordinal + 1),
                                 style = MaterialTheme.typography.labelMedium,
-                                color = if (item == section) colors.primary else colors.textSecondary)
+                                color = if (item == section) colors.accentText else colors.textSecondary)
                             Text(stringResource(if (item == DeckSection.Detail) R.string.hint_details else item.title),
                                 fontSize = 14.sp, fontWeight = if (item == section) FontWeight.Bold else FontWeight.Normal,
-                                color = if (item == section) colors.primary else colors.textPrimary, maxLines = 1)
+                                color = if (item == section) colors.accentText else colors.textPrimary, maxLines = 1)
                         }
                     }
                     Spacer(Modifier.weight(1f))

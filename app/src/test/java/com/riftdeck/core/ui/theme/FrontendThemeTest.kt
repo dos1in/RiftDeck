@@ -22,12 +22,13 @@ class FrontendThemeTest {
             val theme = frontendTheme(dark, palette)
             val surfaces = listOf(theme.background, theme.surface, theme.surfaceElevated)
             for (surface in surfaces) {
-                for (text in listOf(theme.textPrimary, theme.textSecondary, theme.primary, theme.secondary, theme.tertiary)) {
+                for (text in listOf(theme.textPrimary, theme.textSecondary, theme.accentText, theme.secondary, theme.tertiary)) {
                     assertTrue("$palette dark=$dark text contrast=${contrast(text, surface)}", contrast(text, surface) >= 4.5)
                 }
                 assertTrue("$palette dark=$dark focus", contrast(theme.focusBorder, surface) >= 3.0)
             }
-            for (fill in listOf(theme.primary, theme.secondary, theme.tertiary, theme.error)) {
+            assertTrue("$palette dark=$dark primary control", contrast(theme.onPrimary, theme.primary) >= 4.5)
+            for (fill in listOf(theme.secondary, theme.tertiary, theme.error)) {
                 assertTrue("$palette dark=$dark filled control", contrast(theme.onAccent, fill) >= 4.5)
             }
         }

@@ -31,7 +31,7 @@ fun DeckNoticeDialog(title: String, message: String, primaryLabel: String, onCon
                 else -> true
             }
         }, enabled = true, modifier = Modifier.padding(24.dp).widthIn(max = 520.dp).fillMaxWidth()) {
-            Column(Modifier.background(colors.surface).border(2.dp, colors.primary).padding(24.dp),
+            Column(Modifier.background(colors.surface).border(2.dp, colors.focusBorder).padding(24.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 Text(title, color = colors.textPrimary, style = MaterialTheme.typography.headlineMedium)
                 Text(message, color = colors.textSecondary, style = MaterialTheme.typography.bodyLarge)

@@ -4,7 +4,7 @@ Settings → Appearance now offers System (default), Light and Dark modes, with 
 
 Library rows, library filters and settings choices share the same cut-corner focus frame. Touch selection retains visible focus. D-pad navigation moves focus without changing the saved theme until A is pressed.
 
-Light mode uses dedicated emblem and wordmark artwork. The Android launcher uses the RiftDeck emblem in an adaptive icon, with a separate monochrome layer. Asset briefs and final image-generation prompts are recorded in [brand-light.prompts.json](assets/brand-light.prompts.json).
+Light mode uses white surfaces, a pale blue-gray selection fill and dedicated emblem and wordmark artwork rendered in graphite. Bright primary fills have separate text and focus colors to retain contrast without muddying the palette. The Android launcher uses the RiftDeck emblem in an adaptive icon, with a separate monochrome layer. Asset briefs and final image-generation prompts are recorded in [brand-light.prompts.json](assets/brand-light.prompts.json).
 
 ## Validation
 
