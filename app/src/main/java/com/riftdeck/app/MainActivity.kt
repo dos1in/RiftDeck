@@ -1,31 +1,84 @@
 package com.riftdeck.app
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
 import android.os.Bundle
 import android.view.MotionEvent
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.runtime.remember
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.riftdeck.core.ui.theme.LocalFrontendTheme
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.riftdeck.app.navigation.RiftDeckApp
 import com.riftdeck.core.input.GamepadInputManager
+import com.riftdeck.core.launcher.HomeLauncher
+import com.riftdeck.core.ui.theme.LocalFrontendTheme
 import com.riftdeck.core.ui.theme.RiftDeckTheme
 import com.riftdeck.feature.home.HomeViewModel
 import com.riftdeck.feature.home.HomeViewModelFactory
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.receiveAsFlow
 
 class MainActivity : ComponentActivity() {
     private val gamepadInputManager = GamepadInputManager()
 
+    private val homeLauncher by lazy { HomeLauncher(this) }
+    private var defaultHome by mutableStateOf(false)
+    private var launcherError by mutableStateOf(false)
+    private val homeRequests = Channel<Unit>(Channel.CONFLATED)
+    private val homeEvents = homeRequests.receiveAsFlow()
+    private val requestHome = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        defaultHome = homeLauncher.isDefault()
+    }
+
+    private fun chooseHome() {
+        try {
+            val request = homeLauncher.requestIntent()
+            if (request != null) requestHome.launch(request)
+            else launcherError = !homeLauncher.openSettings(home = true)
+        } catch (_: ActivityNotFoundException) {
+            launcherError = !homeLauncher.openSettings(home = true)
+        } catch (_: SecurityException) {
+            launcherError = !homeLauncher.openSettings(home = true)
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        defaultHome = homeLauncher.isDefault()
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        if (intent.action == Intent.ACTION_MAIN && intent.hasCategory(Intent.CATEGORY_HOME)) {
+            homeLauncher.removeOtherLauncherTasks(taskId, componentName)
+            launcherError = false
+            homeRequests.trySend(Unit)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (intent.hasCategory(Intent.CATEGORY_HOME)) {
+            homeLauncher.removeOtherLauncherTasks(taskId, componentName)
+        } else if (homeLauncher.isDefault()) {
+            // App-icon launches also enter the system HOME task once RiftDeck owns the role.
+            startActivity(Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)
+                .setComponent(componentName).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            finishAndRemoveTask()
+            return
+        }
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
             navigationBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
@@ -53,7 +106,15 @@ class MainActivity : ComponentActivity() {
                 RiftDeckApp(
                     homeViewModel = homeViewModel,
                     analogActions = gamepadInputManager.actions,
-                    onExit = ::finish,
+                    onExit = {
+                        if (!defaultHome && !intent.hasCategory(Intent.CATEGORY_HOME)) finish()
+                    },
+                    homeRequests = homeEvents,
+                    isDefaultHome = defaultHome,
+                    onChooseHome = ::chooseHome,
+                    onSystemSettings = { launcherError = !homeLauncher.openSettings(home = false) },
+                    launcherError = launcherError,
+                    onDismissLauncherError = { launcherError = false },
                 )
             }
         }

@@ -45,6 +45,17 @@ Open **Settings → Appearance** to choose:
 
 Choices are saved locally. System mode responds to the device’s light and dark appearance settings. All options support touch and D-pad navigation.
 
+### Home Launcher
+
+RiftDeck can be selected as the Android home screen. Open **Settings → Home launcher → Set as default home** and confirm in the Android chooser. Canceling leaves your current home app unchanged.
+
+* Home returns to RiftDeck’s main screen without creating another launcher instance.
+* Back / B navigates within RiftDeck and stays on its main screen when used as Home.
+* **Change home app** opens Android’s default-home settings; **Android settings** provides access to device settings.
+* Returning with Back from another app preserves the current RiftDeck screen.
+
+The current shell provides a gaming home screen; an installed-app drawer is not included yet.
+
 ### Game Library
 
 * Scan local ROM folders

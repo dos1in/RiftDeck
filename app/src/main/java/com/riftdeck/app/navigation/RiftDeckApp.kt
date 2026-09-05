@@ -1,5 +1,6 @@
 package com.riftdeck.app.navigation
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.background
@@ -43,12 +44,21 @@ private object Route {
 }
 
 @Composable
-fun RiftDeckApp(homeViewModel: HomeViewModel, analogActions: Flow<GameAction>, onExit: () -> Unit, modifier: Modifier = Modifier) {
+fun RiftDeckApp(homeViewModel: HomeViewModel, analogActions: Flow<GameAction>, onExit: () -> Unit,
+    homeRequests: Flow<Unit>, isDefaultHome: Boolean, onChooseHome: () -> Unit, onSystemSettings: () -> Unit,
+    launcherError: Boolean, onDismissLauncherError: () -> Unit, modifier: Modifier = Modifier) {
     val colors = LocalFrontendTheme.current
     val nav = rememberNavController()
     val uiState by homeViewModel.uiState.collectAsStateWithLifecycle()
     val preferenceError by homeViewModel.preferenceError.collectAsStateWithLifecycle()
     var notice by rememberSaveable { mutableStateOf<String?>(null) }
+    LaunchedEffect(homeRequests) {
+        homeRequests.collect {
+            notice = null
+            homeViewModel.dismissPreferenceError()
+            nav.popBackStack(Route.Home, false)
+        }
+    }
     fun navigate(route: String) { nav.navigate(route) { launchSingleTop = true } }
     fun back() { if (!nav.popBackStack()) onExit() }
     fun openLibrary(filter: LibraryFilter) { homeViewModel.setFilter(filter); navigate(Route.Platform) }
@@ -63,7 +73,7 @@ fun RiftDeckApp(homeViewModel: HomeViewModel, analogActions: Flow<GameAction>, o
     val onPlay: (Long) -> Unit = { homeViewModel.focusGame(it); notice = "launch" }
     val onOpenGame: (Long) -> Unit = { homeViewModel.focusGame(it); navigate(Route.game(it)) }
     CompositionLocalProvider(LocalAnalogActions provides analogActions, LocalReducedMotion provides uiState.reducedMotion,
-        LocalControllerInputEnabled provides (notice == null && !preferenceError)) {
+        LocalControllerInputEnabled provides (notice == null && !preferenceError && !launcherError)) {
         // Transient system bars overlay the immersive UI instead of resizing it as they hide.
         // Hardware cutouts and an explicitly opened keyboard still need safe space.
         val contentInsets = WindowInsets.displayCutout.union(WindowInsets.waterfall).union(WindowInsets.ime)
@@ -74,6 +84,7 @@ fun RiftDeckApp(homeViewModel: HomeViewModel, analogActions: Flow<GameAction>, o
                 enterTransition = { EnterTransition.None }, exitTransition = { ExitTransition.None },
                 popEnterTransition = { EnterTransition.None }, popExitTransition = { ExitTransition.None }) {
                 composable(Route.Home) {
+                    BackHandler(enabled = notice == null && !preferenceError && !launcherError, onBack = onExit)
                     if (uiState.isReady) HomeScreen(uiState, homeViewModel::focusGame, homeViewModel::toggleFavorite, onOpenGame,
                         onPlay, ::openLibrary, onNavigate, onExit)
                 }
@@ -89,24 +100,26 @@ fun RiftDeckApp(homeViewModel: HomeViewModel, analogActions: Flow<GameAction>, o
                     if (uiState.isReady) SettingsScreen(entry.arguments?.getString("section") ?: "library", uiState.reducedMotion,
                         homeViewModel::setReducedMotion, { notice = "folder" }, { notice = "configuration" }, onNavigate, ::back,
                         hasGame = uiState.games.isNotEmpty(), themeMode = uiState.themeMode, themePalette = uiState.themePalette,
-                        onThemeMode = homeViewModel::setThemeMode, onThemePalette = homeViewModel::setThemePalette)
+                        onThemeMode = homeViewModel::setThemeMode, onThemePalette = homeViewModel::setThemePalette,
+                        isDefaultHome = isDefaultHome, onChooseHome = onChooseHome, onSystemSettings = onSystemSettings)
                 }
             }
             if (!uiState.isReady) Text(stringResource(R.string.loading_library), color = colors.textSecondary,
                 style = MaterialTheme.typography.bodyLarge, modifier = Modifier.align(Alignment.Center))
-            if (notice != null || preferenceError) {
-                val launch = notice == "launch" && !preferenceError
+            if (notice != null || preferenceError || launcherError) {
+                val launch = notice == "launch" && !preferenceError && !launcherError
                 DeckNoticeDialog(
-                    title = stringResource(when { preferenceError -> R.string.preferences_error_title; launch -> R.string.emulator_missing_title; else -> R.string.demo_feature_title }),
+                    title = stringResource(when { launcherError -> R.string.launcher_error_title; preferenceError -> R.string.preferences_error_title; launch -> R.string.emulator_missing_title; else -> R.string.demo_feature_title }),
                     message = stringResource(when {
+                        launcherError -> R.string.launcher_error_message
                         preferenceError -> R.string.preferences_error_message
                         launch -> R.string.emulator_missing_message
                         notice == "folder" -> R.string.folder_demo_message
                         else -> R.string.emulator_demo_message
                     }),
                     primaryLabel = stringResource(if (launch) R.string.choose_emulator else R.string.acknowledge),
-                    onConfirm = { notice = null; homeViewModel.dismissPreferenceError(); if (launch) navigate(Route.settings("emulators")) },
-                    onDismiss = { notice = null; homeViewModel.dismissPreferenceError() },
+                    onConfirm = { notice = null; onDismissLauncherError(); homeViewModel.dismissPreferenceError(); if (launch) navigate(Route.settings("emulators")) },
+                    onDismiss = { notice = null; onDismissLauncherError(); homeViewModel.dismissPreferenceError() },
                 )
             }
         }

@@ -27,18 +27,22 @@ private enum class SettingSection(val title: Int, val description: Int) {
     Input(R.string.settings_input, R.string.input_settings_description),
     Video(R.string.settings_video, R.string.video_settings_description),
     Performance(R.string.settings_performance, R.string.performance_settings_description),
+    Launcher(R.string.settings_launcher, R.string.launcher_settings_description),
 }
 
 @Composable
 fun SettingsScreen(initialSection: String, reducedMotion: Boolean, onReducedMotion: (Boolean) -> Unit,
     onAddFolder: () -> Unit, onConfigureEmulator: () -> Unit, onNavigate: (DeckSection) -> Unit,
     onBack: () -> Unit, hasGame: Boolean, themeMode: ThemeMode, themePalette: ThemePalette,
-    onThemeMode: (ThemeMode) -> Unit, onThemePalette: (ThemePalette) -> Unit, modifier: Modifier = Modifier) {
+    onThemeMode: (ThemeMode) -> Unit, onThemePalette: (ThemePalette) -> Unit,
+    isDefaultHome: Boolean, onChooseHome: () -> Unit, onSystemSettings: () -> Unit, modifier: Modifier = Modifier) {
     val colors = LocalFrontendTheme.current
     var selectedIndex by rememberSaveable { mutableIntStateOf(if (initialSection == "emulators") 1 else 0) }
     var panelFocused by rememberSaveable { mutableStateOf(false) }
     val tabs = remember { SettingSection.entries.map { FocusRequester() } }
     val action = remember { FocusRequester() }
+    val systemSettings = remember { FocusRequester() }
+    var systemSettingsFocused by rememberSaveable { mutableStateOf(false) }
     val appearanceControls = remember { List(ThemeMode.entries.size + ThemePalette.entries.size + 1) { FocusRequester() } }
     var appearanceFocusIndex by rememberSaveable { mutableIntStateOf(0) }
     val section = SettingSection.entries[selectedIndex]
@@ -48,6 +52,7 @@ fun SettingsScreen(initialSection: String, reducedMotion: Boolean, onReducedMoti
         withFrameNanos { }
         if (panelFocused) {
             if (section == SettingSection.Appearance) appearanceControls[appearanceFocusIndex].requestFocus()
+            else if (section == SettingSection.Launcher && systemSettingsFocused) systemSettings.requestFocus()
             else action.requestFocus()
         } else tabs[selectedIndex].requestFocus()
     }
@@ -102,6 +107,17 @@ fun SettingsScreen(initialSection: String, reducedMotion: Boolean, onReducedMoti
                                     appearanceFocusIndex = index
                                     panelFocused = true
                                 })
+                        }
+                        SettingSection.Launcher -> {
+                            MetadataValue(stringResource(R.string.launcher_status),
+                                stringResource(if (isDefaultHome) R.string.launcher_active else R.string.launcher_inactive))
+                            NeonActionButton(stringResource(if (isDefaultHome) R.string.change_home else R.string.set_default_home),
+                                onChooseHome, Modifier.fillMaxWidth(), primary = true, focusRequester = action,
+                                left = tabs[selectedIndex], down = systemSettings,
+                                onFocused = { panelFocused = true; systemSettingsFocused = false })
+                            NeonActionButton(stringResource(R.string.open_system_settings), onSystemSettings,
+                                Modifier.fillMaxWidth(), focusRequester = systemSettings, left = tabs[selectedIndex], up = action,
+                                onFocused = { panelFocused = true; systemSettingsFocused = true })
                         }
                         else -> {
                             if (section == SettingSection.Input) {

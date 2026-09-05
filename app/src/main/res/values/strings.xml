@@ -90,4 +90,15 @@
     <string name="theme_palette_rift">Rift</string>
     <string name="theme_palette_ocean">Ocean</string>
     <string name="theme_palette_ember">Ember</string>
+
+    <string name="settings_launcher">Home launcher</string>
+    <string name="launcher_settings_description">Choose RiftDeck as your home screen. Press Home to return here from another app.</string>
+    <string name="launcher_status">Default home</string>
+    <string name="launcher_active">RiftDeck is your home screen</string>
+    <string name="launcher_inactive">Using another home app</string>
+    <string name="change_home">Change home app</string>
+    <string name="set_default_home">Set as default home</string>
+    <string name="open_system_settings">Android settings</string>
+    <string name="launcher_error_title">Settings unavailable</string>
+    <string name="launcher_error_message">Open Android settings and select RiftDeck under Default apps → Home app.</string>
 </resources>
