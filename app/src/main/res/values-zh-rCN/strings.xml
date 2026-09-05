@@ -56,14 +56,12 @@
     <string name="back_to_library">返回</string>
     <string name="library_settings_description">当前可浏览 GBA 示例游戏库。ROM 文件夹扫描将在后续里程碑接入。</string>
     <string name="emulator_settings_description">游戏将通过外部模拟器启动。模拟器配置将在后续里程碑接入。</string>
-    <string name="appearance_settings_description">霓虹黄焦点、清晰文字与安静背景。开启减少动效后，封面获得焦点时不再缩放。</string>
+    <string name="appearance_settings_description">调整明暗模式、主题配色和动效。</string>
     <string name="input_settings_description">方向键或左摇杆移动焦点，使用手柄即可完成操作。自定义按键映射将在后续开放。</string>
     <string name="video_settings_description">演示版本尚未接入视频预览。浏览时只显示静态封面。</string>
     <string name="performance_settings_description">游戏列表按需显示可见行，页面即时切换；不使用持续动画背景，也不解码视频。</string>
     <string name="library_source">游戏库来源</string>
     <string name="not_configured">未配置</string>
-    <string name="current_theme">当前主题</string>
-    <string name="theme_focus_stage">聚焦舞台 · 裂隙</string>
     <string name="reduce_motion">减少动效</string>
     <string name="setting_on">开</string>
     <string name="setting_off">关</string>
@@ -81,4 +79,14 @@
     <string name="demo_cover">示例封面</string>
     <string name="previous_game">上一个游戏</string>
     <string name="next_game">下一个游戏</string>
+    <string name="theme_mode">显示模式</string>
+    <string name="theme_mode_system">系统</string>
+    <string name="theme_mode_light">亮色</string>
+    <string name="theme_mode_dark">暗色</string>
+    <string name="theme_follows_system">跟随系统自动切换亮色与暗色。</string>
+    <string name="theme_manual_mode">固定使用所选模式。</string>
+    <string name="theme_palette">主题配色</string>
+    <string name="theme_palette_rift">裂隙</string>
+    <string name="theme_palette_ocean">冰海</string>
+    <string name="theme_palette_ember">余烬</string>
 </resources>

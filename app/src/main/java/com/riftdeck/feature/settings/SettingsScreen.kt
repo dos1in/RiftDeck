@@ -12,14 +12,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.role
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.toggleableState
-import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.dp
 import com.riftdeck.R
 import com.riftdeck.core.input.GameAction
+import com.riftdeck.core.model.ThemeMode
+import com.riftdeck.core.model.ThemePalette
 import com.riftdeck.core.ui.components.*
 import com.riftdeck.core.ui.theme.LocalFrontendTheme
 
@@ -35,16 +32,24 @@ private enum class SettingSection(val title: Int, val description: Int) {
 @Composable
 fun SettingsScreen(initialSection: String, reducedMotion: Boolean, onReducedMotion: (Boolean) -> Unit,
     onAddFolder: () -> Unit, onConfigureEmulator: () -> Unit, onNavigate: (DeckSection) -> Unit,
-    onBack: () -> Unit, hasGame: Boolean, modifier: Modifier = Modifier) {
+    onBack: () -> Unit, hasGame: Boolean, themeMode: ThemeMode, themePalette: ThemePalette,
+    onThemeMode: (ThemeMode) -> Unit, onThemePalette: (ThemePalette) -> Unit, modifier: Modifier = Modifier) {
     val colors = LocalFrontendTheme.current
     var selectedIndex by rememberSaveable { mutableIntStateOf(if (initialSection == "emulators") 1 else 0) }
     var panelFocused by rememberSaveable { mutableStateOf(false) }
     val tabs = remember { SettingSection.entries.map { FocusRequester() } }
     val action = remember { FocusRequester() }
+    val appearanceControls = remember { List(ThemeMode.entries.size + ThemePalette.entries.size + 1) { FocusRequester() } }
+    var appearanceFocusIndex by rememberSaveable { mutableIntStateOf(0) }
     val section = SettingSection.entries[selectedIndex]
+    fun entryAction(item: SettingSection): FocusRequester =
+        if (item == SettingSection.Appearance) appearanceControls[themeMode.ordinal] else action
     LaunchedEffect(Unit) {
         withFrameNanos { }
-        if (panelFocused) action.requestFocus() else tabs[selectedIndex].requestFocus()
+        if (panelFocused) {
+            if (section == SettingSection.Appearance) appearanceControls[appearanceFocusIndex].requestFocus()
+            else action.requestFocus()
+        } else tabs[selectedIndex].requestFocus()
     }
     fun step(delta: Int) {
         val next = (selectedIndex + delta).coerceIn(0, tabs.lastIndex)
@@ -68,16 +73,18 @@ fun SettingsScreen(initialSection: String, reducedMotion: Boolean, onReducedMoti
                         // Touch selects the category; controller confirmation enters its settings.
                         NeonActionButton(stringResource(item.title), { selectedIndex = index; tabs[index].requestFocus() },
                             Modifier.fillMaxWidth(), selected = selectedIndex == index, focusRequester = tabs[index],
-                            left = rail, right = action, up = tabs.getOrNull(index - 1), down = tabs.getOrNull(index + 1),
+                            left = rail, right = entryAction(item), up = tabs.getOrNull(index - 1), down = tabs.getOrNull(index + 1),
                             onFocused = { selectedIndex = index; panelFocused = false },
-                            onConfirm = { action.requestFocus() })
+                            onConfirm = { entryAction(item).requestFocus() })
                     }
                 }
                 Column(Modifier.weight(1.28f).fillMaxHeight().background(colors.surface).border(1.dp, colors.outline)
                     .padding(if (compact) 14.dp else 26.dp).verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.spacedBy(if (compact) 12.dp else 20.dp)) {
                     Text(stringResource(section.title), color = colors.textPrimary, style = MaterialTheme.typography.headlineMedium)
-                    Text(stringResource(section.description), color = colors.textSecondary, style = MaterialTheme.typography.bodyMedium)
+                    if (section != SettingSection.Appearance) {
+                        Text(stringResource(section.description), color = colors.textSecondary, style = MaterialTheme.typography.bodyMedium)
+                    }
                     when (section) {
                         SettingSection.Library -> {
                             MetadataValue(stringResource(R.string.library_source), stringResource(R.string.mock_library_label))
@@ -90,11 +97,11 @@ fun SettingsScreen(initialSection: String, reducedMotion: Boolean, onReducedMoti
                                 focusRequester = action, left = tabs[selectedIndex], onFocused = { panelFocused = true })
                         }
                         SettingSection.Appearance -> {
-                            MetadataValue(stringResource(R.string.current_theme), stringResource(R.string.theme_focus_stage))
-                            NeonActionButton(stringResource(R.string.reduce_motion), { onReducedMotion(!reducedMotion) },
-                                Modifier.fillMaxWidth().semantics { role = Role.Switch; toggleableState = if (reducedMotion) ToggleableState.On else ToggleableState.Off },
-                                glyph = stringResource(if (reducedMotion) R.string.setting_on else R.string.setting_off), selected = reducedMotion,
-                                focusRequester = action, left = tabs[selectedIndex], onFocused = { panelFocused = true })
+                            AppearanceSettings(themeMode, themePalette, reducedMotion, onThemeMode, onThemePalette, onReducedMotion,
+                                appearanceControls, tabs[selectedIndex], onFocused = { index ->
+                                    appearanceFocusIndex = index
+                                    panelFocused = true
+                                })
                         }
                         else -> {
                             if (section == SettingSection.Input) {

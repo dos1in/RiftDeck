@@ -2,6 +2,8 @@ package com.riftdeck.feature.home
 
 import androidx.compose.runtime.Immutable
 import com.riftdeck.core.model.Game
+import com.riftdeck.core.model.ThemeMode
+import com.riftdeck.core.model.ThemePalette
 import com.riftdeck.feature.platform.LibraryFilter
 
 @Immutable
@@ -13,6 +15,8 @@ data class HomeUiState(
     val filter: LibraryFilter = LibraryFilter.All,
     val sortDescending: Boolean = false,
     val reducedMotion: Boolean = false,
+    val themeMode: ThemeMode = ThemeMode.System,
+    val themePalette: ThemePalette = ThemePalette.Rift,
 ) {
     val focusedGame: Game?
         get() = games.firstOrNull { it.id == focusedGameId } ?: games.firstOrNull()

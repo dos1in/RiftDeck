@@ -35,6 +35,16 @@ RiftDeck is designed for handheld controls from the start.
 * Clear and consistent focus states
 * No touch input required for normal use
 
+### Appearance
+
+Open **Settings → Appearance** to choose:
+
+* **System** (default), **Light**, or **Dark** display mode
+* **Rift**, **Ocean**, or **Ember** color palette
+* Reduced motion
+
+Choices are saved locally. System mode responds to the device’s light and dark appearance settings. All options support touch and D-pad navigation.
+
 ### Game Library
 
 * Scan local ROM folders

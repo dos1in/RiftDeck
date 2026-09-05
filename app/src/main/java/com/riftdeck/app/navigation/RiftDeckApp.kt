@@ -85,7 +85,8 @@ fun RiftDeckApp(homeViewModel: HomeViewModel, analogActions: Flow<GameAction>, o
                 composable(Route.Settings, arguments = listOf(navArgument("section") { type = NavType.StringType })) { entry ->
                     if (uiState.isReady) SettingsScreen(entry.arguments?.getString("section") ?: "library", uiState.reducedMotion,
                         homeViewModel::setReducedMotion, { notice = "folder" }, { notice = "configuration" }, onNavigate, ::back,
-                        hasGame = uiState.games.isNotEmpty())
+                        hasGame = uiState.games.isNotEmpty(), themeMode = uiState.themeMode, themePalette = uiState.themePalette,
+                        onThemeMode = homeViewModel::setThemeMode, onThemePalette = homeViewModel::setThemePalette)
                 }
             }
             if (!uiState.isReady) Text(stringResource(R.string.loading_library), color = colors.textSecondary,

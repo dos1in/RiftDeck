@@ -7,6 +7,11 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.riftdeck.data.repository.UiPreferencesRepository
+import com.riftdeck.core.model.ThemeMode
+import com.riftdeck.core.model.ThemePalette
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.shareIn
 import com.riftdeck.domain.repository.GameRepository
 import com.riftdeck.feature.platform.LibraryFilter
 import com.riftdeck.feature.platform.libraryGames
@@ -30,26 +35,35 @@ class HomeViewModel(
     private val mutablePreferenceError = MutableStateFlow(false)
     val preferenceError = mutablePreferenceError.asStateFlow()
 
-    // Moving focus does not repeat filtering or sorting a large library.
-    private val library = combine(gameRepository.games, filter, preferencesRepository.preferences) { games, filterName, prefs ->
+    private val preferences = preferencesRepository.preferences.shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
+
+    // Focus and appearance changes do not repeat filtering or sorting a large library.
+    private val library = combine(gameRepository.games, filter,
+        preferences.map { it.sortDescending }.distinctUntilChanged()) { games, filterName, descending ->
         val selectedFilter = LibraryFilter.entries.firstOrNull { it.name == filterName } ?: LibraryFilter.All
         HomeUiState(
             isReady = true,
             games = games.filterNot { it.hidden },
-            libraryGames = libraryGames(games, selectedFilter, prefs.sortDescending),
+            libraryGames = libraryGames(games, selectedFilter, descending),
             filter = selectedFilter,
-            sortDescending = prefs.sortDescending,
-            reducedMotion = prefs.reducedMotion,
+            sortDescending = descending,
         )
     }.flowOn(Dispatchers.Default)
-    val uiState = combine(library, focusedGameId) { state, focusedId ->
-        state.copy(focusedGameId = focusedId?.takeIf { id -> state.games.any { it.id == id } }
-            ?: state.recentGame?.id ?: state.games.firstOrNull()?.id)
+    val uiState = combine(library, focusedGameId, preferences) { state, focusedId, prefs ->
+        state.copy(
+            focusedGameId = focusedId?.takeIf { id -> state.games.any { it.id == id } }
+                ?: state.recentGame?.id ?: state.games.firstOrNull()?.id,
+            reducedMotion = prefs.reducedMotion,
+            themeMode = prefs.themeMode,
+            themePalette = prefs.themePalette,
+        )
     }.stateIn(viewModelScope, SharingStarted.Eagerly, HomeUiState())
 
     fun focusGame(gameId: Long) { savedState["focused_game"] = gameId }
     fun setFilter(value: LibraryFilter) { savedState["library_filter"] = value.name }
     fun toggleFavorite(gameId: Long) { viewModelScope.launch { gameRepository.toggleFavorite(gameId) } }
+    fun setThemeMode(mode: ThemeMode) = updatePreference { preferencesRepository.setThemeMode(mode) }
+    fun setThemePalette(palette: ThemePalette) = updatePreference { preferencesRepository.setThemePalette(palette) }
     fun setReducedMotion(enabled: Boolean) = updatePreference { preferencesRepository.setReducedMotion(enabled) }
     fun toggleSort() = updatePreference { preferencesRepository.setSortDescending(!uiState.value.sortDescending) }
     fun dismissPreferenceError() { mutablePreferenceError.value = false }

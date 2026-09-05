@@ -57,14 +57,12 @@
     <string name="back_to_library">Back</string>
     <string name="library_settings_description">Browse the sample GBA library. ROM folder scanning will arrive in a later milestone.</string>
     <string name="emulator_settings_description">Games launch through an external emulator. Emulator configuration is planned for a later milestone.</string>
-    <string name="appearance_settings_description">Neon yellow focus, clear typography and a quiet background. Reduce motion to turn off the cover focus zoom.</string>
+    <string name="appearance_settings_description">Choose display mode, accent colors and motion.</string>
     <string name="input_settings_description">Use the D-pad or left stick to move. Every action is available with a controller; custom remapping is planned.</string>
     <string name="video_settings_description">Video previews are not connected in this demo. Artwork stays still while you browse.</string>
     <string name="performance_settings_description">The game list loads rows as they become visible. Pages switch immediately, with no animated backgrounds or video decoding.</string>
     <string name="library_source">Library source</string>
     <string name="not_configured">Not configured</string>
-    <string name="current_theme">Current theme</string>
-    <string name="theme_focus_stage">Focus Stage · Rift</string>
     <string name="reduce_motion">Reduce motion</string>
     <string name="setting_on">On</string>
     <string name="setting_off">Off</string>
@@ -82,4 +80,14 @@
     <string name="demo_cover">DEMO COVER</string>
     <string name="previous_game">Previous game</string>
     <string name="next_game">Next game</string>
+    <string name="theme_mode">Display mode</string>
+    <string name="theme_mode_system">System</string>
+    <string name="theme_mode_light">Light</string>
+    <string name="theme_mode_dark">Dark</string>
+    <string name="theme_follows_system">Automatically follows the system appearance.</string>
+    <string name="theme_manual_mode">Always uses the selected display mode.</string>
+    <string name="theme_palette">Color palette</string>
+    <string name="theme_palette_rift">Rift</string>
+    <string name="theme_palette_ocean">Ocean</string>
+    <string name="theme_palette_ember">Ember</string>
 </resources>

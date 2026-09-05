@@ -1,6 +1,11 @@
 package com.riftdeck.core.ui.components
 
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.CutCornerShape
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.draw.clip
+import com.riftdeck.core.ui.theme.LocalFrontendTheme
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -8,7 +13,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-/** The logo's opposing cuts and yellow/cyan ends, without glow or continuous motion. */
+/** The logo's opposing cuts and two-color ends, without glow or continuous motion. */
 fun Modifier.riftFrame(
     outline: Color,
     primary: Color,
@@ -42,4 +47,14 @@ fun Modifier.riftFrame(
             drawPath(trailing, secondary, style = Stroke(2.dp.toPx()))
         }
     }
+}
+
+/** Shared selection and focus treatment for list items and settings options. */
+@Composable
+fun Modifier.riftSelectionFrame(focused: Boolean, selected: Boolean): Modifier {
+    val colors = LocalFrontendTheme.current
+    val cut = 4.dp
+    return clip(CutCornerShape(topEnd = cut, bottomStart = cut))
+        .background(if (focused || selected) colors.surfaceElevated else colors.background)
+        .riftFrame(colors.outline, colors.focusBorder, colors.secondary, focused, cut, accents = focused)
 }

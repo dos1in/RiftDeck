@@ -1,7 +1,5 @@
 package com.riftdeck.feature.platform
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -145,7 +143,7 @@ fun PlatformScreen(
                 LibraryFilter.entries.forEachIndexed { index, filter ->
                     NeonActionButton(stringResource(when (filter) {
                         LibraryFilter.All -> R.string.all_games; LibraryFilter.Favorites -> R.string.favorites_title; LibraryFilter.Recent -> R.string.recent_title
-                    }), { onFilter(filter) }, Modifier.weight(1f), selected = uiState.filter == filter,
+                    }), { filters.getValue(filter).requestFocus(); onFilter(filter) }, Modifier.weight(1f), selected = uiState.filter == filter,
                         focusRequester = filters.getValue(filter),
                         left = LibraryFilter.entries.getOrNull(index - 1)?.let { filters.getValue(it) } ?: rail,
                         right = LibraryFilter.entries.getOrNull(index + 1)?.let { filters.getValue(it) }
@@ -209,14 +207,13 @@ private fun LibraryRow(game: Game, position: Int, selected: Boolean, requester: 
     Row(Modifier.fillMaxWidth().focusRequester(requester)
         .focusProperties { left = rail; right = play; up = FocusRequester.Cancel; down = FocusRequester.Cancel }
         .onFocusChanged { focused = it.isFocused; if (it.isFocused) onFocused() }
-        .background(if (selected) colors.surfaceElevated else colors.surface)
-        .border(if (focused) 2.dp else 1.dp, if (focused) colors.primary else if (selected) colors.textSecondary else colors.outline)
+        .riftSelectionFrame(focused, selected)
         .semantics { this.selected = selected; stateDescription = favoriteState }
         .controllerClickable(onClick = onClick).padding(if (compact) 8.dp else 12.dp),
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         GameArtwork(game, stringResource(R.string.artwork_description, game.title), Modifier.size(if (compact) 40.dp else 54.dp, if (compact) 46.dp else 64.dp), showLabel = false)
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(game.title, color = colors.textPrimary, style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(game.title, color = if (selected) colors.secondary else colors.textPrimary, style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Text(listOfNotNull(game.releaseYear?.toString(), game.genre).joinToString(" · "), color = colors.textSecondary,
                 style = MaterialTheme.typography.labelMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }

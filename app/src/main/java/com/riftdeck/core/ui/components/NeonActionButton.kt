@@ -39,7 +39,7 @@ fun NeonActionButton(
     var focused by remember { mutableStateOf(false) }
     val cut = if (primary) 12.dp else 4.dp
     val shape = CutCornerShape(topEnd = cut, bottomStart = cut)
-    val contentColor = if (primary) colors.background else if (selected) colors.secondary else colors.textPrimary
+    val contentColor = if (primary) colors.onAccent else if (selected) colors.secondary else colors.textPrimary
     Row(
         modifier = modifier
             .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier)
@@ -50,11 +50,10 @@ fun NeonActionButton(
                 this.right = right ?: FocusRequester.Cancel
             }
             .onFocusChanged { focused = it.isFocused; if (it.isFocused) onFocused() }
-            .clip(shape)
-            .background(when { primary -> colors.primary; focused || selected -> colors.surfaceElevated; else -> colors.background }, shape)
-            .riftFrame(if (primary) colors.primary else colors.outline,
-                if (primary && focused) colors.textPrimary else colors.focusBorder,
-                colors.secondary, focused, cut, accents = primary || focused)
+            .then(if (primary) Modifier.clip(shape).background(colors.primary, shape)
+                .riftFrame(colors.primary, if (focused) colors.textPrimary else colors.focusBorder,
+                    colors.secondary, focused, cut)
+                else Modifier.riftSelectionFrame(focused, selected))
             .heightIn(min = 42.dp)
             .alpha(if (enabled) 1f else 0.4f)
             .semantics { this.selected = selected; if (!enabled) disabled() }

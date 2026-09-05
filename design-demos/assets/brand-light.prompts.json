@@ -1,0 +1,18 @@
+{
+  "tool": "built-in image_gen",
+  "assets": [
+    {
+      "file": "riftdeck-emblem-light.webp",
+      "reference": "riftdeck-emblem.webp",
+      "final_edit": "Precise background replacement only. Keep this light-theme controller/rift logo completely unchanged: exact silver panels, graphite outlines, olive left blade, teal right blade, tiny grid and button placement, proportions, same canvas and scale. Replace ALL light gray checkerboard squares everywhere, including between portal blades, with a completely uniform PURE WHITE (#FFFFFF, RGB 255 255 255) background. A plain white studio-paper background with NO pattern whatsoever, no checkerboard, no gray texture, no shadow, no vignette, no gray gradient. Do not change any logo details or colors. Output one logo on perfectly clean solid white.",
+      "design_brief": "Create the matching light UI variant of the RiftDeck controller-and-rift emblem. Preserve its silhouette, fragmented portal blades, D-pad, four round buttons, proportions and perspective grid. Use silver-white panels with dark graphite outlines, deep yellow-olive left blade and D-pad, deep teal right blade and buttons. Simplify glow for small displays. No wordmark, badge or added text."
+    },
+    {
+      "file": "riftdeck-wordmark-light.webp",
+      "reference": "riftdeck-wordmark.webp",
+      "final_edit": "Precise background replacement only. Preserve the exact RiftDeck wordmark completely unchanged: exact angular italic letters, spacing, split cuts, olive Rift and deep teal Deck, reference canvas dimensions and framing. Replace ALL gray checkerboard pattern everywhere, including inside and between letters, with uniform PURE WHITE (#FFFFFF, RGB 255 255 255). Plain white paper background with absolutely no pattern, no checkerboard squares, no shadow, no gray gradient, no texture. Output only this same wordmark on perfectly clean solid white.",
+      "design_brief": "Create the light-theme RiftDeck wordmark. Preserve exact text, italic angular letter shapes, split cuts, spacing, baseline, proportions and framing. Make Rift deep yellow-olive and Deck deep teal, with no glow. No slogan, controller emblem, border or badge."
+    }
+  ],
+  "integration": "Light assets use a white backing, blended with the app background using Multiply. Both theme variants are decoded off the UI thread at display size. The Android adaptive launcher icon uses a smaller copy of the original neon emblem and a separate monochrome vector."
+}

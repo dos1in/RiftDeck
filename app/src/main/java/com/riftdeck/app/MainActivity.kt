@@ -7,6 +7,10 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.riftdeck.core.ui.theme.LocalFrontendTheme
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -37,7 +41,15 @@ class MainActivity : ComponentActivity() {
             val factory = remember(repository) { HomeViewModelFactory(repository, launcher.uiPreferencesRepository) }
             val homeViewModel: HomeViewModel = viewModel(factory = factory)
 
-            RiftDeckTheme {
+            val uiState by homeViewModel.uiState.collectAsStateWithLifecycle()
+            RiftDeckTheme(mode = uiState.themeMode, palette = uiState.themePalette) {
+                val isDark = LocalFrontendTheme.current.isDark
+                SideEffect {
+                    WindowCompat.getInsetsController(window, window.decorView).apply {
+                        isAppearanceLightStatusBars = !isDark
+                        isAppearanceLightNavigationBars = !isDark
+                    }
+                }
                 RiftDeckApp(
                     homeViewModel = homeViewModel,
                     analogActions = gamepadInputManager.actions,

@@ -4,46 +4,18 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.lightColorScheme
+import androidx.compose.runtime.remember
+import com.riftdeck.core.model.ThemeMode
+import com.riftdeck.core.model.ThemePalette
 import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
-@Immutable
-data class FrontendTheme(
-    val background: Color,
-    val surface: Color,
-    val surfaceElevated: Color,
-    val primary: Color,
-    val secondary: Color,
-    val tertiary: Color,
-    val textPrimary: Color,
-    val textSecondary: Color,
-    val focusBorder: Color,
-    val outline: Color,
-    val error: Color,
-    val success: Color,
-)
-
-private val NeonFrontendTheme = FrontendTheme(
-    background = Color(0xFF000000),
-    surface = Color(0xFF090D0F),
-    surfaceElevated = Color(0xFF142023),
-    primary = Color(0xFFF8F800),
-    secondary = Color(0xFF00F0F0),
-    tertiary = Color(0xFFFF4FA3),
-    textPrimary = Color(0xFFEEF5F3),
-    textSecondary = Color(0xFFA5B6B8),
-    focusBorder = Color(0xFFF8F800),
-    outline = Color(0xFF34484B),
-    error = Color(0xFFFF746C),
-    success = Color(0xFF70E2A0),
-)
-
-val LocalFrontendTheme = staticCompositionLocalOf { NeonFrontendTheme }
+val LocalFrontendTheme = staticCompositionLocalOf { frontendTheme(isDark = true, ThemePalette.Rift) }
 val LocalReducedMotion = staticCompositionLocalOf { false }
 
 private val RiftDeckTypography = Typography(
@@ -108,30 +80,40 @@ private val RiftDeckTypography = Typography(
 )
 
 @Composable
-fun RiftDeckTheme(content: @Composable () -> Unit) {
-    val colors = NeonFrontendTheme
+fun RiftDeckTheme(
+    mode: ThemeMode = ThemeMode.System,
+    palette: ThemePalette = ThemePalette.Rift,
+    content: @Composable () -> Unit,
+) {
+    val isDark = mode.isDark(isSystemInDarkTheme())
+    val colors = remember(isDark, palette) { frontendTheme(isDark, palette) }
     val brandArtwork = rememberBrandArtwork()
-    val materialColors = darkColorScheme(
-        primary = colors.primary,
-        onPrimary = colors.background,
-        secondary = colors.secondary,
-        onSecondary = colors.background,
-        tertiary = colors.tertiary,
-        background = colors.background,
-        onBackground = colors.textPrimary,
-        surface = colors.surface,
-        onSurface = colors.textPrimary,
-        error = colors.error,
-    )
+    val materialColors = remember(colors) {
+        val base = if (isDark) darkColorScheme() else lightColorScheme()
+        base.copy(
+            primary = colors.primary,
+            onPrimary = colors.onAccent,
+            secondary = colors.secondary,
+            onSecondary = colors.onAccent,
+            tertiary = colors.tertiary,
+            onTertiary = colors.onAccent,
+            background = colors.background,
+            onBackground = colors.textPrimary,
+            surface = colors.surface,
+            onSurface = colors.textPrimary,
+            surfaceVariant = colors.surfaceElevated,
+            onSurfaceVariant = colors.textSecondary,
+            outline = colors.outline,
+            surfaceTint = colors.primary,
+            error = colors.error,
+            onError = colors.onAccent,
+        )
+    }
 
     androidx.compose.runtime.CompositionLocalProvider(
         LocalFrontendTheme provides colors,
         LocalBrandArtwork provides brandArtwork,
     ) {
-        MaterialTheme(
-            colorScheme = materialColors,
-            typography = RiftDeckTypography,
-            content = content,
-        )
+        MaterialTheme(colorScheme = materialColors, typography = RiftDeckTypography, content = content)
     }
 }
