@@ -64,7 +64,7 @@ fun RiftDeckApp(homeViewModel: HomeViewModel, analogActions: Flow<GameAction>, o
     val onOpenGame: (Long) -> Unit = { homeViewModel.focusGame(it); navigate(Route.game(it)) }
     CompositionLocalProvider(LocalAnalogActions provides analogActions, LocalReducedMotion provides uiState.reducedMotion,
         LocalControllerInputEnabled provides (notice == null && !preferenceError)) {
-        Box(modifier.fillMaxSize().background(colors.background).windowInsetsPadding(WindowInsets.systemBars)) {
+        Box(modifier.fillMaxSize().background(colors.background).windowInsetsPadding(WindowInsets.safeDrawing)) {
             // Instant page changes keep controls responsive; focus motion is handled by the cover.
             // Restore focus only after the saved ordering is known; otherwise the target row can move offscreen mid-restore.
             NavHost(navController = nav, startDestination = Route.Home, modifier = Modifier.fillMaxSize(),

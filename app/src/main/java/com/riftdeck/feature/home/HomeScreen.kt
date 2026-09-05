@@ -75,11 +75,13 @@ fun HomeScreen(
                     BoxWithConstraints(Modifier.weight(0.85f).fillMaxHeight(), contentAlignment = Alignment.Center) {
                         val coverHeight = (maxHeight - 52.dp).coerceAtLeast(40.dp).coerceAtMost(350.dp)
                         val coverWidth = (coverHeight * 0.83f).coerceAtMost(maxWidth - 8.dp)
+                        val controlsWidth = coverWidth.coerceAtLeast(160.dp).coerceAtMost(maxWidth)
                         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
                             GameStageCover(game, Modifier.size(coverWidth, coverHeight), focus.getValue("cover"),
                                 left = rail, right = focus.getValue("play"), down = focus.getValue(when { index > 0 -> "previous"; index < uiState.games.lastIndex -> "next"; else -> "recent" }),
+                                showLabel = coverWidth >= 100.dp,
                                 onFocused = { focusedKey = "cover" }, onClick = { onOpenGame(game.id) })
-                            Row(Modifier.width(coverWidth), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Row(Modifier.width(controlsWidth), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 NeonActionButton("‹", { step(-1) }, Modifier.width(42.dp).semantics { contentDescription = previousLabel }, enabled = index > 0,
                                     focusRequester = focus.getValue("previous"), up = focus.getValue("cover"), right = focus.getValue(if (index < uiState.games.lastIndex) "next" else "play"),
                                     left = rail, down = focus.getValue("recent"), onFocused = { focusedKey = "previous" })

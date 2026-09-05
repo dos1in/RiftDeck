@@ -8,6 +8,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.runtime.remember
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.composed
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.onPreviewKeyEvent
@@ -59,6 +60,8 @@ fun Modifier.controllerClickable(
 ): Modifier = composed {
     val interactionSource = remember { MutableInteractionSource() }
     this
+        // Handheld controls must retain a visible focus target even when Android starts in touch mode.
+        .focusProperties { canFocus = enabled }
         .onPreviewKeyEvent { event ->
             if (!enabled || event.type != KeyEventType.KeyDown || event.nativeKeyEvent.repeatCount > 0) {
                 return@onPreviewKeyEvent false

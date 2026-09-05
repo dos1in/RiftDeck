@@ -185,7 +185,7 @@ fun PlatformScreen(
                         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.spacedBy(if (compact) 6.dp else 12.dp)) {
-                            GameStageCover(selected, Modifier.size(artworkWidth, artworkHeight))
+                            GameStageCover(selected, Modifier.size(artworkWidth, artworkHeight), showLabel = artworkWidth >= 100.dp)
                             Text(selected.title, color = colors.textPrimary, style = MaterialTheme.typography.titleLarge,
                                 maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
                             if (!compact) Text(gamePlaytime(selected), color = colors.textSecondary, style = MaterialTheme.typography.bodyMedium)

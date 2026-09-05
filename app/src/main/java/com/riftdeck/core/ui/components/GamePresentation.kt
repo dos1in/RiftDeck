@@ -32,6 +32,7 @@ fun GameStageCover(
     right: FocusRequester = FocusRequester.Cancel,
     up: FocusRequester = FocusRequester.Cancel,
     down: FocusRequester = FocusRequester.Cancel,
+    showLabel: Boolean = true,
     onFocused: () -> Unit = {},
     onClick: (() -> Unit)? = null,
 ) {
@@ -46,7 +47,7 @@ fun GameStageCover(
         .controllerClickable(onClick = onClick)
     Box(modifier.graphicsLayer { scaleX = scale; scaleY = scale }.then(interactive)
         .border(if (focused) 3.dp else 1.dp, if (focused) colors.primary else colors.outline).padding(6.dp)) {
-        GameArtwork(game, stringResource(R.string.artwork_description, game.title), Modifier.fillMaxSize())
+        GameArtwork(game, stringResource(R.string.artwork_description, game.title), Modifier.fillMaxSize(), showLabel = showLabel)
         Box(Modifier.width(26.dp).height(3.dp).background(colors.primary))
     }
 }
