@@ -1,0 +1,73 @@
+app/src/main/java/com/riftdeck/feature/home/HomeViewModel.kt
+  795777a48d959e42 10-14,38-42,47,49,52-59,65-66
+app/src/main/java/com/riftdeck/data/repository/UiPreferencesRepository.kt
+  795777a48d959e42 4-8,19-24,26-30,36-41,43-44
+app/src/main/java/com/riftdeck/feature/settings/SettingsScreen.kt
+  795777a48d959e42 18-19,35-36,42-43,45-46,49-52,76,78,85-87,100-104
+app/src/main/java/com/riftdeck/core/ui/components/NeonActionButton.kt
+  795777a48d959e42 42,53-56
+app/src/main/java/com/riftdeck/app/MainActivity.kt
+  795777a48d959e42 10-13,44-52
+app/src/test/java/com/riftdeck/data/repository/UiPreferencesRepositoryTest.kt
+  795777a48d959e42 1-72
+app/src/main/res/drawable/ic_launcher_foreground.xml
+  795777a48d959e42 1-7
+app/src/main/java/com/riftdeck/core/ui/theme/FrontendTheme.kt
+  795777a48d959e42 1-50
+app/src/main/java/com/riftdeck/feature/home/HomeUiState.kt
+  795777a48d959e42 5-6,18-19
+app/src/main/res/drawable/ic_launcher_monochrome.xml
+  795777a48d959e42 3-11
+app/src/main/AndroidManifest.xml
+  795777a48d959e42 12,14,21
+app/src/main/java/com/riftdeck/app/navigation/RiftDeckApp.kt
+  795777a48d959e42 88-89
+README.md
+  795777a48d959e42 38-47
+app/src/main/res/values-zh-rCN/strings.xml
+  795777a48d959e42 59,82-91
+app/src/main/res/mipmap-anydpi/ic_launcher.xml
+  795777a48d959e42 1-6
+app/src/main/java/com/riftdeck/feature/settings/AppearanceSettings.kt
+  795777a48d959e42 1-122
+design-demos/assets/brand-light.prompts.json
+  795777a48d959e42 1-18
+app/src/main/java/com/riftdeck/core/ui/theme/BrandArtwork.kt
+  795777a48d959e42 21-26,39-42
+app/src/main/java/com/riftdeck/feature/platform/PlatformScreen.kt
+  795777a48d959e42 146,210,216
+app/src/main/res/values/strings.xml
+  795777a48d959e42 60,83-92
+app/src/test/java/com/riftdeck/core/ui/theme/FrontendThemeTest.kt
+  795777a48d959e42 1-41
+app/src/main/java/com/riftdeck/core/ui/components/RiftDeckBrand.kt
+  795777a48d959e42 11-12,23,26-28,37,40-42
+design-demos/THEME_VALIDATION.md
+  795777a48d959e42 1-28
+app/src/main/java/com/riftdeck/core/ui/components/RiftFrame.kt
+  795777a48d959e42 4-8,16,51-59
+app/src/main/java/com/riftdeck/core/ui/theme/RiftDeckTheme.kt
+  795777a48d959e42 7-11,18,83-89,91-111,117
+app/src/main/java/com/riftdeck/core/model/Appearance.kt
+  795777a48d959e42 1-23
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "0a9b717c200ae31a9ee5a2a9c40631d02b92343f",
+  "prompts": {
+    "795777a48d959e42": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a06f87-d23d-7b90-80b3-7e99eeb16932",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "doslin",
+      "messages": [],
+      "total_additions": 1172,
+      "total_deletions": 229,
+      "accepted_lines": 3223,
+      "overriden_lines": 10
+    }
+  }
+}
