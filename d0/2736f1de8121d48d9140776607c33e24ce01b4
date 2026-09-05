@@ -1,0 +1,45 @@
+app/src/main/java/com/riftdeck/core/ui/theme/FrontendTheme.kt
+  795777a48d959e42 16-17,30,32,34,36-41,44-46,50-51,53-56
+design-demos/THEME_VALIDATION.md
+  795777a48d959e42 7
+app/src/main/java/com/riftdeck/core/ui/components/RiftDeckBrand.kt
+  795777a48d959e42 11,20-28,37,51,54
+design-demos/assets/brand-light.prompts.json
+  795777a48d959e42 17
+app/src/main/java/com/riftdeck/feature/platform/PlatformScreen.kt
+  795777a48d959e42 220
+app/src/main/java/com/riftdeck/core/ui/components/GamePresentation.kt
+  795777a48d959e42 50
+app/src/main/java/com/riftdeck/core/ui/components/EmptyLibraryState.kt
+  795777a48d959e42 50
+app/src/main/java/com/riftdeck/core/ui/theme/RiftDeckTheme.kt
+  795777a48d959e42 95
+app/src/main/java/com/riftdeck/core/ui/components/NeonActionButton.kt
+  795777a48d959e42 42
+app/src/test/java/com/riftdeck/core/ui/theme/FrontendThemeTest.kt
+  795777a48d959e42 25,30-31
+app/src/main/java/com/riftdeck/core/ui/components/DeckNoticeDialog.kt
+  795777a48d959e42 34
+app/src/main/java/com/riftdeck/core/ui/components/DeckScaffold.kt
+  795777a48d959e42 75,84,87
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "d02736f1de8121d48d9140776607c33e24ce01b4",
+  "prompts": {
+    "795777a48d959e42": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a06f87-d23d-7b90-80b3-7e99eeb16932",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "doslin",
+      "messages": [],
+      "total_additions": 68,
+      "total_deletions": 38,
+      "accepted_lines": 2697,
+      "overriden_lines": 13
+    }
+  }
+}
