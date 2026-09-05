@@ -56,6 +56,7 @@ fun Modifier.gamepadActions(
 
 fun Modifier.controllerClickable(
     enabled: Boolean = true,
+    onConfirm: (() -> Unit)? = null,
     onClick: () -> Unit,
 ): Modifier = composed {
     val interactionSource = remember { MutableInteractionSource() }
@@ -67,7 +68,7 @@ fun Modifier.controllerClickable(
                 return@onPreviewKeyEvent false
             }
             if (GamepadKeyMapper.fromKeyCode(event.nativeKeyEvent.keyCode) == GameAction.Confirm) {
-                onClick()
+                (onConfirm ?: onClick)()
                 true
             } else {
                 false

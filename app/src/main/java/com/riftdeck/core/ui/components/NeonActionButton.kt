@@ -33,6 +33,7 @@ fun NeonActionButton(
     onFocused: () -> Unit = {},
     glyph: String? = null,
     selected: Boolean = false,
+    onConfirm: (() -> Unit)? = null,
 ) {
     val colors = LocalFrontendTheme.current
     var focused by remember { mutableStateOf(false) }
@@ -57,7 +58,7 @@ fun NeonActionButton(
             .heightIn(min = 42.dp)
             .alpha(if (enabled) 1f else 0.4f)
             .semantics { this.selected = selected; if (!enabled) disabled() }
-            .controllerClickable(enabled, onClick)
+            .controllerClickable(enabled = enabled, onConfirm = onConfirm, onClick = onClick)
             .padding(horizontal = 12.dp, vertical = 9.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,

@@ -65,10 +65,12 @@ fun SettingsScreen(initialSection: String, reducedMotion: Boolean, onReducedMoti
                 Column(Modifier.weight(0.72f).fillMaxHeight().verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     SettingSection.entries.forEachIndexed { index, item ->
-                        NeonActionButton(stringResource(item.title), { selectedIndex = index; action.requestFocus() },
+                        // Touch selects the category; controller confirmation enters its settings.
+                        NeonActionButton(stringResource(item.title), { selectedIndex = index; tabs[index].requestFocus() },
                             Modifier.fillMaxWidth(), selected = selectedIndex == index, focusRequester = tabs[index],
                             left = rail, right = action, up = tabs.getOrNull(index - 1), down = tabs.getOrNull(index + 1),
-                            onFocused = { selectedIndex = index; panelFocused = false })
+                            onFocused = { selectedIndex = index; panelFocused = false },
+                            onConfirm = { action.requestFocus() })
                     }
                 }
                 Column(Modifier.weight(1.28f).fillMaxHeight().background(colors.surface).border(1.dp, colors.outline)
