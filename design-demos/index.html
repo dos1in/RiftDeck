@@ -1,0 +1,29 @@
+<!doctype html>
+<!-- Design review shell. The embedded pages are independent offline prototypes, not Android runtime screenshots. No direction has been approved yet. -->
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RiftDeck · UI 方向对比</title>
+<style>
+:root{color-scheme:dark;--bg:#10120e;--surface:#171a15;--raised:#20241d;--line:#46503f;--ink:#f1f3eb;--muted:#b7beae;--yellow:#e7ff4f}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "PingFang SC",sans-serif}button,a{font:inherit}button{cursor:pointer}button:focus-visible,a:focus-visible{outline:3px solid var(--yellow);outline-offset:4px}header{display:flex;gap:18px;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--line);padding:20px 32px}header img{width:40px;height:40px}h1{font:700 22px/1.2 Menlo,monospace;letter-spacing:-1px;margin:0}header p{margin:3px 0 0;color:var(--muted);font-size:13px}.status{margin-left:auto;border:1px solid var(--line);padding:5px 12px;color:var(--yellow);font-size:13px}main{max-width:1500px;margin:auto;padding:24px 32px}nav{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px}.direction{display:grid;grid-template-columns:36px 1fr;gap:4px 12px;text-align:left;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:16px}.direction b{grid-row:span 2;font:700 28px Menlo,monospace;align-self:center}.direction strong{font-size:17px}.direction small{font-size:13px;color:var(--muted)}.direction[aria-pressed=true]{border-color:var(--yellow);background:var(--raised)}.direction[aria-pressed=true] b{color:var(--yellow)}.toolbar{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}.toolbar p{margin:0;flex:1;min-width:180px;color:var(--muted)}select,.toolbar a{background:var(--surface);color:var(--ink);border:1px solid var(--line);font:inherit;padding:6px 10px}.toolbar a{text-decoration:none}select:focus-visible{outline:2px solid var(--yellow)}.stage{position:relative;overflow:hidden;background:var(--surface);border:1px solid var(--line);margin:auto;width:100%}iframe{position:absolute;left:0;top:0;border:0;transform-origin:top left;background:var(--bg)}.note{display:grid;grid-template-columns:1fr auto;gap:20px;margin:16px 0 24px;color:var(--muted);font-size:13px}.note p{margin:0}.note a{color:var(--ink)}details{border-top:1px solid var(--line);padding-top:18px}summary{cursor:pointer;font-size:14px}.boards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:16px}.boards a{display:block;color:var(--ink);text-decoration:none}.boards img{width:100%;display:block;border:1px solid var(--line);margin-bottom:8px}.boards small{color:var(--muted)}@media(max-width:760px){header{padding:16px}main{padding:16px}nav{gap:6px}.direction{display:block;padding:10px}.direction b{font-size:22px;display:block}.direction strong{font-size:14px}.direction small{display:none}.note{grid-template-columns:1fr}.boards{grid-template-columns:1fr}.status{display:none}}
+</style>
+<header><img src="assets/riftdeck.svg" alt="RiftDeck"><div><h1>RIFTDECK / UI DIRECTIONS</h1><p>相同内容，三种掌机界面结构</p></div><span class="status">交互初稿 · 等待方向选择</span></header>
+<main>
+  <nav aria-label="预览方向">
+    <button class="direction" data-file="A-geometric-terminal.html" data-desc="模块几何与规则线，强调信息秩序和操作效率。" aria-pressed="true"><b>A</b><strong>几何终端</strong><small>轮盘逻辑 · Bauhaus Geometric</small></button>
+    <button class="direction" data-file="B-console-shelf.html" data-desc="以横向封面书架浏览，选中游戏的信息随焦点更新。" aria-pressed="false"><b>B</b><strong>主机书架</strong><small>现实参照 · 主机式游戏库</small></button>
+    <button class="direction" data-file="C-focus-stage.html" data-desc="单款游戏成为视觉中心，明确主操作与相邻游戏关系。" aria-pressed="false"><b>C</b><strong>聚焦舞台</strong><small>设计师逻辑 · The Designers Republic</small></button>
+  </nav>
+  <div class="toolbar"><p id="description">模块几何与规则线，强调信息秩序和操作效率。</p><label>画布 <select id="size"><option value="1280,800">1280 × 800 · 16:10</option><option value="960,720">960 × 720 · 4:3</option><option value="1280,720">1280 × 720 · 16:9</option><option value="800,500">800 × 500 · 紧凑</option><option value="640,480">640 × 480 · 紧凑 4:3</option></select></label><a id="standalone" href="A-geometric-terminal.html" target="_blank" rel="noopener">独立打开 ↗</a></div>
+  <div class="stage"><iframe title="RiftDeck 交互初稿" src="A-geometric-terminal.html"></iframe></div>
+  <div class="note"><p>点击画面后：方向键移动 · Enter / A 确认 · Esc / B 返回 · X 详情 · Y 收藏 · M 设置。<br>使用仓库的五款示例游戏与几何占位封面；目录访问、模拟器启动尚未接入。</p><p>预览切换不代表确认方向。<br><a href="README.md">交付说明</a></p></div>
+  <details><summary>展开三版首页截图</summary><div class="boards"><a href="screenshots/A-home.png" target="_blank"><img src="screenshots/A-home.png" alt="A 几何终端首页"><strong>A / 几何终端</strong></a><a href="screenshots/B-home.png" target="_blank"><img src="screenshots/B-home.png" alt="B 主机书架首页"><strong>B / 主机书架</strong></a><a href="screenshots/C-home.png" target="_blank"><img src="screenshots/C-home.png" alt="C 聚焦舞台首页"><strong>C / 聚焦舞台</strong></a></div></details>
+</main>
+<script>
+const frame=document.querySelector('iframe'),stage=document.querySelector('.stage'),size=document.querySelector('#size');
+function fit(){const [w,h]=size.value.split(',').map(Number),scale=stage.clientWidth/w;frame.style.width=w+'px';frame.style.height=h+'px';frame.style.transform=`scale(${scale})`;stage.style.height=(h*scale)+'px'}
+document.querySelectorAll('.direction').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('.direction').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));frame.src=button.dataset.file;document.querySelector('#standalone').href=button.dataset.file;document.querySelector('#description').textContent=button.dataset.desc}));
+size.addEventListener('change',fit);new ResizeObserver(fit).observe(stage);fit();
+</script>
+</html>
