@@ -1,0 +1,59 @@
+app/src/main/java/com/riftdeck/core/ui/components/NeonActionButton.kt
+  795777a48d959e42 13,39-41,52,54-56
+design-demos/index.html
+  795777a48d959e42 2,6,8-9,11,14,16,18-20
+design-demos/direction-approved.md
+  795777a48d959e42 13,15-23
+app/src/main/java/com/riftdeck/core/ui/components/RiftFrame.kt
+  795777a48d959e42 1-45
+design-demos/native-verification.md
+  795777a48d959e42 1-62
+app/src/main/java/com/riftdeck/core/ui/components/DeckScaffold.kt
+  795777a48d959e42 7,14-16,47,53,56,59-60,72-75,105,112,114,134-140
+app/src/main/java/com/riftdeck/core/ui/components/GamePresentation.kt
+  795777a48d959e42 7,13,49-52
+app/src/main/res/values/strings.xml
+  795777a48d959e42 67
+app/src/main/res/values-zh-rCN/strings.xml
+  795777a48d959e42 66
+design-demos/logo-iteration-verification.md
+  795777a48d959e42 1-63
+app/src/main/java/com/riftdeck/core/ui/components/RiftDeckBrand.kt
+  795777a48d959e42 1-39
+app/src/main/java/com/riftdeck/core/ui/theme/RiftDeckTheme.kt
+  795777a48d959e42 32-36,38-41,113,127-130
+app/src/main/java/com/riftdeck/feature/home/HomeScreen.kt
+  795777a48d959e42 14,38,80
+branding/asset-extraction-prompts.md
+  795777a48d959e42 1-21
+branding/README.md
+  795777a48d959e42 1-8
+design-demos/C-rift-brand.html
+  795777a48d959e42 1-110
+app/src/main/java/com/riftdeck/core/ui/theme/BrandArtwork.kt
+  795777a48d959e42 1-61
+design-demos/brand-spec.md
+  795777a48d959e42 1-38
+design-demos/README.md
+  795777a48d959e42 1-3,9,19
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "7b138fa0594ebb11658cb3994db4c9b77e0ba0c5",
+  "prompts": {
+    "795777a48d959e42": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a06f87-d23d-7b90-80b3-7e99eeb16932",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "doslin",
+      "messages": [],
+      "total_additions": 725,
+      "total_deletions": 137,
+      "accepted_lines": 2654,
+      "overriden_lines": 45
+    }
+  }
+}
