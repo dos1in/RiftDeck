@@ -1,0 +1,66 @@
+design-demos/product-facts.md
+  795777a48d959e42 1-8
+design-demos/assets/mock-cover-1.svg
+  795777a48d959e42 1
+design-demos/assets/mock-cover-5.svg
+  795777a48d959e42 1
+design-demos/assets/mock-data.json
+  795777a48d959e42 1-60
+design-demos/A-geometric-terminal.html
+  795777a48d959e42 1-156
+design-demos/brand-spec.md
+  795777a48d959e42 1-13
+design-demos/assets/mock-cover-4.svg
+  795777a48d959e42 1
+design-demos/README.md
+  795777a48d959e42 1-19
+design-demos/assets/mock-cover-3.svg
+  795777a48d959e42 1
+design-demos/verification.md
+  795777a48d959e42 1-28
+design-demos/assets/mock-cover-2.svg
+  795777a48d959e42 1
+design-demos/B-console-shelf.html
+  795777a48d959e42 1-107
+design-demos/index.html
+  795777a48d959e42 1-29
+design-demos/assets/riftdeck.svg
+  795777a48d959e42 1
+design-demos/design-spec.md
+  795777a48d959e42 1-35
+design-demos/C-focus-stage.html
+  795777a48d959e42 1-93
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "53d9965ddef73d5a5124a5b0b61f6a10e9132052",
+  "prompts": {
+    "795777a48d959e42": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a06f87-d23d-7b90-80b3-7e99eeb16932",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "doslin",
+      "messages": [],
+      "total_additions": 927,
+      "total_deletions": 17,
+      "accepted_lines": 910,
+      "overriden_lines": 0
+    },
+    "e7f7972c3e4c277f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a06bc5-0139-7d02-8765-638b5b6fdf85",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "doslin",
+      "messages": [],
+      "total_additions": 2716,
+      "total_deletions": 0,
+      "accepted_lines": 9,
+      "overriden_lines": 0
+    }
+  }
+}
