@@ -1,0 +1,39 @@
+app/src/main/AndroidManifest.xml
+  795777a48d959e42 20,28-31
+design-demos/LAUNCHER_VALIDATION.md
+  795777a48d959e42 1-25
+README.md
+  795777a48d959e42 48-58
+app/src/main/java/com/riftdeck/app/MainActivity.kt
+  795777a48d959e42 3-4,11,14-16,20-21,24-25,29-30,35-70,73-81,109-117
+app/src/main/java/com/riftdeck/feature/settings/SettingsScreen.kt
+  795777a48d959e42 30,37-38,44-45,55,111-120
+app/src/main/res/values-zh-rCN/strings.xml
+  795777a48d959e42 92-102
+app/src/main/java/com/riftdeck/app/navigation/RiftDeckApp.kt
+  795777a48d959e42 3,47-49,55-61,76,87,103-104,109-110,112,114,121-122
+app/src/main/java/com/riftdeck/core/launcher/HomeLauncher.kt
+  795777a48d959e42 1-46
+app/src/main/res/values/strings.xml
+  795777a48d959e42 93-103
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "6c9400faf33a07e527e9fbac38b8c550bedc65ac",
+  "prompts": {
+    "795777a48d959e42": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a06f87-d23d-7b90-80b3-7e99eeb16932",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "doslin",
+      "messages": [],
+      "total_additions": 856,
+      "total_deletions": 35,
+      "accepted_lines": 3498,
+      "overriden_lines": 5
+    }
+  }
+}
