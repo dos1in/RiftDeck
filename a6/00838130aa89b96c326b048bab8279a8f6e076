@@ -1,0 +1,69 @@
+app/src/main/java/com/riftdeck/core/ui/theme/RiftDeckTheme.kt
+  795777a48d959e42 47,76-81,104-105
+app/src/main/res/values-zh-rCN/strings.xml
+  795777a48d959e42 19,41-84
+app/src/main/java/com/riftdeck/feature/home/HomeUiState.kt
+  795777a48d959e42 5,9,12-15,23-25
+app/src/main/java/com/riftdeck/feature/home/HomeViewModel.kt
+  795777a48d959e42 3,6,8-9,11-13,16,20-21,25-26,28-31,33-35,37-42,44-48,50-56,58,65,68,70
+app/src/main/java/com/riftdeck/app/LauncherApplication.kt
+  795777a48d959e42 5,10
+app/src/test/java/com/riftdeck/feature/platform/LibraryFilterTest.kt
+  795777a48d959e42 1-57
+app/src/main/java/com/riftdeck/core/ui/components/EmptyLibraryState.kt
+  795777a48d959e42 29,73
+app/src/main/java/com/riftdeck/feature/game/GameDetailScreen.kt
+  795777a48d959e42 3-6,16,19-25,27,29-43,45-56
+app/src/main/java/com/riftdeck/feature/home/HomeScreen.kt
+  795777a48d959e42 3-6,9-10,15-16,20,22,30-32,37-46,48,50,52-90,94-107,110-121
+app/src/main/java/com/riftdeck/feature/settings/SettingsScreen.kt
+  795777a48d959e42 5-7,10,15-19,23,26-33,36-38,40-44,47,49-71,74-104
+gradle/libs.versions.toml
+  795777a48d959e42 11,29
+app/src/main/java/com/riftdeck/feature/platform/LibraryFilter.kt
+  795777a48d959e42 1-21
+app/src/main/java/com/riftdeck/app/MainActivity.kt
+  795777a48d959e42 11-13,29-32,35-37
+app/src/main/java/com/riftdeck/app/navigation/RiftDeckApp.kt
+  795777a48d959e42 3-4,6-8,10-13,20,22-27,31,39-42,46,48,50-60,63-88,91-106
+app/src/main/java/com/riftdeck/core/ui/components/DeckNoticeDialog.kt
+  795777a48d959e42 4-5,8,10,12-14,16-17,21,23-42
+app/src/main/java/com/riftdeck/data/repository/UiPreferencesRepository.kt
+  795777a48d959e42 1-27
+app/src/main/java/com/riftdeck/core/ui/components/NeonActionButton.kt
+  795777a48d959e42 5,9,13-15,33-34,38-40,44-47,49-58,60-65
+app/src/main/java/com/riftdeck/core/input/ControllerInput.kt
+  795777a48d959e42 1,4,6-9,11-17,19-20,22,24-25,27-28,30-45,50
+app/src/main/res/values/strings.xml
+  795777a48d959e42 19,42-85
+app/build.gradle.kts
+  795777a48d959e42 57
+app/src/main/java/com/riftdeck/core/ui/components/GameArtwork.kt
+  795777a48d959e42 13,22-23,32,43,48,75-76
+app/src/main/java/com/riftdeck/core/ui/components/GamePresentation.kt
+  795777a48d959e42 3-5,8-9,12,14-17,20,24,27,31-36,40-52,54-69,71-75,79-107
+app/src/main/java/com/riftdeck/feature/platform/PlatformScreen.kt
+  795777a48d959e42 4-11,14-15,18,21-25,29,31,33-38,42,46-49,54-66,68-91,93-96,99-109,111-125,128-129,131-153,155-157,159-164,167-194,202-224
+app/src/main/java/com/riftdeck/core/ui/components/DeckScaffold.kt
+  795777a48d959e42 1-154
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "a600838130aa89b96c326b048bab8279a8f6e076",
+  "prompts": {
+    "795777a48d959e42": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a06f87-d23d-7b90-80b3-7e99eeb16932",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "doslin",
+      "messages": [],
+      "total_additions": 1091,
+      "total_deletions": 1587,
+      "accepted_lines": 3133,
+      "overriden_lines": 0
+    }
+  }
+}
