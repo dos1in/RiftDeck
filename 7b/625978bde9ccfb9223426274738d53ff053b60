@@ -1,0 +1,31 @@
+app/src/main/java/com/riftdeck/feature/home/HomeScreen.kt
+  795777a48d959e42 78,82,84
+app/src/main/java/com/riftdeck/feature/platform/PlatformScreen.kt
+  795777a48d959e42 188
+app/src/main/java/com/riftdeck/app/navigation/RiftDeckApp.kt
+  795777a48d959e42 67
+app/src/main/java/com/riftdeck/core/ui/components/GamePresentation.kt
+  795777a48d959e42 35,50
+app/src/main/java/com/riftdeck/core/input/GamepadInput.kt
+  795777a48d959e42 11,63-64
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "7b625978bde9ccfb9223426274738d53ff053b60",
+  "prompts": {
+    "795777a48d959e42": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a06f87-d23d-7b90-80b3-7e99eeb16932",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "doslin",
+      "messages": [],
+      "total_additions": 75,
+      "total_deletions": 5,
+      "accepted_lines": 2067,
+      "overriden_lines": 4
+    }
+  }
+}
