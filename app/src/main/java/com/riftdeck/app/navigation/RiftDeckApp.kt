@@ -64,7 +64,10 @@ fun RiftDeckApp(homeViewModel: HomeViewModel, analogActions: Flow<GameAction>, o
     val onOpenGame: (Long) -> Unit = { homeViewModel.focusGame(it); navigate(Route.game(it)) }
     CompositionLocalProvider(LocalAnalogActions provides analogActions, LocalReducedMotion provides uiState.reducedMotion,
         LocalControllerInputEnabled provides (notice == null && !preferenceError)) {
-        Box(modifier.fillMaxSize().background(colors.background).windowInsetsPadding(WindowInsets.safeDrawing)) {
+        // Transient system bars overlay the immersive UI instead of resizing it as they hide.
+        // Hardware cutouts and an explicitly opened keyboard still need safe space.
+        val contentInsets = WindowInsets.displayCutout.union(WindowInsets.waterfall).union(WindowInsets.ime)
+        Box(modifier.fillMaxSize().background(colors.background).windowInsetsPadding(contentInsets)) {
             // Instant page changes keep controls responsive; focus motion is handled by the cover.
             // Restore focus only after the saved ordering is known; otherwise the target row can move offscreen mid-restore.
             NavHost(navController = nav, startDestination = Route.Home, modifier = Modifier.fillMaxSize(),
