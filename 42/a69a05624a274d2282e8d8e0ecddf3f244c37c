@@ -1,0 +1,155 @@
+app/src/test/java/com/riftdeck/feature/platform/AlphabetPositionsTest.kt
+  795777a48d959e42 1-19
+app/src/main/java/com/riftdeck/data/repository/LocalGameRepository.kt
+  795777a48d959e42 1-10
+app/src/test/java/com/riftdeck/data/scanner/CoverFilesTest.kt
+  795777a48d959e42 1-26
+app/src/androidTest/java/com/riftdeck/data/SafPermissionIntegrationTest.kt
+  795777a48d959e42 1-58
+tools/test-fixtures/README.md
+  795777a48d959e42 1-17
+app/src/main/java/com/riftdeck/core/emulator/RomLaunchPreparer.kt
+  795777a48d959e42 1-69
+app/src/main/java/com/riftdeck/data/database/GameDao.kt
+  795777a48d959e42 1-119
+build.gradle.kts
+  795777a48d959e42 5
+app/src/main/java/com/riftdeck/data/database/LibraryDatabase.kt
+  795777a48d959e42 1-11
+app/src/main/java/com/riftdeck/feature/settings/EmulatorSettings.kt
+  795777a48d959e42 1-37
+app/src/main/java/com/riftdeck/feature/search/GameSearch.kt
+  795777a48d959e42 1-20
+gradle/libs.versions.toml
+  795777a48d959e42 12-14,17,35-39,44
+app/src/test/java/com/riftdeck/data/scanner/RomFileNamesTest.kt
+  795777a48d959e42 1-25
+README.md
+  795777a48d959e42 25,27-34,36,38,40,42,44,46,96,98,204,208,211-212,215
+app/src/main/java/com/riftdeck/feature/platform/AlphabetJumpDialog.kt
+  795777a48d959e42 1-65
+app/src/test/java/com/riftdeck/data/repository/UiPreferencesRepositoryTest.kt
+  795777a48d959e42 65-96
+tools/test-fixtures/gba-smoke.s
+  795777a48d959e42 1-35
+tools/test-fixtures/make_gba_smoke.py
+  795777a48d959e42 1-25
+app/schemas/com.riftdeck.data.database.LibraryDatabase/3.json
+  795777a48d959e42 1-285
+app/src/main/java/com/riftdeck/data/scanner/SafRomDocumentSource.kt
+  795777a48d959e42 1-62
+CORE_IMPLEMENTATION.md
+  795777a48d959e42 1-46
+app/src/main/java/com/riftdeck/data/scanner/CoverFiles.kt
+  795777a48d959e42 1-20
+app/build.gradle.kts
+  795777a48d959e42 5,41-42,61-66,79-80
+app/src/main/res/xml/rom_paths.xml
+  795777a48d959e42 1-4
+app/src/main/java/com/riftdeck/data/scanner/LibraryScanner.kt
+  795777a48d959e42 1-66
+app/src/main/java/com/riftdeck/data/database/PlaySession.kt
+  795777a48d959e42 1-16
+app/src/main/res/values/strings.xml
+  795777a48d959e42 32-33,57-58,77,101-143
+app/src/main/java/com/riftdeck/feature/home/HomeViewModel.kt
+  795777a48d959e42 35,42-43,48,51,65,67,75-77
+app/src/main/java/com/riftdeck/core/emulator/EmulatorCatalog.kt
+  795777a48d959e42 1-32
+app/src/main/java/com/riftdeck/domain/repository/GameRepository.kt
+  795777a48d959e42 4,7
+app/src/main/java/com/riftdeck/app/navigation/RiftDeckApp.kt
+  795777a48d959e42 4-11,55,62-79,82-86,102,105,116,118,122-123,128-134,138,141-144,150-184,186-190,192,194,196-198
+app/src/main/java/com/riftdeck/feature/settings/LibrarySettings.kt
+  795777a48d959e42 1-61
+app/src/main/java/com/riftdeck/data/repository/LibraryRepository.kt
+  795777a48d959e42 1-56
+app/src/main/java/com/riftdeck/core/emulator/PlaySessionTiming.kt
+  795777a48d959e42 1-7
+app/src/main/java/com/riftdeck/feature/home/HomeScreen.kt
+  795777a48d959e42 35-36,64,73
+app/src/main/java/com/riftdeck/core/ui/components/EmptyLibraryState.kt
+  795777a48d959e42 30-31,39,76
+app/src/main/java/com/riftdeck/core/ui/components/DeckScaffold.kt
+  795777a48d959e42 109
+app/src/main/java/com/riftdeck/data/scanner/RomFileNames.kt
+  795777a48d959e42 1-27
+app/src/main/java/com/riftdeck/feature/search/GameSearchDialog.kt
+  795777a48d959e42 1-104
+app/src/main/java/com/riftdeck/core/ui/components/GameArtwork.kt
+  795777a48d959e42 11-18,43-48,61,89-95
+app/src/test/java/com/riftdeck/core/emulator/PlaySessionTimingTest.kt
+  795777a48d959e42 1-14
+app/src/main/java/com/riftdeck/feature/home/HomeUiState.kt
+  795777a48d959e42 17
+app/src/main/java/com/riftdeck/core/ui/components/DeckNoticeDialog.kt
+  795777a48d959e42 3-4,23,28,36,41-42
+app/src/main/java/com/riftdeck/data/database/GameEntity.kt
+  795777a48d959e42 1-44
+app/schemas/com.riftdeck.data.database.LibraryDatabase/2.json
+  795777a48d959e42 1-280
+app/src/main/java/com/riftdeck/core/emulator/GbaArchive.kt
+  795777a48d959e42 1-123
+app/src/main/java/com/riftdeck/core/model/Game.kt
+  795777a48d959e42 27
+app/src/main/java/com/riftdeck/data/repository/EmulationRepository.kt
+  795777a48d959e42 1-72
+app/src/main/java/com/riftdeck/app/MainActivity.kt
+  795777a48d959e42 29-30,61,100-103,115-116
+app/src/main/java/com/riftdeck/core/emulator/EmulatorLauncher.kt
+  795777a48d959e42 1-66
+app/src/main/java/com/riftdeck/app/LauncherApplication.kt
+  795777a48d959e42 4-11,13-14,16-18,21-22,24-33
+app/src/androidTest/java/com/riftdeck/data/LibraryDatabaseTest.kt
+  795777a48d959e42 1-200
+app/src/main/java/com/riftdeck/core/input/GameAction.kt
+  795777a48d959e42 14-15
+app/src/main/java/com/riftdeck/feature/settings/LibraryViewModel.kt
+  795777a48d959e42 1-46
+app/src/main/AndroidManifest.xml
+  795777a48d959e42 8-18,28-34
+app/src/test/java/com/riftdeck/feature/search/GameSearchTest.kt
+  795777a48d959e42 1-29
+app/src/main/java/com/riftdeck/feature/settings/SettingsScreen.kt
+  795777a48d959e42 16,18,37,40-42,100-101,104-105
+app/src/main/java/com/riftdeck/data/repository/UiPreferencesRepository.kt
+  795777a48d959e42 4,7,26-27,33,42-51,58-69
+app/src/test/java/com/riftdeck/core/emulator/GbaArchiveTest.kt
+  795777a48d959e42 1-98
+app/src/main/java/com/riftdeck/core/emulator/EmulatorConfig.kt
+  795777a48d959e42 1-22
+app/src/main/java/com/riftdeck/core/input/GamepadInput.kt
+  795777a48d959e42 38-39
+app/src/main/java/com/riftdeck/feature/platform/LibraryFilter.kt
+  795777a48d959e42 4,9-10
+app/src/main/java/com/riftdeck/feature/platform/PlatformScreen.kt
+  795777a48d959e42 22,28,51-52,58-63,74-75,92-130,134-135,142-143,149-150,165-174,182,213,216-229,231-233,235-248,262,285-289
+app/schemas/com.riftdeck.data.database.LibraryDatabase/1.json
+  795777a48d959e42 1-220
+app/src/main/java/com/riftdeck/feature/emulator/EmulatorViewModel.kt
+  795777a48d959e42 1-57
+app/src/test/java/com/riftdeck/core/input/GamepadKeyMapperTest.kt
+  795777a48d959e42 27-28
+app/src/main/res/values-zh-rCN/strings.xml
+  795777a48d959e42 32-33,56-57,74,76,100-142
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "42a69a05624a274d2282e8d8e0ecddf3f244c37c",
+  "prompts": {
+    "795777a48d959e42": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a06f87-d23d-7b90-80b3-7e99eeb16932",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "doslin",
+      "messages": [],
+      "total_additions": 5733,
+      "total_deletions": 670,
+      "accepted_lines": 8619,
+      "overriden_lines": 17
+    }
+  }
+}
