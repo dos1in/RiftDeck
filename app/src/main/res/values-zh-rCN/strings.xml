@@ -140,4 +140,11 @@
     <string name="game_removed_title">游戏已移出游戏库</string>
     <string name="game_removed_message">这个游戏已不在游戏库中。可以返回游戏库选择其他游戏。</string>
     <string name="return_to_library">返回游戏库</string>
+    <string name="expand_navigation_rail">展开左侧导航</string>
+    <string name="navigation_rail_description">收起后保留页面图标，为游戏留出更多空间。点击侧栏顶部按钮可随时展开。</string>
+    <string name="expand_navigation">展开导航</string>
+    <string name="collapse_navigation">收起导航</string>
+    <string name="navigation_expanded">已展开</string>
+    <string name="navigation_collapsed">已收起为图标</string>
+    <string name="collapse_navigation_short">收起</string>
 </resources>

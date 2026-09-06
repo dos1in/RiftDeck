@@ -62,6 +62,22 @@ class UiPreferencesRepositoryTest {
         } finally { job.cancelAndJoin() }
     }
 
+    @Test fun navigationExpansionPersistsAcrossRestartAndPreservesAppearance() = runBlocking {
+        withRepository { repository ->
+            repository.setThemeMode(ThemeMode.Light)
+            repository.setNavigationRailExpanded(false)
+        }
+        withRepository { repository ->
+            assertEquals(false, repository.preferences.first().navigationRailExpanded)
+            assertEquals(ThemeMode.Light, repository.preferences.first().themeMode)
+            repository.setNavigationRailExpanded(true)
+        }
+        withRepository { repository ->
+            assertEquals(true, repository.preferences.first().navigationRailExpanded)
+            assertEquals(ThemeMode.Light, repository.preferences.first().themeMode)
+        }
+    }
+
     @Test fun folderSelectionsPersistAndDeduplicateWithoutChangingAppearance() = runBlocking {
         withRepository { repository ->
             repository.setThemeMode(ThemeMode.Light)

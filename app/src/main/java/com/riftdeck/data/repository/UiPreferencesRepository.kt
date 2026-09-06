@@ -25,6 +25,7 @@ data class UiPreferences(
     val themePalette: ThemePalette = ThemePalette.Rift,
     val romFolders: Set<String> = emptySet(),
     val emulators: Map<Long, EmulatorConfig> = emptyMap(),
+    val navigationRailExpanded: Boolean = true,
 )
 
 class UiPreferencesRepository internal constructor(private val store: DataStore<Preferences>) {
@@ -35,6 +36,8 @@ class UiPreferencesRepository internal constructor(private val store: DataStore<
     private val themePaletteKey = stringPreferencesKey("theme_palette")
     private val reducedMotionKey = booleanPreferencesKey("reduced_motion")
     private val sortDescendingKey = booleanPreferencesKey("sort_descending")
+    // Preserve the stored choice from the earlier show/hide setting.
+    private val navigationRailExpandedKey = booleanPreferencesKey("navigation_rail_visible")
     val preferences = store.data.catch { error ->
         if (error is IOException) emit(emptyPreferences()) else throw error
     }.map { values ->
@@ -49,6 +52,7 @@ class UiPreferencesRepository internal constructor(private val store: DataStore<
                     values[stringPreferencesKey("emulator_name_$platform")] ?: pkg,
                     mimeType = values[stringPreferencesKey("emulator_mime_$platform")] ?: "application/octet-stream")
             }.toMap(),
+            navigationRailExpanded = values[navigationRailExpandedKey] ?: true,
             reducedMotion = values[reducedMotionKey] ?: false,
             sortDescending = values[sortDescendingKey] ?: false,
             themeMode = ThemeMode.fromStorage(values[themeModeKey]),
@@ -69,6 +73,7 @@ class UiPreferencesRepository internal constructor(private val store: DataStore<
     suspend fun removeRomFolder(uri: String) { store.edit { it[foldersKey] = (it[foldersKey] ?: emptySet()) - uri } }
     suspend fun setThemeMode(mode: ThemeMode) { store.edit { it[themeModeKey] = mode.storageValue } }
     suspend fun setThemePalette(palette: ThemePalette) { store.edit { it[themePaletteKey] = palette.storageValue } }
+    suspend fun setNavigationRailExpanded(expanded: Boolean) { store.edit { it[navigationRailExpandedKey] = expanded } }
     suspend fun setReducedMotion(enabled: Boolean) { store.edit { it[reducedMotionKey] = enabled } }
     suspend fun setSortDescending(enabled: Boolean) { store.edit { it[sortDescendingKey] = enabled } }
 }

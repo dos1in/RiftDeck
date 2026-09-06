@@ -141,4 +141,11 @@
     <string name="game_removed_title">Game no longer in library</string>
     <string name="game_removed_message">This game was removed from the library. Return to choose another game.</string>
     <string name="return_to_library">Return to library</string>
+    <string name="expand_navigation_rail">Expand sidebar</string>
+    <string name="navigation_rail_description">Collapse to icons for more game space. Use the sidebar button to expand it at any time.</string>
+    <string name="expand_navigation">Expand navigation</string>
+    <string name="collapse_navigation">Collapse navigation</string>
+    <string name="navigation_expanded">Expanded</string>
+    <string name="navigation_collapsed">Collapsed to icons</string>
+    <string name="collapse_navigation_short">Collapse</string>
 </resources>

@@ -31,6 +31,8 @@ import com.riftdeck.core.input.GameAction
 import com.riftdeck.core.input.LocalAnalogActions
 import com.riftdeck.core.input.LocalControllerInputEnabled
 import com.riftdeck.core.ui.components.DeckNoticeDialog
+import com.riftdeck.core.ui.components.LocalNavigationRail
+import com.riftdeck.core.ui.components.NavigationRailState
 import com.riftdeck.core.ui.components.DeckSection
 import com.riftdeck.core.ui.theme.LocalFrontendTheme
 import com.riftdeck.core.ui.theme.LocalReducedMotion
@@ -91,7 +93,16 @@ fun RiftDeckApp(homeViewModel: HomeViewModel, libraryViewModel: LibraryViewModel
     fun navigate(route: String) { nav.navigate(route) { launchSingleTop = true } }
     fun back() { if (!nav.popBackStack()) onExit() }
     fun openLibrary(filter: LibraryFilter) { homeViewModel.setFilter(filter); navigate(Route.Platform) }
-    val onNavigate: (DeckSection) -> Unit = { section ->
+    val onNavigate: (DeckSection) -> Unit = navigateSection@{ section ->
+        val currentSection = when (nav.currentDestination?.route) {
+            Route.Home -> DeckSection.Home
+            Route.Platform -> DeckSection.Library
+            Route.Game -> DeckSection.Detail
+            Route.Settings -> DeckSection.Settings
+            else -> null
+        }
+        // Selecting the current section must preserve its filter, scroll position and focus.
+        if (section == currentSection) return@navigateSection
         when (section) {
             DeckSection.Home -> if (!nav.popBackStack(Route.Home, false)) navigate(Route.Home)
             DeckSection.Library -> if (!nav.popBackStack(Route.Platform, false)) openLibrary(LibraryFilter.All)
@@ -101,7 +112,9 @@ fun RiftDeckApp(homeViewModel: HomeViewModel, libraryViewModel: LibraryViewModel
     }
     val onPlay: (Long) -> Unit = { id -> homeViewModel.focusGame(id); uiState.games.firstOrNull { it.id == id }?.let(emulatorViewModel::launch) }
     val onOpenGame: (Long) -> Unit = { homeViewModel.focusGame(it); navigate(Route.game(it)) }
-    CompositionLocalProvider(LocalAnalogActions provides analogActions, LocalReducedMotion provides uiState.reducedMotion,
+    CompositionLocalProvider(
+        LocalNavigationRail provides NavigationRailState(uiState.navigationRailExpanded, homeViewModel::setNavigationRailExpanded),
+        LocalAnalogActions provides analogActions, LocalReducedMotion provides uiState.reducedMotion,
         LocalControllerInputEnabled provides (!preferenceError && !launcherError && !libraryError && removeFolder == null && !searchOpen && !launchBusy && launchError == null && !historyError)) {
         // Transient system bars overlay the immersive UI instead of resizing it as they hide.
         // Hardware cutouts and an explicitly opened keyboard still need safe space.

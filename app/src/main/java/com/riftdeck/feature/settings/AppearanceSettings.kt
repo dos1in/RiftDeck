@@ -18,6 +18,7 @@ import com.riftdeck.R
 import com.riftdeck.core.input.controllerClickable
 import com.riftdeck.core.model.ThemeMode
 import com.riftdeck.core.model.ThemePalette
+import com.riftdeck.core.ui.components.LocalNavigationRail
 import com.riftdeck.core.ui.components.NeonActionButton
 import com.riftdeck.core.ui.components.riftSelectionFrame
 import com.riftdeck.core.ui.theme.LocalFrontendTheme
@@ -36,6 +37,7 @@ internal fun AppearanceSettings(
     onFocused: (Int) -> Unit,
 ) {
     val colors = LocalFrontendTheme.current
+    val rail = LocalNavigationRail.current
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(stringResource(R.string.theme_mode), color = colors.textSecondary, style = MaterialTheme.typography.labelLarge)
         Row(Modifier.fillMaxWidth().selectableGroup(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -77,7 +79,12 @@ internal fun AppearanceSettings(
     NeonActionButton(stringResource(R.string.reduce_motion), { controls[6].requestFocus(); onReducedMotion(!reducedMotion) },
         Modifier.fillMaxWidth().semantics { role = Role.Switch; toggleableState = if (reducedMotion) ToggleableState.On else ToggleableState.Off },
         glyph = stringResource(if (reducedMotion) R.string.setting_on else R.string.setting_off), selected = reducedMotion,
-        focusRequester = controls[6], left = category, up = controls[palette.ordinal + 3], onFocused = { onFocused(6) })
+        focusRequester = controls[6], left = category, up = controls[palette.ordinal + 3], down = controls[7], onFocused = { onFocused(6) })
+    NeonActionButton(stringResource(R.string.expand_navigation_rail), { controls[7].requestFocus(); rail.setExpanded(!rail.expanded) },
+        Modifier.fillMaxWidth().semantics { role = Role.Switch; toggleableState = if (rail.expanded) ToggleableState.On else ToggleableState.Off },
+        glyph = stringResource(if (rail.expanded) R.string.setting_on else R.string.setting_off), selected = rail.expanded,
+        focusRequester = controls[7], left = category, up = controls[6], onFocused = { onFocused(7) })
+    Text(stringResource(R.string.navigation_rail_description), color = colors.textSecondary, style = MaterialTheme.typography.bodyMedium)
 }
 
 @Composable

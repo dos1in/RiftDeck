@@ -15,6 +15,7 @@ data class HomeUiState(
     val filter: LibraryFilter = LibraryFilter.All,
     val sortDescending: Boolean = false,
     val searchQuery: String = "",
+    val navigationRailExpanded: Boolean = true,
     val reducedMotion: Boolean = false,
     val themeMode: ThemeMode = ThemeMode.System,
     val themePalette: ThemePalette = ThemePalette.Rift,

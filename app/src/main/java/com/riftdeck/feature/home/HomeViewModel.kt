@@ -55,6 +55,7 @@ class HomeViewModel(
         state.copy(
             focusedGameId = focusedId?.takeIf { id -> state.games.any { it.id == id } }
                 ?: state.recentGame?.id ?: state.games.firstOrNull()?.id,
+            navigationRailExpanded = prefs.navigationRailExpanded,
             reducedMotion = prefs.reducedMotion,
             themeMode = prefs.themeMode,
             themePalette = prefs.themePalette,
@@ -67,6 +68,7 @@ class HomeViewModel(
     fun toggleFavorite(gameId: Long) = updatePreference { gameRepository.toggleFavorite(gameId) }
     fun setThemeMode(mode: ThemeMode) = updatePreference { preferencesRepository.setThemeMode(mode) }
     fun setThemePalette(palette: ThemePalette) = updatePreference { preferencesRepository.setThemePalette(palette) }
+    fun setNavigationRailExpanded(expanded: Boolean) = updatePreference { preferencesRepository.setNavigationRailExpanded(expanded) }
     fun setReducedMotion(enabled: Boolean) = updatePreference { preferencesRepository.setReducedMotion(enabled) }
     fun toggleSort() = updatePreference { preferencesRepository.setSortDescending(!uiState.value.sortDescending) }
     fun dismissPreferenceError() { mutablePreferenceError.value = false }

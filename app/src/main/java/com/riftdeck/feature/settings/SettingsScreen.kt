@@ -48,7 +48,7 @@ fun SettingsScreen(initialSection: String, reducedMotion: Boolean, onReducedMoti
     val action = remember { FocusRequester() }
     val systemSettings = remember { FocusRequester() }
     var systemSettingsFocused by rememberSaveable { mutableStateOf(false) }
-    val appearanceControls = remember { List(ThemeMode.entries.size + ThemePalette.entries.size + 1) { FocusRequester() } }
+    val appearanceControls = remember { List(ThemeMode.entries.size + ThemePalette.entries.size + 2) { FocusRequester() } }
     var appearanceFocusIndex by rememberSaveable { mutableIntStateOf(0) }
     val section = SettingSection.entries[selectedIndex]
     fun entryAction(item: SettingSection): FocusRequester =
