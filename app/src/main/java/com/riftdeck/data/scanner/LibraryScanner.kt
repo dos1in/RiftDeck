@@ -17,6 +17,7 @@ data class ScanState(
     val discovered: Int = 0,
     val failedFolders: Set<String> = emptySet(),
     val completed: Boolean = false,
+    val runId: Long = 0,
 )
 
 class LibraryScanner(private val source: RomDocumentSource, private val dao: GameDao) {
@@ -26,9 +27,10 @@ class LibraryScanner(private val source: RomDocumentSource, private val dao: Gam
 
     suspend fun scan(folders: Collection<String>) = mutex.withLock {
         withContext(Dispatchers.IO) {
+            val runId = mutableState.value.runId + 1
             var discovered = 0
             val failures = mutableSetOf<String>()
-            mutableState.value = ScanState(running = true)
+            mutableState.value = ScanState(running = true, runId = runId)
             try {
                 for (folder in folders) {
                     currentCoroutineContext().ensureActive()
@@ -41,7 +43,7 @@ class LibraryScanner(private val source: RomDocumentSource, private val dao: Gam
                             if (batch.size >= 50) {
                                 dao.importBatch(folder, generation, batch)
                                 batch.clear()
-                                mutableState.value = ScanState(true, discovered, failures.toSet())
+                                mutableState.value = ScanState(true, discovered, failures.toSet(), runId = runId)
                             }
                         }
                         currentCoroutineContext().ensureActive()
@@ -52,9 +54,9 @@ class LibraryScanner(private val source: RomDocumentSource, private val dao: Gam
                     } catch (_: Exception) {
                         failures.add(folder)
                     }
-                    mutableState.value = ScanState(true, discovered, failures.toSet())
+                    mutableState.value = ScanState(true, discovered, failures.toSet(), runId = runId)
                 }
-                mutableState.value = ScanState(discovered = discovered, failedFolders = failures, completed = true)
+                mutableState.value = ScanState(discovered = discovered, failedFolders = failures, completed = true, runId = runId)
             } finally {
                 mutableState.value = mutableState.value.copy(running = false)
             }

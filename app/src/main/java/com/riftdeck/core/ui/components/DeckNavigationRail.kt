@@ -2,9 +2,6 @@ package com.riftdeck.core.ui.components
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
-import androidx.compose.foundation.hoverable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -13,11 +10,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.*
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.*
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.*
 import com.riftdeck.R
@@ -102,23 +97,17 @@ private fun NavigationRailItem(
 ) {
     val colors = LocalFrontendTheme.current
     var focused by remember { mutableStateOf(false) }
-    val hoverSource = remember { MutableInteractionSource() }
-    val hovered by hoverSource.collectIsHoveredAsState()
-    val foreground = if (selected) colors.accentText else colors.textPrimary
+    val foreground = if (selected) colors.secondary else colors.textPrimary
     Row(modifier.fillMaxWidth().heightIn(min = 44.dp)
         .onFocusChanged { focused = it.isFocused; if (it.isFocused) onFocused() }
-        .background(if (focused || selected || hovered) colors.surfaceElevated else colors.background)
-        .riftFrame(if (selected) colors.outline else Color.Transparent,
-            colors.focusBorder, colors.secondary, focused, cut = 4.dp, accents = focused)
+        .riftSelectionFrame(focused, selected)
         .semantics { contentDescription = label; this.selected = selected }
-        .hoverable(hoverSource)
         .controllerClickable(onClick = onClick)
         .padding(horizontal = if (expanded) 8.dp else 0.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = if (expanded) Arrangement.spacedBy(8.dp) else Arrangement.Center) {
         Icon(painterResource(icon), contentDescription = null, tint = foreground, modifier = Modifier.size(20.dp))
-        if (expanded) Text(displayLabel, color = foreground, style = MaterialTheme.typography.labelLarge,
-            fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+        if (expanded) Text(displayLabel, color = foreground, style = MaterialTheme.typography.titleSmall,
             maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.clearAndSetSemantics { })
     }
 }
