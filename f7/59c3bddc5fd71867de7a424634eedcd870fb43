@@ -1,0 +1,57 @@
+app/src/main/res/drawable/ic_nav_settings.xml
+  795777a48d959e42 1-8
+app/src/main/res/drawable/ic_nav_expand.xml
+  795777a48d959e42 1-8
+app/src/main/java/com/riftdeck/feature/home/HomeUiState.kt
+  795777a48d959e42 18
+app/src/main/res/drawable/ic_nav_library.xml
+  795777a48d959e42 1-8
+app/src/main/res/drawable/ic_nav_collapse.xml
+  795777a48d959e42 1-8
+app/src/main/res/drawable/ic_nav_home.xml
+  795777a48d959e42 1-8
+CORE_IMPLEMENTATION.md
+  795777a48d959e42 12,21-23,46-48
+app/src/main/java/com/riftdeck/core/ui/components/DeckScaffold.kt
+  795777a48d959e42 27-30,43-44,50,52-53,84-87
+app/src/test/java/com/riftdeck/data/repository/UiPreferencesRepositoryTest.kt
+  795777a48d959e42 65-80
+app/src/main/java/com/riftdeck/feature/settings/AppearanceSettings.kt
+  795777a48d959e42 21,40,82-87
+app/src/main/java/com/riftdeck/feature/settings/SettingsScreen.kt
+  795777a48d959e42 51
+app/src/main/res/values-zh-rCN/strings.xml
+  795777a48d959e42 143-149
+app/src/main/res/drawable/ic_nav_detail.xml
+  795777a48d959e42 1-8
+app/src/main/java/com/riftdeck/feature/home/HomeViewModel.kt
+  795777a48d959e42 58,71
+app/src/main/java/com/riftdeck/data/repository/UiPreferencesRepository.kt
+  795777a48d959e42 28,39-40,55,76
+app/src/main/java/com/riftdeck/app/navigation/RiftDeckApp.kt
+  795777a48d959e42 34-35,96-105,115-117
+app/src/main/res/values/strings.xml
+  795777a48d959e42 144-150
+app/src/main/java/com/riftdeck/core/ui/components/DeckNavigationRail.kt
+  795777a48d959e42 1-124
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "f759c3bddc5fd71867de7a424634eedcd870fb43",
+  "prompts": {
+    "795777a48d959e42": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a06f87-d23d-7b90-80b3-7e99eeb16932",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "doslin",
+      "messages": [],
+      "total_additions": 666,
+      "total_deletions": 329,
+      "accepted_lines": 5924,
+      "overriden_lines": 0
+    }
+  }
+}
