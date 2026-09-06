@@ -106,7 +106,7 @@ fun DeckScaffold(
                         Text("/", color = colors.outline)
                         Text(stringResource(section.title), color = colors.textSecondary, style = MaterialTheme.typography.labelMedium)
                         Spacer(Modifier.weight(1f))
-                        if (!compact) Text(stringResource(R.string.mock_library_label), color = colors.textSecondary,
+                        if (!compact) Text(stringResource(R.string.local_library_label), color = colors.textSecondary,
                             style = MaterialTheme.typography.labelMedium)
                     }
                     DeckDivider()

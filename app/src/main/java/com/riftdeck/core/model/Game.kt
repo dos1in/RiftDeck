@@ -24,5 +24,5 @@ data class Game(
     val releaseYear: Int?,
     val developer: String?,
     val genre: String?,
+    val coverVersion: String? = null,
 )
-

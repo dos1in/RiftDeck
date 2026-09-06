@@ -22,111 +22,28 @@ The architecture is designed to support additional Android handhelds and retro p
 
 ---
 
-## Features
+## Current Features
 
-### Controller-First Navigation
+* Controller navigation with D-pad / stick, A/B/X/Y actions, L1/R1 categories, L2/R2 library paging and first-letter jumps in the displayed title order.
+* Home, game library, game details and controller-friendly settings.
+* System, light and dark appearance; Rift, Ocean and Ember palettes; reduced motion. Preferences use DataStore.
+* Android Home launcher support. Use **Settings → Home launcher → Set as default home**. Android asks you to confirm; the current Home app stays unchanged if you cancel.
+* Persistent SAF folder access, recursive `.gba` / `.zip` scanning, incremental updates, cancellation and removed-file detection.
+* Room library storage, favorites, recent games, sorting and name / filename search. Search includes a controller keyboard; touch input supports the system keyboard.
+* Installed-emulator selection and saved configuration. GBA.emu has been tested with an original diagnostic ROM through both SAF and ZIP extraction.
+* Launch count, last-played time and estimated session duration, with page, selection and scroll restoration when returning.
 
-RiftDeck is designed for handheld controls from the start.
+New installations start with an empty library. Choose **Add ROM folder**, grant access in Android's folder picker, then select an installed GBA emulator in **Settings → Emulators**. Use game files you are entitled to run. Android's picker and the external emulator have their own input and storage settings. Configure a writable save directory in the emulator; RiftDeck shares ROMs with read access and does not manage emulator save files.
 
-* Full D-pad navigation
-* Analog stick navigation
-* A / B / X / Y actions
-* Shoulder-button navigation
-* Clear and consistent focus states
-* No touch input required for normal use
+ZIP files must contain one GBA ROM. Unsafe paths, ambiguous archives and oversized files are rejected. Extracted ROMs use a private temporary cache and a limited FileProvider read grant; older files are cleaned after 24 hours when the frontend resumes or prepares another ROM.
 
-### Appearance
+Duplicate detection currently recognizes the same document imported through overlapping folders. Identical copies with different document IDs remain separate. Playtime estimates the interval between launch and return, capped at 24 hours per session; it cannot distinguish paused or backgrounded emulator time. A successful Android launch does not guarantee the emulator accepts every ROM.
 
-Open **Settings → Appearance** to choose:
+Local covers are loaded with Coil. Put a matching PNG, WebP, JPG or JPEG beside the ROM, then rescan (for example, `Game.gba` and `Game.png`). Matching ignores case, preserves region tags and prefers PNG, then WebP, JPG and JPEG when several exist. Replacing or deleting a cover updates the next scan; unavailable or damaged images fall back to a geometric placeholder.
 
-* **System** (default), **Light**, or **Dark** display mode
-* **Rift**, **Ocean**, or **Ember** color palette
-* Reduced motion
+Metadata scraping, video previews, additional emulator-specific adapters and an Android app drawer are planned.
 
-Choices are saved locally. System mode responds to the device’s light and dark appearance settings. All options support touch and D-pad navigation.
-
-### Home Launcher
-
-RiftDeck can be selected as the Android home screen. Open **Settings → Home launcher → Set as default home** and confirm in the Android chooser. Canceling leaves your current home app unchanged.
-
-* Home returns to RiftDeck’s main screen without creating another launcher instance.
-* Back / B navigates within RiftDeck and stays on its main screen when used as Home.
-* **Change home app** opens Android’s default-home settings; **Android settings** provides access to device settings.
-* Returning with Back from another app preserves the current RiftDeck screen.
-
-The current shell provides a gaming home screen; an installed-app drawer is not included yet.
-
-### Game Library
-
-* Scan local ROM folders
-* Organize games by platform
-* Browse games with cover artwork
-* Favorites
-* Recently played games
-* Play history
-* Search
-* Sorting
-* Incremental library scanning
-
-### Game Details
-
-View useful information before launching a game:
-
-* Cover artwork
-* Screenshots
-* Platform
-* Release year
-* Developer
-* Genre
-* Playtime
-* Last played
-* Favorite status
-
-Optional video previews are powered by AndroidX Media3.
-
-### External Emulator Support
-
-RiftDeck acts as a frontend rather than an emulator.
-
-Games are launched through installed Android emulators using configurable Android intents.
-
-The emulator integration layer is designed to support applications such as:
-
-* RetroArch
-* standalone emulators
-* platform-specific emulators
-* custom emulator configurations
-
-RiftDeck does not distribute ROMs, BIOS files, or emulator binaries.
-
----
-
-## First Supported Platform
-
-### Game Boy Advance
-
-The first development milestone focuses on delivering an excellent GBA experience.
-
-Initial ROM formats:
-
-```text
-.gba
-.zip
-```
-
-Planned GBA functionality includes:
-
-* ROM folder scanning
-* Cover artwork
-* Metadata
-* Favorites
-* Recent games
-* Search and sorting
-* Emulator launching
-* Play history
-* Restoring library position after returning from an emulator
-
-More platforms will be added after the GBA experience is stable.
+See [CORE_IMPLEMENTATION.md](CORE_IMPLEMENTATION.md) for verification evidence and remaining hardware checks.
 
 ---
 
@@ -176,48 +93,9 @@ Responsiveness and readability always take priority over decorative effects.
 
 ## Tech Stack
 
-RiftDeck is built with modern Android technologies.
+Implemented: Kotlin, Jetpack Compose, Navigation Compose, Room / KSP, Coil, Coroutines / Flow and DataStore. ROM scanning and ZIP preparation run in Kotlin on background dispatchers.
 
-```text
-App
-│
-├── Kotlin
-│
-├── Jetpack Compose
-│   ├── Home
-│   ├── Platform
-│   ├── Game Details
-│   └── Settings
-│
-├── Room
-│   └── Game Library
-│
-├── Coil
-│   └── Artwork
-│
-├── Media3
-│   └── Video Previews
-│
-├── Coroutines / Flow
-│
-├── DataStore
-│
-└── Native Core (optional)
-    │
-    └── C++
-        ├── ROM Scanning
-        ├── CRC / SHA
-        ├── Archive Processing
-        └── Large Filesystem Operations
-```
-
-### Kotlin First
-
-RiftDeck is intentionally Kotlin-first.
-
-Native C++ code is optional and will only be introduced when profiling demonstrates a measurable performance benefit.
-
-UI, application logic, Android integration, and most library operations remain in Kotlin.
+Media3 previews, Baseline Profiles and macrobenchmarks are planned. There is no native core; C++ will only be considered after profiling demonstrates a need.
 
 ---
 
@@ -323,92 +201,18 @@ RiftDeck does not upload ROM files.
 
 ## Roadmap
 
-### Phase 1 — Application Shell
-
-* [ ] Application architecture
-* [ ] Navigation
-* [ ] Controller input layer
-* [ ] Focus system
-* [ ] RiftDeck theme
-* [ ] Mock GBA library
-
-### Phase 2 — GBA Library
-
-* [ ] ROM directory selection
-* [ ] GBA ROM scanning
-* [ ] Room database
-* [ ] Game library
-* [ ] Favorites
-* [ ] Recent games
-* [ ] Search
-* [ ] Sorting
-
-### Phase 3 — Emulator Integration
-
-* [ ] Emulator configuration
-* [ ] Generic emulator launcher
-* [ ] GBA emulator support
-* [ ] Return-to-library state restoration
-
-### Phase 4 — Metadata
-
-* [ ] Metadata provider abstraction
-* [ ] Cover artwork
-* [ ] Screenshots
-* [ ] Background metadata scraping
-
-### Phase 5 — Media
-
-* [ ] Video previews
-* [ ] Media3 integration
-* [ ] Preview lifecycle management
-
-### Phase 6 — Performance
-
-* [ ] Baseline Profiles
-* [ ] Macrobenchmarks
-* [ ] Compose profiling
-* [ ] Image cache tuning
-* [ ] ROM scanning benchmarks
-
-### Phase 7 — Additional Platforms
-
-Planned platforms may include:
-
-* Game Boy
-* Game Boy Color
-* NES
-* SNES
-* Mega Drive / Genesis
-* PlayStation
-* Nintendo 64
-* PSP
-* Dreamcast
-
----
+The application shell, local GBA library and first external emulator launch flow are implemented. Remaining work focuses on target-handheld validation, metadata / artwork, optional video previews, performance profiling and more platforms.
 
 ## Building
 
-RiftDeck is an Android project built with Gradle.
-
-Requirements will be documented as the initial project structure stabilizes.
-
-Typical development environment:
-
-* Android Studio
-* Android SDK
-* Kotlin
-* JDK
-* Gradle
-
-Clone the repository:
+Use JDK 17 and Android SDK 36. The repository includes the Gradle wrapper; Room schemas are versioned under `app/schemas`.
 
 ```bash
-git clone https://github.com/dos1in/RiftDeck.git
-cd RiftDeck
+./gradlew :app:assembleDebug :app:testDebugUnitTest :app:lintDebug
+./gradlew :app:connectedDebugAndroidTest
 ```
 
-Then open the project in Android Studio.
+The second command requires a connected Android test device or emulator. Use an isolated test device for instrumentation. See `tools/test-fixtures` for a source-built diagnostic ROM without third-party game data.
 
 ---
 

@@ -35,6 +35,8 @@ object GamepadKeyMapper {
         AndroidKeyEvent.KEYCODE_BUTTON_Y -> GameAction.Favorite
         AndroidKeyEvent.KEYCODE_BUTTON_L1 -> GameAction.PreviousCategory
         AndroidKeyEvent.KEYCODE_BUTTON_R1 -> GameAction.NextCategory
+        AndroidKeyEvent.KEYCODE_BUTTON_L2 -> GameAction.PreviousPage
+        AndroidKeyEvent.KEYCODE_BUTTON_R2 -> GameAction.NextPage
         AndroidKeyEvent.KEYCODE_BUTTON_START -> GameAction.Menu
         AndroidKeyEvent.KEYCODE_BUTTON_SELECT -> GameAction.Search
         else -> null

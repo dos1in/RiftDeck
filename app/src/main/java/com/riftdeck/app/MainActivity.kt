@@ -26,6 +26,8 @@ import com.riftdeck.core.ui.theme.LocalFrontendTheme
 import com.riftdeck.core.ui.theme.RiftDeckTheme
 import com.riftdeck.feature.home.HomeViewModel
 import com.riftdeck.feature.home.HomeViewModelFactory
+import com.riftdeck.feature.settings.LibraryViewModel
+import com.riftdeck.feature.emulator.EmulatorViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 
@@ -56,6 +58,7 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         defaultHome = homeLauncher.isDefault()
+        (application as LauncherApplication).emulationRepository.onFrontendResumed()
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -94,6 +97,10 @@ class MainActivity : ComponentActivity() {
             val factory = remember(repository) { HomeViewModelFactory(repository, launcher.uiPreferencesRepository) }
             val homeViewModel: HomeViewModel = viewModel(factory = factory)
 
+            val libraryFactory = remember(launcher) { LibraryViewModel.Factory(launcher.libraryRepository) }
+            val libraryViewModel: LibraryViewModel = viewModel(factory = libraryFactory)
+            val emulatorFactory = remember(launcher) { EmulatorViewModel.Factory(launcher.emulationRepository, launcher.uiPreferencesRepository) }
+            val emulatorViewModel: EmulatorViewModel = viewModel(factory = emulatorFactory)
             val uiState by homeViewModel.uiState.collectAsStateWithLifecycle()
             RiftDeckTheme(mode = uiState.themeMode, palette = uiState.themePalette) {
                 val isDark = LocalFrontendTheme.current.isDark
@@ -105,6 +112,8 @@ class MainActivity : ComponentActivity() {
                 }
                 RiftDeckApp(
                     homeViewModel = homeViewModel,
+                    libraryViewModel = libraryViewModel,
+                    emulatorViewModel = emulatorViewModel,
                     analogActions = gamepadInputManager.actions,
                     onExit = {
                         if (!defaultHome && !intent.hasCategory(Intent.CATEGORY_HOME)) finish()

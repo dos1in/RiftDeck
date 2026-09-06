@@ -27,6 +27,8 @@ fun EmptyLibraryState(
     onAction: () -> Unit,
     modifier: Modifier = Modifier,
     left: FocusRequester = FocusRequester.Cancel,
+    up: FocusRequester = FocusRequester.Cancel,
+    showIllustration: Boolean = true,
 ) {
     val colors = LocalFrontendTheme.current
     Column(
@@ -34,7 +36,7 @@ fun EmptyLibraryState(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Canvas(
+        if (showIllustration) Canvas(
             modifier = Modifier
                 .width(54.dp)
                 .height(42.dp)
@@ -71,6 +73,7 @@ fun EmptyLibraryState(
             focusRequester = focusRequester,
             primary = true,
             left = left,
+            up = up,
         )
     }
 }

@@ -1,12 +1,13 @@
 package com.riftdeck.feature.platform
 
 import com.riftdeck.core.model.Game
+import com.riftdeck.feature.search.searchGames
 import java.util.Locale
 
 enum class LibraryFilter { All, Favorites, Recent }
 
-fun libraryGames(games: List<Game>, filter: LibraryFilter, descending: Boolean): List<Game> {
-    val visible = games.filter { game ->
+fun libraryGames(games: List<Game>, filter: LibraryFilter, descending: Boolean, query: String = ""): List<Game> {
+    val visible = searchGames(games, query).filter { game ->
         !game.hidden && when (filter) {
             LibraryFilter.All -> true
             LibraryFilter.Favorites -> game.favorite

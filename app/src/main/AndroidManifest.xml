@@ -5,6 +5,17 @@
         android:name="android.hardware.gamepad"
         android:required="false" />
 
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="content" android:mimeType="application/octet-stream" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="content" android:mimeType="application/x-gba-rom" />
+        </intent>
+        <package android:name="com.explusalpha.GbaEmu" />
+    </queries>
     <application
         android:name=".app.LauncherApplication"
         android:allowBackup="true"
@@ -14,6 +25,13 @@
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/Theme.RiftDeck">
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.roms"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/rom_paths" />
+        </provider>
         <activity
             android:name=".app.MainActivity"
             android:exported="true"

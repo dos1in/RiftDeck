@@ -1,5 +1,7 @@
 package com.riftdeck.core.ui.components
 
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -18,12 +20,12 @@ import com.riftdeck.core.input.GameAction
 import com.riftdeck.core.ui.theme.LocalFrontendTheme
 
 @Composable
-fun DeckNoticeDialog(title: String, message: String, primaryLabel: String, onConfirm: () -> Unit, onDismiss: () -> Unit) {
+fun DeckNoticeDialog(title: String, message: String, primaryLabel: String, onConfirm: () -> Unit, onDismiss: () -> Unit, focusCancel: Boolean = false, showBackButton: Boolean = true) {
     val colors = LocalFrontendTheme.current
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         val confirm = remember { FocusRequester() }
         val cancel = remember { FocusRequester() }
-        LaunchedEffect(Unit) { withFrameNanos { }; confirm.requestFocus() }
+        LaunchedEffect(Unit) { withFrameNanos { }; (if (focusCancel && showBackButton) cancel else confirm).requestFocus() }
         ControllerInput(onAction = {
             when (it) {
                 GameAction.Back -> { onDismiss(); true }
@@ -31,13 +33,13 @@ fun DeckNoticeDialog(title: String, message: String, primaryLabel: String, onCon
                 else -> true
             }
         }, enabled = true, modifier = Modifier.padding(24.dp).widthIn(max = 520.dp).fillMaxWidth()) {
-            Column(Modifier.background(colors.surface).border(2.dp, colors.focusBorder).padding(24.dp),
+            Column(Modifier.background(colors.surface).border(2.dp, colors.focusBorder).verticalScroll(rememberScrollState()).padding(24.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 Text(title, color = colors.textPrimary, style = MaterialTheme.typography.headlineMedium)
                 Text(message, color = colors.textSecondary, style = MaterialTheme.typography.bodyLarge)
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    NeonActionButton(primaryLabel, onConfirm, Modifier.weight(1f), primary = true, focusRequester = confirm, right = cancel)
-                    NeonActionButton(stringResource(R.string.hint_back), onDismiss, Modifier.weight(0.6f), focusRequester = cancel, left = confirm)
+                    NeonActionButton(primaryLabel, onConfirm, Modifier.weight(1f), primary = true, focusRequester = confirm, right = if (showBackButton) cancel else null)
+                    if (showBackButton) NeonActionButton(stringResource(R.string.hint_back), onDismiss, Modifier.weight(0.6f), focusRequester = cancel, left = confirm)
                 }
             }
         }

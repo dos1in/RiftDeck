@@ -11,6 +11,8 @@ enum class GameAction {
     Favorite,
     PreviousCategory,
     NextCategory,
+    PreviousPage,
+    NextPage,
     Menu,
     Search,
 }
@@ -20,4 +22,3 @@ val GameAction.isDirectional: Boolean
         this == GameAction.Down ||
         this == GameAction.Left ||
         this == GameAction.Right
-

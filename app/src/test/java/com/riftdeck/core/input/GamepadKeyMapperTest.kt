@@ -24,6 +24,8 @@ class GamepadKeyMapperTest {
         assertEquals(GameAction.Right, GamepadKeyMapper.fromKeyCode(KeyEvent.KEYCODE_DPAD_RIGHT))
         assertEquals(GameAction.PreviousCategory, GamepadKeyMapper.fromKeyCode(KeyEvent.KEYCODE_BUTTON_L1))
         assertEquals(GameAction.NextCategory, GamepadKeyMapper.fromKeyCode(KeyEvent.KEYCODE_BUTTON_R1))
+        assertEquals(GameAction.PreviousPage, GamepadKeyMapper.fromKeyCode(KeyEvent.KEYCODE_BUTTON_L2))
+        assertEquals(GameAction.NextPage, GamepadKeyMapper.fromKeyCode(KeyEvent.KEYCODE_BUTTON_R2))
     }
 
     @Test
@@ -31,4 +33,3 @@ class GamepadKeyMapperTest {
         assertNull(GamepadKeyMapper.fromKeyCode(KeyEvent.KEYCODE_VOLUME_UP))
     }
 }
-

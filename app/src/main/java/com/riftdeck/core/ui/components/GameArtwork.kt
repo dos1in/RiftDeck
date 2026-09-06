@@ -8,6 +8,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
@@ -32,6 +40,12 @@ fun GameArtwork(
     showLabel: Boolean = true,
 ) {
     val colors = LocalFrontendTheme.current
+    val context = LocalContext.current
+    val coverRequest = remember(context, game.coverUri, game.coverVersion) {
+        game.coverUri?.let { uri -> ImageRequest.Builder(context).data(uri)
+            .memoryCacheKey("$uri:${game.coverVersion}").diskCacheKey("$uri:${game.coverVersion}").build() }
+    }
+    var coverLoaded by remember(coverRequest) { mutableStateOf(false) }
     val accent = when ((game.id % 3).toInt()) {
         0 -> colors.primary
         1 -> colors.secondary
@@ -44,7 +58,7 @@ fun GameArtwork(
             .background(colors.surfaceElevated)
             .semantics { this.contentDescription = contentDescription },
     ) {
-        Canvas(Modifier.fillMaxSize()) {
+        if (!coverLoaded) Canvas(Modifier.fillMaxSize()) {
             if (size.minDimension <= 0f) return@Canvas
             val gridColor = colors.outline.copy(alpha = 0.46f)
             val step = size.minDimension / 6f
@@ -72,8 +86,13 @@ fun GameArtwork(
                 strokeWidth = size.minDimension * 0.035f,
             )
         }
-        if (showLabel) Text(
-            text = stringResource(R.string.demo_cover),
+        if (coverRequest != null) AsyncImage(
+            model = coverRequest, contentDescription = null,
+            modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Fit,
+            onSuccess = { coverLoaded = true }, onError = { coverLoaded = false },
+        )
+        if (showLabel && !coverLoaded) Text(
+            text = stringResource(R.string.cover_placeholder),
             modifier = Modifier
                 .align(Alignment.BottomStart)
                 .padding(12.dp),

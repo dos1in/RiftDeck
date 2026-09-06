@@ -19,11 +19,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.riftdeck.R
 import com.riftdeck.core.input.GameAction
+import com.riftdeck.core.input.LocalControllerInputEnabled
 import com.riftdeck.core.input.controllerClickable
 import com.riftdeck.core.model.Game
 import com.riftdeck.core.ui.components.*
@@ -46,11 +48,19 @@ fun PlatformScreen(
     onSort: () -> Unit,
     onNavigate: (DeckSection) -> Unit,
     onBack: () -> Unit,
+    onSearch: () -> Unit,
+    onAddFolder: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalFrontendTheme.current
     val games = uiState.libraryGames
     val filters = remember { LibraryFilter.entries.associateWith { FocusRequester() } }
+    val search = remember { FocusRequester() }
+    val addFolder = remember { FocusRequester() }
+    val alphabet = remember { FocusRequester() }
+    var alphabetOpen by rememberSaveable { mutableStateOf(false) }
+    val letterPositions = remember(games) { alphabetPositions(games) }
+    var pendingJump by remember { mutableStateOf<Int?>(null) }
     val sort = remember { FocusRequester() }
     val play = remember { FocusRequester() }
     val listState = rememberLazyListState()
@@ -61,6 +71,8 @@ fun PlatformScreen(
     var filterFocused by remember { mutableStateOf(false) }
     var cursorId by rememberSaveable { mutableStateOf(uiState.focusedGameId) }
     var focusArea by rememberSaveable { mutableStateOf("list") }
+    var pendingImport by rememberSaveable { mutableStateOf(false) }
+    var previousQuery by rememberSaveable { mutableStateOf(uiState.searchQuery) }
     val selected = games.firstOrNull { it.id == cursorId } ?: games.firstOrNull()
 
     fun requestRow(index: Int) {
@@ -77,24 +89,65 @@ fun PlatformScreen(
             }
         }
     }
-    LaunchedEffect(games, uiState.filter, uiState.sortDescending) {
+    LaunchedEffect(pendingJump) {
+        pendingJump?.let { index ->
+            withFrameNanos { }
+            focusArea = "list"
+            requestRow(index)
+            pendingJump = null
+        }
+    }
+    LaunchedEffect(games, uiState.games.isEmpty(), uiState.filter, uiState.sortDescending, uiState.searchQuery) {
+        val searchChanged = previousQuery != uiState.searchQuery
+        previousQuery = uiState.searchQuery
+        if (uiState.games.isEmpty()) {
+            focusArea = "empty"
+            addFolder.requestFocus()
+            return@LaunchedEffect
+        }
+        if (pendingImport) {
+            if (games.isNotEmpty()) {
+                focusArea = "list"
+                requestRow(0)
+            } else {
+                pendingImport = false
+                search.requestFocus()
+            }
+            return@LaunchedEffect
+        }
+        if (searchChanged) {
+            // Closing a search dialog can restore Android focus to a row that was filtered out.
+            // Wait until the dialog is removed, then place focus on the actual search result.
+            withFrameNanos { }
+            if (games.isNotEmpty()) {
+                focusArea = "list"
+                requestRow(games.indexOfFirst { it.id == cursorId }.coerceAtLeast(0))
+            } else {
+                focusArea = "filter"
+                search.requestFocus()
+            }
+            return@LaunchedEffect
+        }
         if (games.isNotEmpty() && games.none { it.id == cursorId }) {
             cursorId = games.first().id
             onFocusGame(games.first().id)
-            if (focusArea == "list") requestRow(0)
-        } else if (games.isEmpty() && focusArea == "list") {
+            if (focusArea == "list" || focusArea == "empty") requestRow(0)
+        } else if (games.isEmpty() && (focusArea == "list" || focusArea == "empty")) {
             filters.getValue(uiState.filter).requestFocus()
         }
     }
     LaunchedEffect(Unit) {
         withFrameNanos { }
         when {
+            uiState.games.isEmpty() -> addFolder.requestFocus()
+            pendingImport && selected != null -> requestRow(0)
             focusArea == "play" && selected != null -> play.requestFocus()
             focusArea == "list" && selected != null -> requestRow(games.indexOf(selected))
             else -> filters.getValue(uiState.filter).requestFocus()
         }
     }
-    DeckScaffold(DeckSection.Library, filters.getValue(uiState.filter), onNavigate,
+    CompositionLocalProvider(LocalControllerInputEnabled provides (LocalControllerInputEnabled.current && !alphabetOpen)) {
+    DeckScaffold(DeckSection.Library, if (uiState.games.isEmpty()) addFolder else filters.getValue(uiState.filter), onNavigate,
         onAction = { action ->
             val inList = listFocused || moveJob?.isActive == true
             when (action) {
@@ -109,7 +162,16 @@ fun PlatformScreen(
                     true
                 }
                 GameAction.Menu -> { onNavigate(DeckSection.Settings); true }
-                GameAction.Search -> { filters.getValue(uiState.filter).requestFocus(); true }
+                GameAction.Search -> { onSearch(); true }
+                GameAction.PreviousPage, GameAction.NextPage -> {
+                    if (games.isNotEmpty()) {
+                        val page = listState.layoutInfo.visibleItemsInfo.size.coerceAtLeast(1)
+                        val index = games.indexOfFirst { it.id == cursorId }.coerceAtLeast(0)
+                        val delta = if (action == GameAction.PreviousPage) -page else page
+                        requestRow((index + delta).coerceIn(0, games.lastIndex))
+                    }
+                    true
+                }
                 GameAction.PreviousCategory, GameAction.NextCategory -> {
                     val delta = if (action == GameAction.PreviousCategory) -1 else 1
                     val next = LibraryFilter.entries[(uiState.filter.ordinal + delta + LibraryFilter.entries.size) % LibraryFilter.entries.size]
@@ -117,6 +179,7 @@ fun PlatformScreen(
                     onFilter(next); true
                 }
                 GameAction.Up, GameAction.Down -> when {
+                    uiState.games.isEmpty() && action == GameAction.Down && filterFocused -> { addFolder.requestFocus(); true }
                     inList && selected != null -> {
                         val index = games.indexOfFirst { it.id == cursorId }.coerceAtLeast(0)
                         if (action == GameAction.Up && index == 0) filters.getValue(uiState.filter).requestFocus()
@@ -147,19 +210,42 @@ fun PlatformScreen(
                         focusRequester = filters.getValue(filter),
                         left = LibraryFilter.entries.getOrNull(index - 1)?.let { filters.getValue(it) } ?: rail,
                         right = LibraryFilter.entries.getOrNull(index + 1)?.let { filters.getValue(it) }
-                            ?: if (uiState.filter != LibraryFilter.Recent) sort else FocusRequester.Cancel,
+                            ?: if (uiState.filter != LibraryFilter.Recent) sort else search,
                         onFocused = { focusArea = "filter" })
                 }
-                NeonActionButton(stringResource(if (uiState.sortDescending) R.string.sort_descending else R.string.sort_ascending), onSort,
-                    Modifier.weight(1f), enabled = uiState.filter != LibraryFilter.Recent,
-                    focusRequester = sort, left = filters.getValue(LibraryFilter.Recent), onFocused = { focusArea = "filter" })
+                val sortDescription = stringResource(if (uiState.sortDescending) R.string.sort_descending else R.string.sort_ascending)
+                NeonActionButton(if (compact) stringResource(if (uiState.sortDescending) R.string.sort_descending_short else R.string.sort_ascending_short)
+                    else sortDescription, onSort,
+                    Modifier.weight(1f).semantics { contentDescription = sortDescription }, enabled = uiState.filter != LibraryFilter.Recent,
+                    focusRequester = sort, left = filters.getValue(LibraryFilter.Recent),
+                    right = if (games.isNotEmpty()) alphabet else search, onFocused = { focusArea = "filter" })
+                NeonActionButton(stringResource(R.string.alphabet_jump), { alphabetOpen = true }, Modifier.weight(1f),
+                    enabled = games.isNotEmpty() && uiState.filter != LibraryFilter.Recent,
+                    focusRequester = alphabet, left = sort, right = search, onFocused = { focusArea = "filter" })
+                NeonActionButton(stringResource(R.string.search_apply), onSearch, Modifier.weight(1f),
+                    selected = uiState.searchQuery.isNotBlank(), focusRequester = search,
+                    left = if (uiState.filter == LibraryFilter.Recent) filters.getValue(LibraryFilter.Recent)
+                        else if (games.isNotEmpty()) alphabet else sort,
+                    onFocused = { focusArea = "filter" })
             }
+            if (uiState.searchQuery.isNotBlank()) Text(stringResource(R.string.search_active, uiState.searchQuery),
+                color = colors.textSecondary, style = MaterialTheme.typography.labelMedium,
+                modifier = Modifier.padding(bottom = 6.dp))
             if (selected == null) {
-                Column(Modifier.weight(1f).fillMaxWidth(), verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(stringResource(R.string.empty_filter_title), color = colors.textPrimary, style = MaterialTheme.typography.headlineMedium)
-                    Text(stringResource(R.string.empty_filter_message), color = colors.textSecondary,
-                        style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 8.dp))
+                if (uiState.games.isEmpty()) {
+                    EmptyLibraryState(
+                        stringResource(R.string.empty_library_title), stringResource(R.string.empty_library_message),
+                        stringResource(R.string.add_rom_folder), addFolder, { pendingImport = true; focusArea = "empty"; onAddFolder() },
+                        Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()), left = rail,
+                        up = filters.getValue(uiState.filter), showIllustration = !compact,
+                    )
+                } else {
+                    Column(Modifier.weight(1f).fillMaxWidth(), verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(stringResource(R.string.empty_filter_title), color = colors.textPrimary, style = MaterialTheme.typography.headlineMedium)
+                        Text(stringResource(R.string.empty_filter_message), color = colors.textSecondary,
+                            style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 8.dp))
+                    }
                 }
             } else {
                 Row(Modifier.weight(1f).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(if (compact) 16.dp else 32.dp)) {
@@ -173,7 +259,7 @@ fun PlatformScreen(
                                 onDispose { rowFocus.remove(game.id) }
                             }
                             LibraryRow(game, index + 1, selected.id == game.id, requester, rail, play, compact,
-                                onFocused = { cursorId = game.id; onFocusGame(game.id); focusArea = "list" },
+                                onFocused = { cursorId = game.id; onFocusGame(game.id); focusArea = "list"; pendingImport = false },
                                 onClick = { onOpenGame(game.id) })
                         }
                     }
@@ -196,6 +282,11 @@ fun PlatformScreen(
             }
         }
     }
+    }
+    if (alphabetOpen) AlphabetJumpDialog(letterPositions.keys.sorted(), onChoose = { letter ->
+        pendingJump = letterPositions[letter]
+        alphabetOpen = false
+    }, onDismiss = { alphabetOpen = false })
 }
 
 @Composable

@@ -32,6 +32,8 @@ fun HomeScreen(
     onOpenLibrary: (LibraryFilter) -> Unit,
     onNavigate: (DeckSection) -> Unit,
     onExit: () -> Unit,
+    onSearch: () -> Unit,
+    onAddFolder: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalFrontendTheme.current
@@ -59,7 +61,7 @@ fun HomeScreen(
                 GameAction.Favorite -> { game?.let { onToggleFavorite(it.id) }; true }
                 GameAction.PreviousCategory -> { if (game != null) step(-1); true }
                 GameAction.NextCategory -> { if (game != null) step(1); true }
-                GameAction.Search -> { onOpenLibrary(LibraryFilter.All); true }
+                GameAction.Search -> { onSearch(); true }
                 GameAction.Menu -> { onNavigate(DeckSection.Settings); true }
                 else -> false
             }
@@ -68,7 +70,7 @@ fun HomeScreen(
         if (game == null) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 EmptyLibraryState(stringResource(R.string.empty_library_title), stringResource(R.string.empty_library_message),
-                    stringResource(R.string.add_rom_folder), focus.getValue("empty"), { onNavigate(DeckSection.Settings) }, left = rail)
+                    stringResource(R.string.add_rom_folder), focus.getValue("empty"), onAddFolder, left = rail)
             }
         } else {
             Column(Modifier.fillMaxSize().padding(horizontal = if (compact) 14.dp else 30.dp, vertical = if (compact) 10.dp else 24.dp)) {

@@ -62,6 +62,38 @@ class UiPreferencesRepositoryTest {
         } finally { job.cancelAndJoin() }
     }
 
+    @Test fun folderSelectionsPersistAndDeduplicateWithoutChangingAppearance() = runBlocking {
+        withRepository { repository ->
+            repository.setThemeMode(ThemeMode.Light)
+            repository.addRomFolder("content://provider/tree/one")
+            repository.addRomFolder("content://provider/tree/two")
+            repository.addRomFolder("content://provider/tree/one")
+        }
+        withRepository { repository ->
+            assertEquals(setOf("content://provider/tree/one", "content://provider/tree/two"), repository.preferences.first().romFolders)
+            repository.removeRomFolder("content://provider/tree/one")
+            assertEquals(ThemeMode.Light, repository.preferences.first().themeMode)
+        }
+        withRepository { repository ->
+            assertEquals(setOf("content://provider/tree/two"), repository.preferences.first().romFolders)
+        }
+    }
+
+    @Test fun emulatorMappingPersistsPerPlatformWithoutChangingFolders() = runBlocking {
+        val gba = com.riftdeck.core.emulator.EmulatorConfig(1, "example.gba", "example.gba.Play", "GBA 测试")
+        val other = com.riftdeck.core.emulator.EmulatorConfig(2, "example.other", "example.other.Play", "Other",
+            mimeType = "application/x-test-rom")
+        withRepository { repository ->
+            repository.addRomFolder("content://provider/tree/one")
+            repository.setEmulator(gba)
+            repository.setEmulator(other)
+        }
+        withRepository { repository ->
+            assertEquals(mapOf(1L to gba, 2L to other), repository.preferences.first().emulators)
+            assertEquals(setOf("content://provider/tree/one"), repository.preferences.first().romFolders)
+        }
+    }
+
     private fun file() = folder.root.resolve("ui.preferences_pb")
 
     private suspend fun withRepository(block: suspend (UiPreferencesRepository) -> Unit) {

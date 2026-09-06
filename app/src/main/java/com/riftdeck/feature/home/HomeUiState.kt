@@ -14,6 +14,7 @@ data class HomeUiState(
     val libraryGames: List<Game> = emptyList(),
     val filter: LibraryFilter = LibraryFilter.All,
     val sortDescending: Boolean = false,
+    val searchQuery: String = "",
     val reducedMotion: Boolean = false,
     val themeMode: ThemeMode = ThemeMode.System,
     val themePalette: ThemePalette = ThemePalette.Rift,

@@ -13,7 +13,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.riftdeck.core.emulator.EmulatorConfig
 import com.riftdeck.R
+import com.riftdeck.data.scanner.ScanState
 import com.riftdeck.core.input.GameAction
 import com.riftdeck.core.model.ThemeMode
 import com.riftdeck.core.model.ThemePalette
@@ -32,9 +34,12 @@ private enum class SettingSection(val title: Int, val description: Int) {
 
 @Composable
 fun SettingsScreen(initialSection: String, reducedMotion: Boolean, onReducedMotion: (Boolean) -> Unit,
-    onAddFolder: () -> Unit, onConfigureEmulator: () -> Unit, onNavigate: (DeckSection) -> Unit,
+    onAddFolder: () -> Unit, onNavigate: (DeckSection) -> Unit,
     onBack: () -> Unit, hasGame: Boolean, themeMode: ThemeMode, themePalette: ThemePalette,
     onThemeMode: (ThemeMode) -> Unit, onThemePalette: (ThemePalette) -> Unit,
+    emulatorTargets: List<EmulatorConfig>, selectedEmulator: EmulatorConfig?,
+    onChooseEmulator: (EmulatorConfig) -> Unit, onRefreshEmulators: () -> Unit,
+    folders: Set<String>, scanState: ScanState, onRescan: () -> Unit, onCancelScan: () -> Unit, onRemoveFolder: (String) -> Unit,
     isDefaultHome: Boolean, onChooseHome: () -> Unit, onSystemSettings: () -> Unit, modifier: Modifier = Modifier) {
     val colors = LocalFrontendTheme.current
     var selectedIndex by rememberSaveable { mutableIntStateOf(if (initialSection == "emulators") 1 else 0) }
@@ -92,14 +97,12 @@ fun SettingsScreen(initialSection: String, reducedMotion: Boolean, onReducedMoti
                     }
                     when (section) {
                         SettingSection.Library -> {
-                            MetadataValue(stringResource(R.string.library_source), stringResource(R.string.mock_library_label))
-                            NeonActionButton(stringResource(R.string.add_rom_folder), onAddFolder, Modifier.fillMaxWidth(), primary = true,
-                                focusRequester = action, left = tabs[selectedIndex], onFocused = { panelFocused = true })
+                            LibrarySettings(folders, scanState, onAddFolder, onRescan, onCancelScan, onRemoveFolder,
+                                action, tabs[selectedIndex], onFocused = { panelFocused = true })
                         }
                         SettingSection.Emulators -> {
-                            MetadataValue(stringResource(R.string.platform_gba_short), stringResource(R.string.not_configured))
-                            NeonActionButton(stringResource(R.string.choose_emulator), onConfigureEmulator, Modifier.fillMaxWidth(), primary = true,
-                                focusRequester = action, left = tabs[selectedIndex], onFocused = { panelFocused = true })
+                            EmulatorSettings(emulatorTargets, selectedEmulator, onChooseEmulator, onRefreshEmulators,
+                                action, tabs[selectedIndex], panelFocused, onFocused = { panelFocused = true })
                         }
                         SettingSection.Appearance -> {
                             AppearanceSettings(themeMode, themePalette, reducedMotion, onThemeMode, onThemePalette, onReducedMotion,
