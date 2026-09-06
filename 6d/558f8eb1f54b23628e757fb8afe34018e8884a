@@ -1,0 +1,35 @@
+app/src/main/java/com/riftdeck/feature/settings/ScanStatus.kt
+  795777a48d959e42 1-61
+app/src/main/java/com/riftdeck/feature/settings/LibrarySettings.kt
+  795777a48d959e42 36
+app/src/main/java/com/riftdeck/feature/settings/ScanCompletionFeedback.kt
+  795777a48d959e42 1-16
+app/src/test/java/com/riftdeck/feature/settings/ScanCompletionFeedbackTest.kt
+  795777a48d959e42 1-57
+CORE_IMPLEMENTATION.md
+  795777a48d959e42 9,22
+app/src/main/java/com/riftdeck/core/ui/components/DeckNavigationRail.kt
+  795777a48d959e42 100,103,110
+app/src/main/java/com/riftdeck/data/scanner/LibraryScanner.kt
+  795777a48d959e42 20,30,33,46,57,59
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "6d558f8eb1f54b23628e757fb8afe34018e8884a",
+  "prompts": {
+    "795777a48d959e42": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a06f87-d23d-7b90-80b3-7e99eeb16932",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "doslin",
+      "messages": [],
+      "total_additions": 295,
+      "total_deletions": 53,
+      "accepted_lines": 5937,
+      "overriden_lines": 0
+    }
+  }
+}
