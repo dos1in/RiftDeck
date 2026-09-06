@@ -3,8 +3,10 @@ package com.riftdeck.core.ui.components
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -70,6 +72,7 @@ fun EmptyLibraryState(
         NeonActionButton(
             label = actionLabel,
             onClick = onAction,
+            modifier = Modifier.widthIn(min = 160.dp).width(IntrinsicSize.Max),
             focusRequester = focusRequester,
             primary = true,
             left = left,

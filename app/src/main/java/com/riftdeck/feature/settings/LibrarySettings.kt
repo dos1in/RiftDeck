@@ -34,7 +34,8 @@ fun LibrarySettings(folders: Set<String>, scan: ScanState, onAdd: () -> Unit, on
     val rescan = remember { FocusRequester() }
     val folderFocus = remember(sorted) { sorted.associateWith { FocusRequester() } }
     ScanStatus(scan)
-    NeonActionButton(stringResource(R.string.add_rom_folder), onAdd, Modifier.fillMaxWidth(), primary = true,
+    NeonActionButton(stringResource(R.string.add_rom_folder), onAdd,
+        Modifier.widthIn(min = 160.dp).width(IntrinsicSize.Max), primary = true,
         focusRequester = first, left = left, down = if (folders.isNotEmpty()) rescan else null, onFocused = onFocused)
     if (folders.isNotEmpty()) {
         NeonActionButton(stringResource(if (scan.running) R.string.cancel_scan else R.string.rescan_library),
