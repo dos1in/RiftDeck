@@ -50,12 +50,12 @@ fun NeonActionButton(
                 this.right = right ?: FocusRequester.Cancel
             }
             .onFocusChanged { focused = it.isFocused; if (it.isFocused) onFocused() }
+            .alpha(if (enabled) 1f else 0.4f)
             .then(if (primary) Modifier.clip(shape).background(colors.primary, shape)
                 .riftFrame(colors.primary, if (focused) colors.textPrimary else colors.focusBorder,
                     colors.secondary, focused, cut)
                 else Modifier.riftSelectionFrame(focused, selected))
             .heightIn(min = 42.dp)
-            .alpha(if (enabled) 1f else 0.4f)
             .semantics { this.selected = selected; if (!enabled) disabled() }
             .controllerClickable(enabled = enabled, onConfirm = onConfirm, onClick = onClick)
             .padding(horizontal = 12.dp, vertical = 9.dp),

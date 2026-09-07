@@ -9,6 +9,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.composed
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.onPreviewKeyEvent
@@ -62,7 +64,9 @@ fun Modifier.controllerClickable(
     onClick: () -> Unit,
 ): Modifier = composed {
     val interactionSource = remember { MutableInteractionSource() }
+    val focusRequester = remember { FocusRequester() }
     this
+        .focusRequester(focusRequester)
         // Handheld controls must retain a visible focus target even when Android starts in touch mode.
         .focusProperties { canFocus = enabled }
         .onPreviewKeyEvent { event ->
@@ -81,7 +85,11 @@ fun Modifier.controllerClickable(
             role = Role.Button,
             interactionSource = interactionSource,
             indication = null,
-            onClick = onClick,
+            onClick = {
+                // Touch and controller confirmation must act on the same visible focus target.
+                focusRequester.requestFocus()
+                onClick()
+            },
         )
 }
 
