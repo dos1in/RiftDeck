@@ -32,6 +32,17 @@ class EmulatorCatalog(private val context: Context) {
         pm.getLaunchIntentForPackage("com.explusalpha.GbaEmu")?.component?.let { component ->
             candidates.add(EmulatorConfig(platformId, component.packageName, component.className, "GBA.emu"))
         }
+        if (platformId == 1L) {
+            val component = android.content.ComponentName(RetroArchLaunch.packageName, RetroArchLaunch.activityName)
+            try {
+                @Suppress("DEPRECATION")
+                val activity = pm.getActivityInfo(component, 0)
+                if (activity.exported && activity.enabled && activity.applicationInfo.enabled) {
+                    candidates.add(EmulatorConfig(platformId, component.packageName, component.className,
+                        activity.applicationInfo.loadLabel(pm).toString() + " · mGBA"))
+                }
+            } catch (_: PackageManager.NameNotFoundException) { /* Optional external emulator. */ }
+        }
         candidates.distinctBy { it.packageName to it.activityName }.sortedBy { it.displayName.lowercase() }
     }
 }

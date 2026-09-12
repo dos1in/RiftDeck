@@ -19,6 +19,7 @@
             <data android:scheme="content" android:mimeType="application/x-gba-rom" />
         </intent>
         <package android:name="com.explusalpha.GbaEmu" />
+        <package android:name="com.retroarch.aarch64" />
     </queries>
     <application
         android:name=".app.LauncherApplication"
