@@ -10,6 +10,12 @@ data class CoverFile(val name: String, val uri: String, val size: Long, val modi
 /** Sidecar artwork stays inside the already authorized ROM folder. */
 object CoverFiles {
     private val extensions = listOf("png", "webp", "jpg", "jpeg")
+    /** Prefer the full front cover; a thumbnail is a fallback, never the title logo. */
+    fun pegasusCover(files: List<CoverFile>): CoverFile? {
+        val indexed = index(files)
+        return indexed["boxfront"] ?: indexed["mini_boxfront"]
+    }
+
     fun supported(name: String) = name.substringAfterLast('.', "").lowercase(Locale.ROOT) in extensions
     fun key(name: String): String = Normalizer.normalize(name.substringBeforeLast('.', name), Normalizer.Form.NFC)
         .lowercase(Locale.ROOT)

@@ -18,6 +18,14 @@ class CoverFilesTest {
         assertEquals(CoverFiles.index(listOf(jpg, png)), CoverFiles.index(listOf(png, jpg)))
         assertFalse(CoverFiles.index(listOf(gif)).containsKey("other"))
     }
+    @Test fun pegasusPrefersFrontCoverOverThumbnailAndLogo() {
+        val front = CoverFile("boxfront.jpg", "front", 100, 1)
+        val mini = CoverFile("mini_boxfront.png", "mini", 10, 1)
+        val logo = CoverFile("logo.png", "logo", 10, 1)
+        assertEquals(front, CoverFiles.pegasusCover(listOf(logo, mini, front)))
+        assertEquals(mini, CoverFiles.pegasusCover(listOf(logo, mini)))
+        assertNull(CoverFiles.pegasusCover(listOf(logo)))
+    }
     @Test fun cacheVersionTracksImageReplacement() {
         val image = CoverFile("Game.png", "content://test/cover", 500, 10)
         assertNotEquals(image.version, image.copy(size = 600).version)
