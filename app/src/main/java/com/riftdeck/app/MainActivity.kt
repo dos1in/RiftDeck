@@ -131,4 +131,14 @@ class MainActivity : ComponentActivity() {
 
     override fun dispatchGenericMotionEvent(event: MotionEvent): Boolean =
         gamepadInputManager.onGenericMotionEvent(event) || super.dispatchGenericMotionEvent(event)
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (!hasFocus) gamepadInputManager.reset()
+    }
+
+    override fun onPause() {
+        gamepadInputManager.reset()
+        super.onPause()
+    }
 }

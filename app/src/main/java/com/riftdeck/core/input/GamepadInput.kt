@@ -3,6 +3,8 @@ package com.riftdeck.core.input
 import android.view.InputDevice
 import android.view.KeyEvent as AndroidKeyEvent
 import android.view.MotionEvent
+import android.os.Handler
+import android.os.Looper
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.runtime.remember
@@ -98,58 +100,42 @@ private fun MotionEvent.isJoystickMove(): Boolean =
         (source and InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK
 
 class GamepadInputManager {
-    private val analogRepeatGate = AnalogRepeatGate()
     private val mutableActions = MutableSharedFlow<GameAction>(extraBufferCapacity = 8)
+    private val handler = Handler(Looper.getMainLooper())
+    private val repeater = HeldDirectionRepeater(
+        schedule = { task, delay -> handler.postDelayed(task, delay) },
+        cancel = handler::removeCallbacks,
+        emit = { mutableActions.tryEmit(it) },
+    )
 
     val actions: SharedFlow<GameAction> = mutableActions.asSharedFlow()
 
     fun onGenericMotionEvent(event: MotionEvent): Boolean {
         if (!event.isJoystickMove()) return false
-        analogRepeatGate.actionFor(event)?.let(mutableActions::tryEmit)
+        repeater.update(analogDirection(event))
         return true
     }
+
+    fun reset() = repeater.update(null)
 }
 
-private class AnalogRepeatGate {
-    private var lastAction: GameAction? = null
-    private var lastDispatchAt = 0L
-
-    fun actionFor(event: MotionEvent): GameAction? {
-        val horizontal = strongestAxis(
-            event.getAxisValue(MotionEvent.AXIS_HAT_X),
-            event.getAxisValue(MotionEvent.AXIS_X),
-        )
-        val vertical = strongestAxis(
-            event.getAxisValue(MotionEvent.AXIS_HAT_Y),
-            event.getAxisValue(MotionEvent.AXIS_Y),
-        )
-        val action = when {
-            abs(horizontal) < DEAD_ZONE && abs(vertical) < DEAD_ZONE -> null
-            abs(horizontal) > abs(vertical) && horizontal < 0 -> GameAction.Left
-            abs(horizontal) > abs(vertical) -> GameAction.Right
-            vertical < 0 -> GameAction.Up
-            else -> GameAction.Down
-        }
-
-        if (action == null) {
-            lastAction = null
-            return null
-        }
-
-        val now = event.eventTime
-        val shouldDispatch = action != lastAction || now - lastDispatchAt >= REPEAT_INTERVAL_MS
-        lastAction = action
-        if (!shouldDispatch) return null
-
-        lastDispatchAt = now
-        return action
-    }
-
-    private fun strongestAxis(first: Float, second: Float): Float =
-        if (abs(first) >= abs(second)) first else second
-
-    private companion object {
-        const val DEAD_ZONE = 0.55f
-        const val REPEAT_INTERVAL_MS = 145L
+private fun analogDirection(event: MotionEvent): GameAction? {
+    val horizontal = strongestAxis(
+        event.getAxisValue(MotionEvent.AXIS_HAT_X),
+        event.getAxisValue(MotionEvent.AXIS_X),
+    )
+    val vertical = strongestAxis(
+        event.getAxisValue(MotionEvent.AXIS_HAT_Y),
+        event.getAxisValue(MotionEvent.AXIS_Y),
+    )
+    return when {
+        abs(horizontal) < 0.55f && abs(vertical) < 0.55f -> null
+        abs(horizontal) > abs(vertical) && horizontal < 0 -> GameAction.Left
+        abs(horizontal) > abs(vertical) -> GameAction.Right
+        vertical < 0 -> GameAction.Up
+        else -> GameAction.Down
     }
 }
+
+private fun strongestAxis(first: Float, second: Float): Float =
+    if (abs(first) >= abs(second)) first else second
