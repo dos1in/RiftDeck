@@ -45,7 +45,7 @@ fun GameDetailScreen(game: Game, onToggleFavorite: () -> Unit, onPlay: () -> Uni
             Row(Modifier.weight(1f).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(if (compact) 20.dp else 40.dp)) {
                 BoxWithConstraints(Modifier.weight(0.85f).fillMaxHeight(), contentAlignment = Alignment.Center) {
                     val height = maxHeight.coerceAtMost(390.dp)
-                    GameStageCover(game, Modifier.size((height * 0.83f).coerceAtMost(maxWidth), height))
+                    GameStageCover(game, Modifier.size(maxWidth, height))
                 }
                 BoxWithConstraints(Modifier.weight(1.15f).fillMaxHeight()) {
                     val condensed = maxHeight < 260.dp

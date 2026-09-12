@@ -46,10 +46,19 @@ fun GameStageCover(
         .focusProperties { this.left = left; this.right = right; this.up = up; this.down = down }
         .onFocusChanged { focused = it.isFocused; if (it.isFocused) onFocused() }
         .controllerClickable(onClick = onClick)
-    var coverRatio by remember(game.coverUri, game.coverVersion) { mutableFloatStateOf(0.83f) }
+    var coverRatio by remember(game.coverUri, game.coverVersion) { mutableStateOf<Float?>(null) }
     val videoEnabled = LocalVideoPreviews.current
+    val expectsVideo = videoEnabled && game.videoUri != null
     var videoRatio by remember(game.videoUri, videoEnabled) { mutableStateOf<Float?>(null) }
-    val ratio = (videoRatio ?: coverRatio).coerceIn(0.2f, 5f)
+    var videoUnavailable by remember(game.videoUri, videoEnabled) { mutableStateOf(false) }
+    // Keep the frame while the next media loads. A video preview must not briefly adopt
+    // the cover ratio during its playback delay or when the previous player is disposed.
+    var settledRatio by remember { mutableFloatStateOf(if (expectsVideo) 1.5f else 0.83f) }
+    val resolvedRatio = if (expectsVideo && !videoUnavailable) videoRatio else coverRatio
+    LaunchedEffect(resolvedRatio) {
+        resolvedRatio?.let { settledRatio = it.coerceIn(0.2f, 5f) }
+    }
+    val ratio by animateFloatAsState(settledRatio, tween(if (reduced) 0 else 160), label = "preview frame ratio")
     // Keep the surrounding layout stable while the frame fits the displayed media.
     BoxWithConstraints(modifier, contentAlignment = Alignment.Center) {
         val inset = 12.dp
@@ -61,7 +70,10 @@ fun GameStageCover(
             GameArtwork(game, stringResource(R.string.artwork_description, game.title), Modifier.fillMaxSize()
                 .clip(CutCornerShape(topEnd = 12.dp, bottomStart = 12.dp)), showLabel = showLabel,
                 onAspectRatio = { coverRatio = it })
-            GameVideoPreview(game.videoUri, Modifier.fillMaxSize(), onAspectRatio = { videoRatio = it })
+            key(game.videoUri, videoEnabled) {
+                GameVideoPreview(game.videoUri, Modifier.fillMaxSize(), onAspectRatio = { videoRatio = it },
+                    onFallback = { videoUnavailable = true })
+            }
         }
     }
 }

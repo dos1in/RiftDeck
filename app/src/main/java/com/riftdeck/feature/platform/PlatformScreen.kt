@@ -274,7 +274,7 @@ fun PlatformScreen(
                     }
                     BoxWithConstraints(Modifier.weight(0.9f).fillMaxHeight()) {
                         val artworkHeight = (maxHeight - if (compact) 90.dp else 118.dp).coerceIn(64.dp, 310.dp)
-                        val artworkWidth = (artworkHeight * 0.83f).coerceAtMost(maxWidth)
+                        val artworkWidth = maxWidth
                         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.spacedBy(if (compact) 6.dp else 12.dp)) {

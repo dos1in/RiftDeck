@@ -78,7 +78,7 @@ fun HomeScreen(
                 Row(Modifier.weight(1f).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(if (compact) 16.dp else 36.dp)) {
                     BoxWithConstraints(Modifier.weight(0.85f).fillMaxHeight(), contentAlignment = Alignment.Center) {
                         val coverHeight = (maxHeight - 52.dp).coerceAtLeast(40.dp).coerceAtMost(350.dp)
-                        val coverWidth = (coverHeight * 0.83f).coerceAtMost(maxWidth - 8.dp)
+                        val coverWidth = (maxWidth - 8.dp).coerceAtLeast(1.dp)
                         val controlsWidth = coverWidth.coerceAtLeast(160.dp * fontScale).coerceAtMost(maxWidth)
                         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
                             GameStageCover(game, Modifier.size(coverWidth, coverHeight), focus.getValue("cover"),

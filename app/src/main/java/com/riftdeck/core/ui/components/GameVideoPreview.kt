@@ -32,13 +32,16 @@ val LocalVideoPreviews = staticCompositionLocalOf { false }
 
 /** One muted preview for the active stage. Navigation and backgrounding dispose playback. */
 @Composable
-fun GameVideoPreview(uri: String?, modifier: Modifier = Modifier, onAspectRatio: (Float?) -> Unit = {}) {
+fun GameVideoPreview(uri: String?, modifier: Modifier = Modifier, onAspectRatio: (Float?) -> Unit = {},
+    onFallback: () -> Unit = {},
+) {
     if (!LocalVideoPreviews.current || uri == null) return
     val screenActive = LocalPreviewScreenActive.current
     val currentScreenActive by rememberUpdatedState(screenActive)
     val previewDelayMs = LocalPreviewDelayMs.current
     val loop = LocalLoopVideoPreviews.current
     val reportRatio by rememberUpdatedState(onAspectRatio)
+    val reportFallback by rememberUpdatedState(onFallback)
     val context = LocalContext.current
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     var player by remember(uri) { mutableStateOf<ExoPlayer?>(null) }
@@ -66,7 +69,7 @@ fun GameVideoPreview(uri: String?, modifier: Modifier = Modifier, onAspectRatio:
                 active.repeatMode = if (loop) Player.REPEAT_MODE_ONE else Player.REPEAT_MODE_OFF
                 active.addListener(object : Player.Listener {
                     override fun onPlaybackStateChanged(state: Int) {
-                        if (state == Player.STATE_ENDED) { completed = true; finished.complete(Unit) }
+                        if (state == Player.STATE_ENDED) { completed = true; reportFallback(); finished.complete(Unit) }
                     }
                     override fun onRenderedFirstFrame() { rendered = true; reportRatio(ratio) }
                     override fun onVideoSizeChanged(size: VideoSize) {
@@ -75,7 +78,7 @@ fun GameVideoPreview(uri: String?, modifier: Modifier = Modifier, onAspectRatio:
                             if (rendered) reportRatio(ratio)
                         }
                     }
-                    override fun onPlayerError(error: PlaybackException) { rendered = false; reportRatio(null); completed = true; finished.complete(Unit) }
+                    override fun onPlayerError(error: PlaybackException) { rendered = false; reportRatio(null); reportFallback(); completed = true; finished.complete(Unit) }
                 })
                 player = active
                 active.setMediaItem(MediaItem.fromUri(uri))
