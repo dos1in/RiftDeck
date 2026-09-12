@@ -1,289 +1,55 @@
 # RiftDeck
 
+**简体中文** | [English](README.en.md)
+
 <p align="center">
-  <img src="app/src/main/res/drawable-nodpi/riftdeck_emblem.webp" alt="RiftDeck logo: a handheld split by a yellow and cyan rift" width="160">
+  <img src="app/src/main/res/drawable-nodpi/riftdeck_emblem.webp" alt="RiftDeck 标志：被黄色与青色裂隙分开的掌机" width="160">
   <br>
   <img src="app/src/main/res/drawable-nodpi/riftdeck_wordmark.webp" alt="RiftDeck" width="360">
 </p>
 
-**A controller-first retro game frontend for Android handhelds.**
+**为 KPA 打造，手柄优先的复古游戏前端。**
 
-RiftDeck is an open-source game library and emulator frontend designed specifically for Android gaming handhelds.
+RiftDeck 是专为 KPA（KONKR Pocket Advance）打造的开源游戏库与模拟器前端。用方向键、摇杆和手柄按钮浏览游戏、管理收藏，再通过外部模拟器启动。
 
-It provides a fast, focused interface for browsing ROM libraries, viewing game metadata, managing favorites and recent games, and launching games through external emulators.
+目前正在积极开发，优先支持 **Game Boy Advance**。核心功能无需账号，ROM 保留在本地。
 
-RiftDeck is built around physical controls first. Every core interaction is designed to work with a D-pad, analog stick, and face buttons without requiring touch input.
+## 真机运行截图
 
-> **Browse. Launch. Play.**
+首页和游戏详情运行于 **KONKR Pocket Advance**，采用横屏布局。以下开发阶段截图使用示例游戏库和占位封面。
 
-## On-device Screenshots
+**首页 — 继续游戏、收藏与最近游玩**
 
-Home and game details running on a **OnePlus PLK110 · Android 16** in landscape. These development screenshots use a sample library and placeholder artwork. See the [capture and verification notes](design-demos/logo-iteration-verification.md) for details; KONKR Pocket Advance validation is still pending.
+![KONKR Pocket Advance 上的 RiftDeck 首页，展示高亮的开始游戏按钮和手柄操作提示](design-demos/screenshots/brand-assets/home-phone.png)
 
-**Home — continue playing, favorites and recent games**
+**游戏详情 — 启动游戏、查看资料与管理收藏**
 
-![RiftDeck home running on an Android phone, with a highlighted Play action and controller button hints](design-demos/screenshots/brand-assets/home-phone.png)
+![KONKR Pocket Advance 上的 RiftDeck 游戏详情，展示示例封面、游玩记录和获得焦点的开始游戏按钮](design-demos/screenshots/brand-assets/detail-phone.png)
 
-**Game details — play, check metadata and manage favorites**
+## 核心功能
 
-![RiftDeck game details running on an Android phone, showing sample artwork, play history and a focused Play button](design-demos/screenshots/brand-assets/detail-phone.png)
+* 手柄优先：首页、游戏库、详情与设置，支持分类切换和快速翻页。
+* 本地游戏库：扫描 `.gba` / `.zip`，支持增量更新、搜索、排序和本地封面。
+* 收藏与最近游玩：记录启动次数和估算时长，返回时恢复选中项与滚动位置。
+* 外部模拟器：选择并保存配置，已验证 GBA.emu 启动流程。
+* 个性化：深浅色外观、多套配色、减少动态效果，可设为 Android 默认桌面。
 
----
+## 快速开始
 
-## Status
+1. 安装 RiftDeck 和兼容的 GBA 模拟器。
+2. 选择 **添加 ROM 文件夹**，授予访问权限。
+3. 在 **设置 → 模拟器** 中选择已安装的模拟器，然后选择游戏启动。
 
-RiftDeck is currently under active development.
+ZIP 中须只包含一个 GBA ROM。存档目录请在模拟器中配置；RiftDeck 不管理存档。本地封面可与 ROM 同名放置，例如 `Game.gba` 和 `Game.png`，然后重新扫描。
 
-The first target device is the **KONKR Pocket Advance**, with **Game Boy Advance** as the first fully supported platform.
+## 更多文档
 
-The architecture is designed to support additional Android handhelds and retro platforms over time.
+* [使用与开发指南](GUIDE.md)：详细功能、使用限制、架构、构建与路线图。
+* [实现与验证记录](CORE_IMPLEMENTATION.md)：验证证据和待完成的硬件检查。
+* [开发规范](AGENTS.md)：参与贡献前请先阅读。
 
----
+## 许可与版权
 
-## Current Features
+源代码采用 [MPL-2.0](LICENSE)；名称、Logo 和应用图标等品牌资产适用独立的[商标规则](TRADEMARKS.md)，不包含在 MPL-2.0 授权中。未经授权，修改版和分叉项目不得冒充官方发行版。
 
-* Controller navigation with D-pad / stick, A/B/X/Y actions, L1/R1 categories, L2/R2 library paging and first-letter jumps in the displayed title order.
-* Home, game library, game details and controller-friendly settings.
-* System, light and dark appearance; Rift, Ocean and Ember palettes; reduced motion. Preferences use DataStore.
-* Android Home launcher support. Use **Settings → Home launcher → Set as default home**. Android asks you to confirm; the current Home app stays unchanged if you cancel.
-* Persistent SAF folder access, recursive `.gba` / `.zip` scanning, incremental updates, cancellation and removed-file detection.
-* Room library storage, favorites, recent games, sorting and name / filename search. Search includes a controller keyboard; touch input supports the system keyboard.
-* Installed-emulator selection and saved configuration. GBA.emu has been tested with an original diagnostic ROM through both SAF and ZIP extraction.
-* Launch count, last-played time and estimated session duration, with page, selection and scroll restoration when returning.
-
-New installations start with an empty library. Choose **Add ROM folder**, grant access in Android's folder picker, then select an installed GBA emulator in **Settings → Emulators**. Use game files you are entitled to run. Android's picker and the external emulator have their own input and storage settings. Configure a writable save directory in the emulator; RiftDeck shares ROMs with read access and does not manage emulator save files.
-
-ZIP files must contain one GBA ROM. Unsafe paths, ambiguous archives and oversized files are rejected. Extracted ROMs use a private temporary cache and a limited FileProvider read grant; older files are cleaned after 24 hours when the frontend resumes or prepares another ROM.
-
-Duplicate detection currently recognizes the same document imported through overlapping folders. Identical copies with different document IDs remain separate. Playtime estimates the interval between launch and return, capped at 24 hours per session; it cannot distinguish paused or backgrounded emulator time. A successful Android launch does not guarantee the emulator accepts every ROM.
-
-Local covers are loaded with Coil. Put a matching PNG, WebP, JPG or JPEG beside the ROM, then rescan (for example, `Game.gba` and `Game.png`). Matching ignores case, preserves region tags and prefers PNG, then WebP, JPG and JPEG when several exist. Replacing or deleting a cover updates the next scan; unavailable or damaged images fall back to a geometric placeholder.
-
-Metadata scraping, video previews, additional emulator-specific adapters and an Android app drawer are planned.
-
-See [CORE_IMPLEMENTATION.md](CORE_IMPLEMENTATION.md) for verification evidence and remaining hardware checks.
-
----
-
-## Target Devices
-
-### KONKR Pocket Advance
-
-The KONKR Pocket Advance is the first reference device for RiftDeck development.
-
-The interface is designed around compact landscape handheld displays and physical controls.
-
-RiftDeck is not intended to remain device-specific. The UI architecture is designed to adapt to different:
-
-* screen sizes
-* aspect ratios
-* pixel densities
-* controller layouts
-* Android gaming handhelds
-
-Planned layouts include support for:
-
-* 4:3
-* 16:9
-* 16:10
-
----
-
-## Design
-
-RiftDeck aims to feel like a dedicated gaming system rather than a traditional Android application.
-
-The default visual direction combines:
-
-* dark surfaces
-* high-contrast typography
-* neon yellow focus accents
-* cyan and magenta secondary accents
-* technical geometry
-* subtle futuristic HUD elements
-* strong controller focus indicators
-
-Visual effects are intentionally kept lightweight.
-
-Responsiveness and readability always take priority over decorative effects.
-
----
-
-## Tech Stack
-
-Implemented: Kotlin, Jetpack Compose, Navigation Compose, Room / KSP, Coil, Coroutines / Flow and DataStore. ROM scanning and ZIP preparation run in Kotlin on background dispatchers.
-
-Media3 previews, Baseline Profiles and macrobenchmarks are planned. There is no native core; C++ will only be considered after profiling demonstrates a need.
-
----
-
-## Architecture
-
-RiftDeck follows a layered architecture.
-
-```text
-Compose UI
-    │
-    ▼
-ViewModel
-    │
-    ▼
-Use Cases
-    │
-    ▼
-Repository
-    │
-    ├── Room
-    ├── Android APIs
-    ├── Storage
-    ├── Metadata Providers
-    └── Emulator Integration
-            │
-            ▼
-      Native Core
-        (optional)
-```
-
-Recommended project structure:
-
-```text
-app/
-core/
-data/
-domain/
-feature/
-```
-
-The architecture keeps UI, storage, emulator integration, ROM scanning, and platform-specific logic separated.
-
-See [AGENTS.md](AGENTS.md) for detailed architecture and development guidelines.
-
----
-
-## Performance
-
-Performance is a core product requirement.
-
-RiftDeck is designed around:
-
-* fast startup
-* low input latency
-* smooth game-grid scrolling
-* background ROM scanning
-* incremental database updates
-* appropriately sized image decoding
-* delayed video preview playback
-* minimal work on the Android main thread
-
-The project targets smooth operation even with large ROM libraries.
-
-Native optimization will only be introduced after profiling identifies an actual bottleneck.
-
----
-
-## Storage
-
-RiftDeck uses Android's Storage Access Framework where possible.
-
-The application is designed to support:
-
-* internal storage
-* SD cards
-* removable storage
-* multiple ROM directories
-* persistent folder permissions
-
-ROM files remain on the user's device.
-
----
-
-## Local-First
-
-RiftDeck is designed as a local-first application.
-
-Core functionality does not require an account or online service.
-
-Your ROM library remains local by default.
-
-Metadata services may optionally be used to retrieve information such as:
-
-* game titles
-* cover artwork
-* screenshots
-* descriptions
-* release information
-
-RiftDeck does not upload ROM files.
-
----
-
-## Roadmap
-
-The application shell, local GBA library and first external emulator launch flow are implemented. Remaining work focuses on target-handheld validation, metadata / artwork, optional video previews, performance profiling and more platforms.
-
-## Building
-
-Use JDK 17 and Android SDK 36. The repository includes the Gradle wrapper; Room schemas are versioned under `app/schemas`.
-
-```bash
-./gradlew :app:assembleDebug :app:testDebugUnitTest :app:lintDebug
-./gradlew :app:connectedDebugAndroidTest
-```
-
-The second command requires a connected Android test device or emulator. Use an isolated test device for instrumentation. See `tools/test-fixtures` for a source-built diagnostic ROM without third-party game data.
-
----
-
-## Contributing
-
-RiftDeck is still in an early stage of development.
-
-Contributions, bug reports, design discussions, emulator configurations, device compatibility reports, and performance improvements are welcome.
-
-Before making code changes, please read:
-
-[AGENTS.md](AGENTS.md)
-
-Important project principles:
-
-1. Controller navigation comes first.
-2. Performance is a feature.
-3. Core functionality should remain local-first.
-4. Avoid unnecessary dependencies.
-5. Do not introduce native code without a measured reason.
-6. Keep platform and emulator integrations modular.
-7. Optimize for real handheld hardware, not only Android emulators.
-
----
-
-## ROMs and Copyright
-
-RiftDeck does not provide, host, download, or distribute copyrighted game ROMs or BIOS files.
-
-Users are responsible for ensuring that any game files used with RiftDeck are obtained and used in accordance with applicable laws and licenses.
-
----
-
-## License
-
-RiftDeck source code is licensed under the **Mozilla Public License 2.0**.
-
-See [LICENSE](LICENSE) for the complete license terms.
-
----
-
-## Trademark
-
-The RiftDeck name, logo, application icon, and other distinctive brand assets are not licensed under the Mozilla Public License 2.0.
-
-Modified versions and forks must not present themselves as official RiftDeck releases unless explicitly authorized.
-
-See [TRADEMARKS.md](TRADEMARKS.md) for details.
-
----
-
-## Acknowledgements
-
-RiftDeck is inspired by the long history of open-source emulation frontends and the retro handheld community.
-
-RiftDeck itself is a frontend and does not contain emulator cores or copyrighted game content.
+RiftDeck 不包含模拟器核心，也不提供、托管、下载或分发受版权保护的 ROM 或 BIOS。请确保游戏文件的获取和使用符合适用法律与许可条款。
