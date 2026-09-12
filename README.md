@@ -1,5 +1,11 @@
 # RiftDeck
 
+<p align="center">
+  <img src="app/src/main/res/drawable-nodpi/riftdeck_emblem.webp" alt="RiftDeck logo: a handheld split by a yellow and cyan rift" width="160">
+  <br>
+  <img src="app/src/main/res/drawable-nodpi/riftdeck_wordmark.webp" alt="RiftDeck" width="360">
+</p>
+
 **A controller-first retro game frontend for Android handhelds.**
 
 RiftDeck is an open-source game library and emulator frontend designed specifically for Android gaming handhelds.
@@ -9,6 +15,18 @@ It provides a fast, focused interface for browsing ROM libraries, viewing game m
 RiftDeck is built around physical controls first. Every core interaction is designed to work with a D-pad, analog stick, and face buttons without requiring touch input.
 
 > **Browse. Launch. Play.**
+
+## On-device Screenshots
+
+Home and game details running on a **OnePlus PLK110 · Android 16** in landscape. These development screenshots use a sample library and placeholder artwork. See the [capture and verification notes](design-demos/logo-iteration-verification.md) for details; KONKR Pocket Advance validation is still pending.
+
+**Home — continue playing, favorites and recent games**
+
+![RiftDeck home running on an Android phone, with a highlighted Play action and controller button hints](design-demos/screenshots/brand-assets/home-phone.png)
+
+**Game details — play, check metadata and manage favorites**
+
+![RiftDeck game details running on an Android phone, showing sample artwork, play history and a focused Play button](design-demos/screenshots/brand-assets/detail-phone.png)
 
 ---
 
