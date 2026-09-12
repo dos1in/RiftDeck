@@ -10,6 +10,10 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.riftdeck.core.media.PreviewScreenMonitor
+import com.riftdeck.core.ui.components.LocalPreviewScreenActive
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -29,6 +33,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 
 class MainActivity : ComponentActivity() {
+    private val previewScreen by lazy { PreviewScreenMonitor(this) }
     private val gamepadInputManager = GamepadInputManager()
 
     private val homeLauncher by lazy { HomeLauncher(this) }
@@ -54,6 +59,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
+        previewScreen.resume()
         defaultHome = homeLauncher.isDefault()
         (application as LauncherApplication).emulationRepository.onFrontendResumed()
     }
@@ -98,6 +104,8 @@ class MainActivity : ComponentActivity() {
             val libraryViewModel: LibraryViewModel = viewModel(factory = libraryFactory)
             val emulatorFactory = remember(launcher) { EmulatorViewModel.Factory(launcher.emulationRepository, launcher.uiPreferencesRepository) }
             val emulatorViewModel: EmulatorViewModel = viewModel(factory = emulatorFactory)
+            val screenActive by previewScreen.active.collectAsStateWithLifecycle()
+            CompositionLocalProvider(LocalPreviewScreenActive provides screenActive) {
             RiftDeckTheme() {
                 RiftDeckApp(
                     homeViewModel = homeViewModel,
@@ -116,17 +124,33 @@ class MainActivity : ComponentActivity() {
                 )
             }
         }
+        }
     }
 
-    override fun dispatchGenericMotionEvent(event: MotionEvent): Boolean =
-        gamepadInputManager.onGenericMotionEvent(event) || super.dispatchGenericMotionEvent(event)
+    override fun onUserInteraction() {
+        super.onUserInteraction()
+        previewScreen.userActivity()
+    }
+
+    override fun onDestroy() {
+        previewScreen.destroy()
+        super.onDestroy()
+    }
+
+    override fun dispatchGenericMotionEvent(event: MotionEvent): Boolean {
+        val handled = gamepadInputManager.onGenericMotionEvent(event)
+        if (handled) previewScreen.userActivity()
+        return handled || super.dispatchGenericMotionEvent(event)
+    }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
+        previewScreen.windowFocusChanged(hasFocus)
         if (!hasFocus) gamepadInputManager.reset()
     }
 
     override fun onPause() {
+        previewScreen.pause()
         gamepadInputManager.reset()
         super.onPause()
     }

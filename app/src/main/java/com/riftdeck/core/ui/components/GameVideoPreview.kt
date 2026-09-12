@@ -23,7 +23,9 @@ import androidx.media3.common.VideoSize
 import androidx.media3.exoplayer.ExoPlayer
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 
+val LocalPreviewScreenActive = staticCompositionLocalOf { true }
 val LocalPreviewDelayMs = staticCompositionLocalOf { 650 }
 val LocalLoopVideoPreviews = staticCompositionLocalOf { true }
 val LocalVideoPreviews = staticCompositionLocalOf { false }
@@ -32,6 +34,8 @@ val LocalVideoPreviews = staticCompositionLocalOf { false }
 @Composable
 fun GameVideoPreview(uri: String?, modifier: Modifier = Modifier, onAspectRatio: (Float?) -> Unit = {}) {
     if (!LocalVideoPreviews.current || uri == null) return
+    val screenActive = LocalPreviewScreenActive.current
+    val currentScreenActive by rememberUpdatedState(screenActive)
     val previewDelayMs = LocalPreviewDelayMs.current
     val loop = LocalLoopVideoPreviews.current
     val reportRatio by rememberUpdatedState(onAspectRatio)
@@ -40,8 +44,20 @@ fun GameVideoPreview(uri: String?, modifier: Modifier = Modifier, onAspectRatio:
     var player by remember(uri) { mutableStateOf<ExoPlayer?>(null) }
     var rendered by remember(uri) { mutableStateOf(false) }
     var ratio by remember(uri) { mutableFloatStateOf(1.5f) }
+    LaunchedEffect(player, screenActive) {
+        player?.let { active ->
+            active.playWhenReady = screenActive
+            if (context.applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE != 0) {
+                android.util.Log.d("Media", "Preview active=$screenActive positionMs=${active.currentPosition}")
+            }
+        }
+    }
     LaunchedEffect(uri, lifecycle, previewDelayMs, loop) {
+        var position = 0L
+        var completed = false
         lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            if (completed) return@repeatOnLifecycle
+            snapshotFlow { currentScreenActive }.first { it }
             delay(previewDelayMs.toLong())
             val finished = CompletableDeferred<Unit>()
             val active = ExoPlayer.Builder(context).build()
@@ -50,7 +66,7 @@ fun GameVideoPreview(uri: String?, modifier: Modifier = Modifier, onAspectRatio:
                 active.repeatMode = if (loop) Player.REPEAT_MODE_ONE else Player.REPEAT_MODE_OFF
                 active.addListener(object : Player.Listener {
                     override fun onPlaybackStateChanged(state: Int) {
-                        if (state == Player.STATE_ENDED) finished.complete(Unit)
+                        if (state == Player.STATE_ENDED) { completed = true; finished.complete(Unit) }
                     }
                     override fun onRenderedFirstFrame() { rendered = true; reportRatio(ratio) }
                     override fun onVideoSizeChanged(size: VideoSize) {
@@ -59,14 +75,16 @@ fun GameVideoPreview(uri: String?, modifier: Modifier = Modifier, onAspectRatio:
                             if (rendered) reportRatio(ratio)
                         }
                     }
-                    override fun onPlayerError(error: PlaybackException) { rendered = false; reportRatio(null); finished.complete(Unit) }
+                    override fun onPlayerError(error: PlaybackException) { rendered = false; reportRatio(null); completed = true; finished.complete(Unit) }
                 })
                 player = active
                 active.setMediaItem(MediaItem.fromUri(uri))
+                active.seekTo(position)
                 active.prepare()
-                active.playWhenReady = true
+                active.playWhenReady = currentScreenActive
                 finished.await()
             } finally {
+                position = active.currentPosition.coerceAtLeast(0L)
                 rendered = false
                 reportRatio(null)
                 player = null
