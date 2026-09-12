@@ -80,6 +80,15 @@ fun PlatformScreen(
         cursorId = target.id
         onFocusGame(target.id)
         moveJob?.cancel()
+        val visibleRequester = rowFocus[target.id]?.takeIf {
+            listState.layoutInfo.visibleItemsInfo.any { it.key == target.id }
+        }
+        if (visibleRequester != null) {
+            // Attached visible rows can take focus in this input event. Only offscreen rows
+            // need to wait for scrolling and composition to create their focus target.
+            visibleRequester.requestFocus()
+            return
+        }
         moveJob = scope.launch {
             if (listState.layoutInfo.visibleItemsInfo.none { it.key == target.id }) listState.scrollToItem(index)
             // Only visible rows allocate focus nodes. Wait for an offscreen row to be composed.

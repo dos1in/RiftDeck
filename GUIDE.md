@@ -67,7 +67,7 @@ RiftDeck 希望带来专用游戏主机般的操作体验。
 
 已使用 Kotlin、Jetpack Compose、Navigation Compose、Room / KSP、Coil、Coroutines / Flow 和 DataStore。ROM 扫描与 ZIP 处理均使用 Kotlin，在后台调度器上执行。
 
-Media3 视频预览已实现；Baseline Profiles 和宏基准测试仍在计划中。目前没有原生核心；只有性能分析证明有必要时，才会考虑引入 C++。
+Media3 视频预览已实现；已加入应用 Baseline Profile 并提供导航帧采样工具；自动化宏基准测试仍在计划中。目前没有原生核心；只有性能分析证明有必要时，才会考虑引入 C++。
 
 ## 架构
 

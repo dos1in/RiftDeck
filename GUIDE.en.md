@@ -69,7 +69,7 @@ Responsiveness and readability always take priority over decorative effects.
 
 Implemented: Kotlin, Jetpack Compose, Navigation Compose, Room / KSP, Coil, Coroutines / Flow and DataStore. ROM scanning and ZIP preparation run in Kotlin on background dispatchers.
 
-Media3 previews are implemented; Baseline Profiles and macrobenchmarks are planned. There is no native core; C++ will only be considered after profiling demonstrates a need.
+Media3 previews are implemented; an application Baseline Profile and navigation sampling tool are available; automated macrobenchmarks are planned. There is no native core; C++ will only be considered after profiling demonstrates a need.
 
 ## Architecture
 
