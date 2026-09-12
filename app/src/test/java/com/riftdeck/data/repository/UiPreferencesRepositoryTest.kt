@@ -136,6 +136,33 @@ class UiPreferencesRepositoryTest {
         }
     }
 
+    @Test fun customLaunchArgumentsPersistAndAreReplacedWithTheSelection() = runBlocking {
+        val config = com.riftdeck.core.emulator.EmulatorConfig(1, "example.gba", "example.gba.Play", "Custom",
+            action = "example.action.LAUNCH", extras = mapOf("core" to "mgba", "参数:名" to "第一行\n第二行:值", "empty" to ""))
+        withRepository { it.setEmulator(config) }
+        withRepository {
+            assertEquals(config, it.preferences.first().emulators[1L])
+            it.setEmulator(config.copy(action = "android.intent.action.VIEW", extras = emptyMap()))
+        }
+        withRepository {
+            assertEquals(config.copy(action = "android.intent.action.VIEW", extras = emptyMap()), it.preferences.first().emulators[1L])
+        }
+    }
+
+    @Test fun legacyEmulatorMappingsKeepDefaultLaunchContract() = runBlocking {
+        val job = SupervisorJob()
+        val store = PreferenceDataStoreFactory.create(scope = CoroutineScope(job + Dispatchers.IO)) { file() }
+        try {
+            store.edit {
+                it[stringPreferencesKey("emulator_package_1")] = "example.gba"
+                it[stringPreferencesKey("emulator_activity_1")] = "example.gba.Play"
+            }
+            val config = UiPreferencesRepository(store).preferences.first().emulators.getValue(1)
+            assertEquals("android.intent.action.VIEW", config.action)
+            assertEquals(emptyMap<String, String>(), config.extras)
+        } finally { job.cancelAndJoin() }
+    }
+
     private fun file() = folder.root.resolve("ui.preferences_pb")
 
     private suspend fun withRepository(block: suspend (UiPreferencesRepository) -> Unit) {

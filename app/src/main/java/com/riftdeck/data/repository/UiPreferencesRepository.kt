@@ -51,7 +51,10 @@ class UiPreferencesRepository internal constructor(private val store: DataStore<
                 val activity = values[stringPreferencesKey("emulator_activity_$platform")] ?: return@mapNotNull null
                 platform to EmulatorConfig(platform, pkg, activity,
                     values[stringPreferencesKey("emulator_name_$platform")] ?: pkg,
-                    mimeType = values[stringPreferencesKey("emulator_mime_$platform")] ?: "application/octet-stream")
+                    action = values[stringPreferencesKey("emulator_action_$platform")] ?: "android.intent.action.VIEW",
+                    mimeType = values[stringPreferencesKey("emulator_mime_$platform")] ?: "application/octet-stream",
+                    extras = values[stringSetPreferencesKey("emulator_extras_$platform")].orEmpty()
+                        .mapNotNull(::decodeEmulatorExtra).toMap())
             }.toMap(),
             navigationRailExpanded = values[navigationRailExpandedKey] ?: true,
             videoPreviews = values[videoPreviewsKey] ?: false,
@@ -69,6 +72,10 @@ class UiPreferencesRepository internal constructor(private val store: DataStore<
             it[stringPreferencesKey("emulator_activity_$id")] = config.activityName
             it[stringPreferencesKey("emulator_name_$id")] = config.displayName
             it[stringPreferencesKey("emulator_mime_$id")] = config.mimeType
+            it[stringPreferencesKey("emulator_action_$id")] = config.action
+            it[stringSetPreferencesKey("emulator_extras_$id")] = config.extras.mapTo(mutableSetOf()) { (key, value) ->
+                "${key.length}:$key$value"
+            }
         }
     }
     suspend fun addRomFolder(uri: String) { store.edit { it[foldersKey] = (it[foldersKey] ?: emptySet()) + uri } }
@@ -82,4 +89,14 @@ class UiPreferencesRepository internal constructor(private val store: DataStore<
     suspend fun setVideoPreviews(enabled: Boolean) { store.edit { it[videoPreviewsKey] = enabled } }
     suspend fun setReducedMotion(enabled: Boolean) { store.edit { it[reducedMotionKey] = enabled } }
     suspend fun setSortDescending(enabled: Boolean) { store.edit { it[sortDescendingKey] = enabled } }
+}
+
+/** Length-prefix keys so colons, Unicode and newlines round-trip without delimiter escaping. */
+private fun decodeEmulatorExtra(encoded: String): Pair<String, String>? {
+    val separator = encoded.indexOf(':')
+    if (separator < 0) return null
+    val keyLength = encoded.substring(0, separator).toIntOrNull() ?: return null
+    val payload = encoded.substring(separator + 1)
+    if (keyLength !in 0..payload.length) return null
+    return payload.substring(0, keyLength) to payload.substring(keyLength)
 }
