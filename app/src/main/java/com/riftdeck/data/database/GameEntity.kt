@@ -31,10 +31,11 @@ data class GameEntity(
     val developer: String? = null,
     val genre: String? = null,
     val coverVersion: String? = null,
+    val description: String? = null,
 ) {
     fun toGame() = Game(id, platformId, title, sortTitle, romUri, fileName, fileSize, crc32, sha1,
         favorite, hidden, playCount, playTimeSeconds, lastPlayedAt, coverUri, screenshotUri, videoUri,
-        releaseYear, developer, genre, coverVersion)
+        releaseYear, developer, genre, coverVersion, description)
 }
 
 /** One document may be reachable through more than one selected SAF tree. */

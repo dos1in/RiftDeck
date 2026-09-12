@@ -42,6 +42,7 @@ import com.riftdeck.feature.home.HomeViewModel
 import com.riftdeck.feature.platform.LibraryFilter
 import com.riftdeck.feature.platform.PlatformScreen
 import com.riftdeck.feature.settings.SettingsScreen
+import com.riftdeck.core.ui.components.LocalVideoPreviews
 import kotlinx.coroutines.flow.Flow
 
 private object Route {
@@ -113,6 +114,7 @@ fun RiftDeckApp(homeViewModel: HomeViewModel, libraryViewModel: LibraryViewModel
     val onPlay: (Long) -> Unit = { id -> homeViewModel.focusGame(id); uiState.games.firstOrNull { it.id == id }?.let(emulatorViewModel::launch) }
     val onOpenGame: (Long) -> Unit = { homeViewModel.focusGame(it); navigate(Route.game(it)) }
     CompositionLocalProvider(
+        LocalVideoPreviews provides (uiState.videoPreviews && !launchBusy && launchError == null),
         LocalNavigationRail provides NavigationRailState(uiState.navigationRailExpanded, homeViewModel::setNavigationRailExpanded),
         LocalAnalogActions provides analogActions, LocalReducedMotion provides uiState.reducedMotion,
         LocalControllerInputEnabled provides (!preferenceError && !launcherError && !libraryError && removeFolder == null && !searchOpen && !launchBusy && launchError == null && !historyError)) {
@@ -149,7 +151,7 @@ fun RiftDeckApp(homeViewModel: HomeViewModel, libraryViewModel: LibraryViewModel
                 composable(Route.Settings, arguments = listOf(navArgument("section") { type = NavType.StringType })) { entry ->
                     if (uiState.isReady) SettingsScreen(entry.arguments?.getString("section") ?: "library", uiState.reducedMotion,
                         homeViewModel::setReducedMotion, ::addFolder, onNavigate, ::back,
-                        hasGame = uiState.games.isNotEmpty(),
+                        hasGame = uiState.games.isNotEmpty(), videoPreviews = uiState.videoPreviews, onVideoPreviews = homeViewModel::setVideoPreviews,
                         emulatorTargets = emulatorTargets, selectedEmulator = selectedEmulator,
                         onChooseEmulator = emulatorViewModel::choose, onRefreshEmulators = emulatorViewModel::refresh,
                         folders = folders, scanState = scanState, onRescan = libraryViewModel::rescan,

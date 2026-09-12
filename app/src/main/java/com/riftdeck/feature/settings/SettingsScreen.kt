@@ -33,7 +33,7 @@ private enum class SettingSection(val title: Int, val description: Int) {
 @Composable
 fun SettingsScreen(initialSection: String, reducedMotion: Boolean, onReducedMotion: (Boolean) -> Unit,
     onAddFolder: () -> Unit, onNavigate: (DeckSection) -> Unit,
-    onBack: () -> Unit, hasGame: Boolean,
+    onBack: () -> Unit, hasGame: Boolean, videoPreviews: Boolean, onVideoPreviews: (Boolean) -> Unit,
     emulatorTargets: List<EmulatorConfig>, selectedEmulator: EmulatorConfig?,
     onChooseEmulator: (EmulatorConfig) -> Unit, onRefreshEmulators: () -> Unit,
     folders: Set<String>, scanState: ScanState, onRescan: () -> Unit, onCancelScan: () -> Unit, onRemoveFolder: (String) -> Unit,
@@ -107,6 +107,12 @@ fun SettingsScreen(initialSection: String, reducedMotion: Boolean, onReducedMoti
                                     appearanceFocusIndex = index
                                     panelFocused = true
                                 })
+                        }
+                        SettingSection.Video -> {
+                            NeonActionButton(stringResource(if (videoPreviews) R.string.preview_video else R.string.preview_cover),
+                                { action.requestFocus(); onVideoPreviews(!videoPreviews) }, Modifier.fillMaxWidth(),
+                                selected = videoPreviews, focusRequester = action, left = tabs[selectedIndex],
+                                onFocused = { panelFocused = true })
                         }
                         SettingSection.Launcher -> {
                             MetadataValue(stringResource(R.string.launcher_status),

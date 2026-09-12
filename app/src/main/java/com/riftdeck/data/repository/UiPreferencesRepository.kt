@@ -22,12 +22,14 @@ data class UiPreferences(
     val romFolders: Set<String> = emptySet(),
     val emulators: Map<Long, EmulatorConfig> = emptyMap(),
     val navigationRailExpanded: Boolean = true,
+    val videoPreviews: Boolean = false,
 )
 
 class UiPreferencesRepository internal constructor(private val store: DataStore<Preferences>) {
     constructor(context: Context) : this(context.applicationContext.uiPreferences)
 
     private val foldersKey = stringSetPreferencesKey("rom_folders")
+    private val videoPreviewsKey = booleanPreferencesKey("video_previews")
     private val reducedMotionKey = booleanPreferencesKey("reduced_motion")
     private val sortDescendingKey = booleanPreferencesKey("sort_descending")
     // Preserve the stored choice from the earlier show/hide setting.
@@ -47,6 +49,7 @@ class UiPreferencesRepository internal constructor(private val store: DataStore<
                     mimeType = values[stringPreferencesKey("emulator_mime_$platform")] ?: "application/octet-stream")
             }.toMap(),
             navigationRailExpanded = values[navigationRailExpandedKey] ?: true,
+            videoPreviews = values[videoPreviewsKey] ?: false,
             reducedMotion = values[reducedMotionKey] ?: false,
             sortDescending = values[sortDescendingKey] ?: false,
         )
@@ -64,6 +67,7 @@ class UiPreferencesRepository internal constructor(private val store: DataStore<
     suspend fun addRomFolder(uri: String) { store.edit { it[foldersKey] = (it[foldersKey] ?: emptySet()) + uri } }
     suspend fun removeRomFolder(uri: String) { store.edit { it[foldersKey] = (it[foldersKey] ?: emptySet()) - uri } }
     suspend fun setNavigationRailExpanded(expanded: Boolean) { store.edit { it[navigationRailExpandedKey] = expanded } }
+    suspend fun setVideoPreviews(enabled: Boolean) { store.edit { it[videoPreviewsKey] = enabled } }
     suspend fun setReducedMotion(enabled: Boolean) { store.edit { it[reducedMotionKey] = enabled } }
     suspend fun setSortDescending(enabled: Boolean) { store.edit { it[sortDescendingKey] = enabled } }
 }

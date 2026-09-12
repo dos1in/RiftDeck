@@ -19,6 +19,8 @@ class SafRomDocumentSource(private val resolver: ContentResolver) : RomDocumentS
         val pending = ArrayDeque<String>()
         val seen = HashSet<String>()
         val mappedCovers = mutableMapOf<String, CoverFile>()
+        val mappedVideos = mutableMapOf<String, String>()
+        val descriptions = mutableMapOf<String, String>()
         pending.add(DocumentsContract.getTreeDocumentId(tree))
         while (pending.isNotEmpty()) {
             currentCoroutineContext().ensureActive()
@@ -75,12 +77,15 @@ class SafRomDocumentSource(private val resolver: ContentResolver) : RomDocumentS
                             output.write(buffer, 0, count)
                         }
                     }.toByteArray() }
+                    var metadataDescriptions = emptyMap<String, String>()
                     val paths = if (bytes != null && bytes.size <= 4 * 1024 * 1024) {
                         val text = bytes.toString(Charsets.UTF_8)
-                        PegasusArtwork.paths(text).toList() + PegasusArtwork.paths(text, preferExplicit = false).toList()
+                        metadataDescriptions = PegasusArtwork.descriptions(text)
+                        (PegasusArtwork.paths(text).toList() + PegasusArtwork.paths(text, preferExplicit = false).toList()).map { (key, path) -> Triple(key, path, false) } +
+                            (PegasusArtwork.paths(text, video = true).toList() + PegasusArtwork.paths(text, preferExplicit = false, video = true).toList()).map { (key, path) -> Triple(key, path, true) }
                     } else emptyList()
                     val directoryCache = mutableMapOf<String, List<Entry>>()
-                    for ((key, path) in paths) {
+                    for ((key, path, isVideo) in paths) {
                         val romSegments = key.split('/')
                         var romDirectory = parent
                         var romExists = true
@@ -93,7 +98,8 @@ class SafRomDocumentSource(private val resolver: ContentResolver) : RomDocumentS
                         if (!romExists) continue
                         val romEntries = directoryCache[romDirectory] ?: children(tree, romDirectory).also { result -> directoryCache[romDirectory] = result }
                         val rom = romEntries.firstOrNull { entry -> !entry.directory && RomFileNames.platform(entry.name) != null && CoverFiles.key(entry.name) == romSegments.last() } ?: continue
-                        if (rom.id in mappedCovers) continue
+                        metadataDescriptions[key]?.let { value -> descriptions[rom.id] = value }
+                        if (if (isVideo) rom.id in mappedVideos else rom.id in mappedCovers) continue
                         var directory = parent
                         val segments = path.split('/')
                         var valid = true
@@ -107,6 +113,11 @@ class SafRomDocumentSource(private val resolver: ContentResolver) : RomDocumentS
                         val entries = directoryCache[directory] ?: children(tree, directory).also { result -> directoryCache[directory] = result }
                         val imagesInDirectory = entries.filterNot { entry -> entry.directory }.map { entry ->
                             CoverFile(entry.name, DocumentsContract.buildDocumentUriUsingTree(tree, entry.id).toString(), entry.size, entry.modified)
+                        }
+                        if (isVideo) {
+                            imagesInDirectory.firstOrNull { image -> image.name.equals(segments.last(), ignoreCase = true) && image.name.endsWith(".mp4", ignoreCase = true) }
+                                ?.let { video -> mappedVideos[rom.id] = video.uri }
+                            continue
                         }
                         val artwork = if (segments.last() == "boxfront") CoverFiles.pegasusCover(imagesInDirectory)
                             else imagesInDirectory.firstOrNull { image -> image.name.equals(segments.last(), ignoreCase = true) && CoverFiles.supported(image.name) }
@@ -126,7 +137,7 @@ class SafRomDocumentSource(private val resolver: ContentResolver) : RomDocumentS
                         val uri = DocumentsContract.buildDocumentUriUsingTree(tree, id)
                         val cover = covers[CoverFiles.key(name)] ?: mappedCovers[id]
                         onDocument(RomDocument("${tree.authority}:$id", uri.toString(), name,
-                            it.getLong(3), it.getLong(4), platform, coverUri = cover?.uri, coverVersion = cover?.version))
+                            it.getLong(3), it.getLong(4), platform, coverUri = cover?.uri, coverVersion = cover?.version, description = descriptions[id], videoUri = mappedVideos[id]))
                     }
                 }
             }

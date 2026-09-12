@@ -15,6 +15,13 @@ class PegasusArtworkTest {
         assertEquals("media/第一卷/boxfront", paths["第一卷/game"])
         assertEquals("media/第二卷/boxfront", paths["第二卷/game"])
     }
+    @Test fun extractsDescriptionAndVideoForEveryVersion() {
+        val text = "game: Game\nfiles:\n  a.zip\n  b.zip\ndescription: First\\nSecond\n  Third\nassets.video: media/shared/movie.mp4"
+        assertEquals("First\nSecond\nThird", PegasusArtwork.descriptions(text)["a"])
+        assertEquals(PegasusArtwork.descriptions(text)["a"], PegasusArtwork.descriptions(text)["b"])
+        assertEquals("media/shared/movie.mp4", PegasusArtwork.paths(text, video = true)["a"])
+        assertEquals("media/Game/video.mp4", PegasusArtwork.paths(text, preferExplicit = false, video = true)["a"])
+    }
     @Test fun rejectsPathsOutsideLibraryAndDoesNotReadCommands() {
         assertTrue(PegasusArtwork.paths("game: A\nfile: a.zip\nassets.box_front: ../secret.png").isEmpty())
         assertTrue(PegasusArtwork.paths("launch: command\n  file: evil.zip").isEmpty())

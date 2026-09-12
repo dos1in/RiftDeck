@@ -18,6 +18,13 @@ import org.junit.rules.TemporaryFolder
 class UiPreferencesRepositoryTest {
     @get:Rule val folder = TemporaryFolder()
 
+    @Test fun videoChoicePersistsAcrossStoreRecreation() = runBlocking {
+        withRepository { it.setVideoPreviews(true) }
+        withRepository { assertEquals(true, it.preferences.first().videoPreviews) }
+        withRepository { it.setVideoPreviews(false) }
+        withRepository { assertEquals(false, it.preferences.first().videoPreviews) }
+    }
+
     @Test fun newInstallUsesDefaultPreferences() = runBlocking {
         withRepository { repository -> assertEquals(UiPreferences(), repository.preferences.first()) }
     }

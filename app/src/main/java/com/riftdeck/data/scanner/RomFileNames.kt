@@ -20,6 +20,8 @@ data class RomDocument(
     val sortTitle: String = RomFileNames.sortTitle(title),
     val coverUri: String? = null,
     val coverVersion: String? = null,
+    val description: String? = null,
+    val videoUri: String? = null,
 )
 
 interface RomDocumentSource {

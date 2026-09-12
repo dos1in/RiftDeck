@@ -44,6 +44,23 @@ class LibraryDatabaseTest {
     private fun file(id: Int, tree: String = "a") = RomDocument("provider:rom/$id", "content://provider/tree/$tree/document/rom/$id",
         "Game_$id.gba", 1024, 1, 1)
 
+    @Test fun rescanRefreshesIntroductionAndVideoWithoutLosingFavorites() = runBlocking {
+        files["a"] = listOf(file(1).copy(description = "Old", videoUri = "content://video/old"))
+        scanner.scan(listOf("a"))
+        val id = dao.findByIdentity("provider:rom/1")!!.id
+        dao.toggleFavorite(id)
+        files["a"] = listOf(file(1).copy(description = "New", videoUri = "content://video/new"))
+        scanner.scan(listOf("a"))
+        val game = dao.findById(id)!!.toGame()
+        assertEquals("New", game.description)
+        assertEquals("content://video/new", game.videoUri)
+        assertTrue(game.favorite)
+        files["a"] = listOf(file(1))
+        scanner.scan(listOf("a"))
+        assertNull(dao.findById(id)!!.description)
+        assertNull(dao.findById(id)!!.videoUri)
+    }
+
     @Test fun incrementalScanPreservesFavoriteHistoryAndStableIds() = runBlocking {
         files["a"] = (1..120).map { file(it) }
         scanner.scan(listOf("a"))

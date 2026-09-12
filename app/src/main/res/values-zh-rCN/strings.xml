@@ -57,7 +57,7 @@
     <string name="emulator_settings_description">选择已安装的应用来打开 GBA ROM。</string>
     <string name="appearance_settings_description">调整动效与左侧导航显示。</string>
     <string name="input_settings_description">方向键或左摇杆移动焦点，使用手柄即可完成操作。自定义按键映射将在后续开放。</string>
-    <string name="video_settings_description">演示版本尚未接入视频预览。浏览时只显示静态封面。</string>
+    <string name="video_settings_description">选择封面图片或静音游戏视频。停留片刻后播放，无视频时显示封面。</string>
     <string name="performance_settings_description">游戏列表按需显示可见行，页面即时切换；不使用持续动画背景，也不解码视频。</string>
     <string name="library_source">游戏库来源</string>
     <string name="not_configured">未配置</string>
@@ -137,4 +137,9 @@
     <string name="navigation_expanded">已展开</string>
     <string name="navigation_collapsed">已收起为图标</string>
     <string name="collapse_navigation_short">收起</string>
+    <string name="preview_video">预览方式：游戏视频</string>
+    <string name="preview_cover">预览方式：封面图片</string>
+    <string name="game_description">游戏介绍</string>
+    <string name="description_empty">暂无游戏介绍</string>
+    <string name="description_hint">方向键滚动 · B 返回</string>
 </resources>

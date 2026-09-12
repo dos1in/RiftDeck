@@ -18,14 +18,19 @@ import com.riftdeck.core.ui.components.*
 @Composable
 fun GameDetailScreen(game: Game, onToggleFavorite: () -> Unit, onPlay: () -> Unit,
     onNavigate: (DeckSection) -> Unit, onBack: () -> Unit, modifier: Modifier = Modifier) {
+    var showDescription by rememberSaveable(game.id) { mutableStateOf(false) }
+    val introduction = remember { FocusRequester() }
     val play = remember { FocusRequester() }
     val favorite = remember { FocusRequester() }
     val back = remember { FocusRequester() }
     var focusedKey by rememberSaveable { mutableStateOf("play") }
     LaunchedEffect(Unit) {
         withFrameNanos { }
-        when (focusedKey) { "favorite" -> favorite; "back" -> back; else -> play }.requestFocus()
+        when (focusedKey) { "introduction" -> introduction; "favorite" -> favorite; "back" -> back; else -> play }.requestFocus()
     }
+    if (showDescription) GameDescriptionDialog(game.description.orEmpty()) { showDescription = false }
+    CompositionLocalProvider(com.riftdeck.core.input.LocalControllerInputEnabled provides (com.riftdeck.core.input.LocalControllerInputEnabled.current && !showDescription),
+        LocalVideoPreviews provides (LocalVideoPreviews.current && !showDescription)) {
     DeckScaffold(DeckSection.Detail, play, onNavigate, onAction = { action ->
         when (action) {
             GameAction.Back -> { onBack(); true }
@@ -48,10 +53,13 @@ fun GameDetailScreen(game: Game, onToggleFavorite: () -> Unit, onPlay: () -> Uni
                         verticalArrangement = Arrangement.spacedBy(if (compact) 8.dp else 16.dp, Alignment.CenterVertically)) {
                         GameInformation(game, compact, detailed = true, condensed = condensed)
                         NeonActionButton(stringResource(R.string.play_game), onPlay, Modifier.fillMaxWidth(), primary = true, glyph = "A",
-                            focusRequester = play, left = rail, down = back, onFocused = { focusedKey = "play" })
+                            focusRequester = play, left = rail, down = if (game.description.isNullOrBlank()) back else introduction, onFocused = { focusedKey = "play" })
+                        NeonActionButton(stringResource(R.string.game_description), { showDescription = true }, Modifier.fillMaxWidth(),
+                            focusRequester = introduction, left = rail, up = play, down = back,
+                            enabled = !game.description.isNullOrBlank(), onFocused = { focusedKey = "introduction" })
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             NeonActionButton(stringResource(R.string.back_to_library), onBack, Modifier.weight(1f),
-                                focusRequester = back, left = rail, up = play, right = favorite, onFocused = { focusedKey = "back" })
+                                focusRequester = back, left = rail, up = if (game.description.isNullOrBlank()) play else introduction, right = favorite, onFocused = { focusedKey = "back" })
                             FavoriteButton(game, onToggleFavorite, Modifier.weight(1f), favorite, back, play,
                                 onFocused = { focusedKey = "favorite" })
                         }
@@ -60,4 +68,5 @@ fun GameDetailScreen(game: Game, onToggleFavorite: () -> Unit, onPlay: () -> Uni
             }
         }
     }
+}
 }

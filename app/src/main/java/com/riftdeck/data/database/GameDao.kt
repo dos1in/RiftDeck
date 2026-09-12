@@ -84,17 +84,17 @@ abstract class GameDao {
                 insert(GameEntity(identity = document.identity, platformId = document.platformId,
                     title = document.title, sortTitle = document.sortTitle, romUri = document.uri,
                         fileName = document.name, fileSize = document.size, modifiedAt = document.modifiedAt,
-                        coverUri = document.coverUri, coverVersion = document.coverVersion))
+                        coverUri = document.coverUri, coverVersion = document.coverVersion, description = document.description, videoUri = document.videoUri))
             } else {
                 // Keep favorites/history/metadata; an incremental scan only updates file attributes.
                 if (existing.fileName != document.name || existing.fileSize != document.size || existing.modifiedAt != document.modifiedAt) {
                     update(existing.copy(fileName = document.name, fileSize = document.size,
                         modifiedAt = document.modifiedAt, romUri = document.uri,
-                        coverUri = document.coverUri, coverVersion = document.coverVersion,
+                        coverUri = document.coverUri, coverVersion = document.coverVersion, description = document.description, videoUri = document.videoUri,
                         crc32 = null, sha1 = null))
-                } else if (existing.romUri != document.uri || existing.coverUri != document.coverUri || existing.coverVersion != document.coverVersion) {
+                } else if (existing.romUri != document.uri || existing.coverUri != document.coverUri || existing.coverVersion != document.coverVersion || existing.description != document.description || existing.videoUri != document.videoUri) {
                     // A successful overlapping tree scan may restore access after another grant was revoked.
-                    update(existing.copy(romUri = document.uri, coverUri = document.coverUri, coverVersion = document.coverVersion))
+                    update(existing.copy(romUri = document.uri, coverUri = document.coverUri, coverVersion = document.coverVersion, description = document.description, videoUri = document.videoUri))
                 }
                 existing.id
             }

@@ -58,7 +58,7 @@
     <string name="emulator_settings_description">Choose an installed app to open GBA ROMs.</string>
     <string name="appearance_settings_description">Adjust motion and sidebar visibility.</string>
     <string name="input_settings_description">Use the D-pad or left stick to move. Every action is available with a controller; custom remapping is planned.</string>
-    <string name="video_settings_description">Video previews are not connected in this demo. Artwork stays still while you browse.</string>
+    <string name="video_settings_description">Choose cover images or muted game videos. Videos start after a brief pause and fall back to covers when unavailable.</string>
     <string name="performance_settings_description">The game list loads rows as they become visible. Pages switch immediately, with no animated backgrounds or video decoding.</string>
     <string name="library_source">Library source</string>
     <string name="not_configured">Not configured</string>
@@ -138,4 +138,9 @@
     <string name="navigation_expanded">Expanded</string>
     <string name="navigation_collapsed">Collapsed to icons</string>
     <string name="collapse_navigation_short">Collapse</string>
+    <string name="preview_video">Preview: Game video</string>
+    <string name="preview_cover">Preview: Cover image</string>
+    <string name="game_description">Game introduction</string>
+    <string name="description_empty">No introduction available</string>
+    <string name="description_hint">D-pad: scroll · B: return</string>
 </resources>

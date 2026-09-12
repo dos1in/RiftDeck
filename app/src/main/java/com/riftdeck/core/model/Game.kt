@@ -25,4 +25,5 @@ data class Game(
     val developer: String?,
     val genre: String?,
     val coverVersion: String? = null,
+    val description: String? = null,
 )

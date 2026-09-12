@@ -60,6 +60,7 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.room.runtime)
     implementation(libs.coil.compose)
+    implementation("androidx.media3:media3-exoplayer:1.9.2")
     ksp(libs.androidx.room.compiler)
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.test.core)
