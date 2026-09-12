@@ -34,6 +34,8 @@ private enum class SettingSection(val title: Int, val description: Int) {
 fun SettingsScreen(initialSection: String, reducedMotion: Boolean, onReducedMotion: (Boolean) -> Unit,
     onAddFolder: () -> Unit, onNavigate: (DeckSection) -> Unit,
     onBack: () -> Unit, hasGame: Boolean, videoPreviews: Boolean, onVideoPreviews: (Boolean) -> Unit,
+    previewDelayMs: Int, onPreviewDelay: (Int) -> Unit,
+    loopVideoPreviews: Boolean, onLoopVideoPreviews: (Boolean) -> Unit,
     emulatorTargets: List<EmulatorConfig>, selectedEmulator: EmulatorConfig?,
     onChooseEmulator: (EmulatorConfig) -> Unit, onRefreshEmulators: () -> Unit,
     folders: Set<String>, scanState: ScanState, onRescan: () -> Unit, onCancelScan: () -> Unit, onRemoveFolder: (String) -> Unit,
@@ -43,6 +45,8 @@ fun SettingsScreen(initialSection: String, reducedMotion: Boolean, onReducedMoti
     var panelFocused by rememberSaveable { mutableStateOf(false) }
     val tabs = remember { SettingSection.entries.map { FocusRequester() } }
     val action = remember { FocusRequester() }
+    val loopControl = remember { FocusRequester() }
+    var loopControlFocused by rememberSaveable { mutableStateOf(false) }
     val systemSettings = remember { FocusRequester() }
     var systemSettingsFocused by rememberSaveable { mutableStateOf(false) }
     val appearanceControls = remember { List(2) { FocusRequester() } }
@@ -54,6 +58,7 @@ fun SettingsScreen(initialSection: String, reducedMotion: Boolean, onReducedMoti
         withFrameNanos { }
         if (panelFocused) {
             if (section == SettingSection.Appearance) appearanceControls[appearanceFocusIndex.coerceIn(0, appearanceControls.lastIndex)].requestFocus()
+            else if (section == SettingSection.Performance && loopControlFocused) loopControl.requestFocus()
             else if (section == SettingSection.Launcher && systemSettingsFocused) systemSettings.requestFocus()
             else action.requestFocus()
         } else tabs[selectedIndex].requestFocus()
@@ -113,6 +118,17 @@ fun SettingsScreen(initialSection: String, reducedMotion: Boolean, onReducedMoti
                                 { action.requestFocus(); onVideoPreviews(!videoPreviews) }, Modifier.fillMaxWidth(),
                                 selected = videoPreviews, focusRequester = action, left = tabs[selectedIndex],
                                 onFocused = { panelFocused = true })
+                        }
+                        SettingSection.Performance -> {
+                            NeonActionButton(stringResource(R.string.preview_delay_value, previewDelayMs / 1000.0),
+                                { action.requestFocus(); onPreviewDelay(when (previewDelayMs) { 650 -> 1200; 1200 -> 2000; else -> 650 }) },
+                                Modifier.fillMaxWidth(), focusRequester = action, left = tabs[selectedIndex], down = loopControl,
+                                onFocused = { panelFocused = true; loopControlFocused = false })
+                            NeonActionButton(stringResource(if (loopVideoPreviews) R.string.preview_loop_on else R.string.preview_loop_off),
+                                { loopControl.requestFocus(); onLoopVideoPreviews(!loopVideoPreviews) }, Modifier.fillMaxWidth(),
+                                selected = loopVideoPreviews, focusRequester = loopControl, left = tabs[selectedIndex], up = action,
+                                onFocused = { panelFocused = true; loopControlFocused = true })
+                            Text(stringResource(R.string.preview_performance_hint), color = colors.textSecondary, style = MaterialTheme.typography.bodyMedium)
                         }
                         SettingSection.Launcher -> {
                             MetadataValue(stringResource(R.string.launcher_status),

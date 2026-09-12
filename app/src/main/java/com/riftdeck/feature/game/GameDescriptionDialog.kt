@@ -10,6 +10,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -43,9 +44,10 @@ internal fun GameDescriptionDialog(description: String, onDismiss: () -> Unit) {
                 Text(stringResource(R.string.game_description), color = colors.textPrimary, style = MaterialTheme.typography.headlineMedium)
                 Text(description, Modifier.weight(1f).fillMaxWidth().verticalScroll(scroll), color = colors.textSecondary,
                     style = MaterialTheme.typography.bodyLarge)
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text(stringResource(R.string.description_hint), color = colors.textSecondary, style = MaterialTheme.typography.labelMedium)
-                    NeonActionButton(stringResource(R.string.hint_back), onDismiss, focusRequester = close)
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalAlignment = Alignment.CenterVertically) {
+                    Text(stringResource(R.string.description_hint), modifier = Modifier.weight(1f), color = colors.textSecondary, style = MaterialTheme.typography.labelMedium)
+                    NeonActionButton(stringResource(R.string.hint_back), onDismiss, Modifier.width(100.dp), focusRequester = close)
                 }
             }
         }

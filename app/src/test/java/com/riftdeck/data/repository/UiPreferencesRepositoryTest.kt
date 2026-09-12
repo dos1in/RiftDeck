@@ -18,6 +18,34 @@ import org.junit.rules.TemporaryFolder
 class UiPreferencesRepositoryTest {
     @get:Rule val folder = TemporaryFolder()
 
+    @Test fun performanceChoicesPersistWithoutChangingVideoChoice() = runBlocking {
+        withRepository {
+            it.setVideoPreviews(true)
+            it.setPreviewDelay(2000)
+            it.setLoopVideoPreviews(false)
+        }
+        withRepository {
+            val prefs = it.preferences.first()
+            assertEquals(2000, prefs.previewDelayMs)
+            assertEquals(false, prefs.loopVideoPreviews)
+            assertEquals(true, prefs.videoPreviews)
+            it.setPreviewDelay(650)
+            it.setLoopVideoPreviews(true)
+        }
+        withRepository {
+            assertEquals(650, it.preferences.first().previewDelayMs)
+            assertEquals(true, it.preferences.first().loopVideoPreviews)
+        }
+    }
+
+    @Test fun invalidPreviewDelayIsRejected() = runBlocking {
+        withRepository {
+            try { it.setPreviewDelay(-1); org.junit.Assert.fail("Invalid delay accepted") }
+            catch (_: IllegalArgumentException) { }
+            assertEquals(650, it.preferences.first().previewDelayMs)
+        }
+    }
+
     @Test fun videoChoicePersistsAcrossStoreRecreation() = runBlocking {
         withRepository { it.setVideoPreviews(true) }
         withRepository { assertEquals(true, it.preferences.first().videoPreviews) }

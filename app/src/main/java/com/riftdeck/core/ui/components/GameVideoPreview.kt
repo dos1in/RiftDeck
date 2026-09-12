@@ -21,41 +21,54 @@ import androidx.media3.common.Player
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.VideoSize
 import androidx.media3.exoplayer.ExoPlayer
-import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.delay
 
+val LocalPreviewDelayMs = staticCompositionLocalOf { 650 }
+val LocalLoopVideoPreviews = staticCompositionLocalOf { true }
 val LocalVideoPreviews = staticCompositionLocalOf { false }
 
 /** One muted preview for the active stage. Navigation and backgrounding dispose playback. */
 @Composable
-fun GameVideoPreview(uri: String?, modifier: Modifier = Modifier) {
+fun GameVideoPreview(uri: String?, modifier: Modifier = Modifier, onAspectRatio: (Float?) -> Unit = {}) {
     if (!LocalVideoPreviews.current || uri == null) return
+    val previewDelayMs = LocalPreviewDelayMs.current
+    val loop = LocalLoopVideoPreviews.current
+    val reportRatio by rememberUpdatedState(onAspectRatio)
     val context = LocalContext.current
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     var player by remember(uri) { mutableStateOf<ExoPlayer?>(null) }
     var rendered by remember(uri) { mutableStateOf(false) }
     var ratio by remember(uri) { mutableFloatStateOf(1.5f) }
-    LaunchedEffect(uri, lifecycle) {
+    LaunchedEffect(uri, lifecycle, previewDelayMs, loop) {
         lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-            delay(650)
+            delay(previewDelayMs.toLong())
+            val finished = CompletableDeferred<Unit>()
             val active = ExoPlayer.Builder(context).build()
             try {
                 active.volume = 0f
-                active.repeatMode = Player.REPEAT_MODE_ONE
+                active.repeatMode = if (loop) Player.REPEAT_MODE_ONE else Player.REPEAT_MODE_OFF
                 active.addListener(object : Player.Listener {
-                    override fun onRenderedFirstFrame() { rendered = true }
-                    override fun onVideoSizeChanged(size: VideoSize) {
-                        if (size.height > 0) ratio = (size.width * size.pixelWidthHeightRatio / size.height).coerceIn(0.2f, 5f)
+                    override fun onPlaybackStateChanged(state: Int) {
+                        if (state == Player.STATE_ENDED) finished.complete(Unit)
                     }
-                    override fun onPlayerError(error: PlaybackException) { rendered = false; active.stop() }
+                    override fun onRenderedFirstFrame() { rendered = true; reportRatio(ratio) }
+                    override fun onVideoSizeChanged(size: VideoSize) {
+                        if (size.height > 0) {
+                            ratio = (size.width * size.pixelWidthHeightRatio / size.height).coerceIn(0.2f, 5f)
+                            if (rendered) reportRatio(ratio)
+                        }
+                    }
+                    override fun onPlayerError(error: PlaybackException) { rendered = false; reportRatio(null); finished.complete(Unit) }
                 })
                 player = active
                 active.setMediaItem(MediaItem.fromUri(uri))
                 active.prepare()
                 active.playWhenReady = true
-                awaitCancellation()
+                finished.await()
             } finally {
                 rendered = false
+                reportRatio(null)
                 player = null
                 active.release()
             }

@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.preferencesDataStore
@@ -23,12 +24,16 @@ data class UiPreferences(
     val emulators: Map<Long, EmulatorConfig> = emptyMap(),
     val navigationRailExpanded: Boolean = true,
     val videoPreviews: Boolean = false,
+    val previewDelayMs: Int = 650,
+    val loopVideoPreviews: Boolean = true,
 )
 
 class UiPreferencesRepository internal constructor(private val store: DataStore<Preferences>) {
     constructor(context: Context) : this(context.applicationContext.uiPreferences)
 
     private val foldersKey = stringSetPreferencesKey("rom_folders")
+    private val previewDelayKey = intPreferencesKey("preview_delay_ms")
+    private val loopVideoKey = booleanPreferencesKey("loop_video_previews")
     private val videoPreviewsKey = booleanPreferencesKey("video_previews")
     private val reducedMotionKey = booleanPreferencesKey("reduced_motion")
     private val sortDescendingKey = booleanPreferencesKey("sort_descending")
@@ -50,6 +55,8 @@ class UiPreferencesRepository internal constructor(private val store: DataStore<
             }.toMap(),
             navigationRailExpanded = values[navigationRailExpandedKey] ?: true,
             videoPreviews = values[videoPreviewsKey] ?: false,
+            previewDelayMs = values[previewDelayKey]?.takeIf { it in listOf(650, 1200, 2000) } ?: 650,
+            loopVideoPreviews = values[loopVideoKey] ?: true,
             reducedMotion = values[reducedMotionKey] ?: false,
             sortDescending = values[sortDescendingKey] ?: false,
         )
@@ -67,6 +74,11 @@ class UiPreferencesRepository internal constructor(private val store: DataStore<
     suspend fun addRomFolder(uri: String) { store.edit { it[foldersKey] = (it[foldersKey] ?: emptySet()) + uri } }
     suspend fun removeRomFolder(uri: String) { store.edit { it[foldersKey] = (it[foldersKey] ?: emptySet()) - uri } }
     suspend fun setNavigationRailExpanded(expanded: Boolean) { store.edit { it[navigationRailExpandedKey] = expanded } }
+    suspend fun setPreviewDelay(delayMs: Int) {
+        require(delayMs in listOf(650, 1200, 2000))
+        store.edit { it[previewDelayKey] = delayMs }
+    }
+    suspend fun setLoopVideoPreviews(loop: Boolean) { store.edit { it[loopVideoKey] = loop } }
     suspend fun setVideoPreviews(enabled: Boolean) { store.edit { it[videoPreviewsKey] = enabled } }
     suspend fun setReducedMotion(enabled: Boolean) { store.edit { it[reducedMotionKey] = enabled } }
     suspend fun setSortDescending(enabled: Boolean) { store.edit { it[sortDescendingKey] = enabled } }

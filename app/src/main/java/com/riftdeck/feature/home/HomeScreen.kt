@@ -103,7 +103,7 @@ fun HomeScreen(
                             verticalArrangement = Arrangement.spacedBy(if (compact) 8.dp else 16.dp, Alignment.CenterVertically)) {
                             GameInformation(game, compact, detailed = false, condensed = condensed)
                             NeonActionButton(stringResource(R.string.play_game), { onPlayGame(game.id) }, Modifier.fillMaxWidth(), primary = true,
-                                glyph = "A", focusRequester = focus.getValue("play"), left = focus.getValue("cover"),
+                                focusRequester = focus.getValue("play"), left = focus.getValue("cover"),
                                 down = focus.getValue("details"), onFocused = { focusedKey = "play" })
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 NeonActionButton(stringResource(R.string.hint_details), { onOpenGame(game.id) }, Modifier.weight(1f),

@@ -52,7 +52,7 @@ fun GameDetailScreen(game: Game, onToggleFavorite: () -> Unit, onPlay: () -> Uni
                     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
                         verticalArrangement = Arrangement.spacedBy(if (compact) 8.dp else 16.dp, Alignment.CenterVertically)) {
                         GameInformation(game, compact, detailed = true, condensed = condensed)
-                        NeonActionButton(stringResource(R.string.play_game), onPlay, Modifier.fillMaxWidth(), primary = true, glyph = "A",
+                        NeonActionButton(stringResource(R.string.play_game), onPlay, Modifier.fillMaxWidth(), primary = true,
                             focusRequester = play, left = rail, down = if (game.description.isNullOrBlank()) back else introduction, onFocused = { focusedKey = "play" })
                         NeonActionButton(stringResource(R.string.game_description), { showDescription = true }, Modifier.fillMaxWidth(),
                             focusRequester = introduction, left = rail, up = play, down = back,

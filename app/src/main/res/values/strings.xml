@@ -59,7 +59,7 @@
     <string name="appearance_settings_description">Adjust motion and sidebar visibility.</string>
     <string name="input_settings_description">Use the D-pad or left stick to move. Every action is available with a controller; custom remapping is planned.</string>
     <string name="video_settings_description">Choose cover images or muted game videos. Videos start after a brief pause and fall back to covers when unavailable.</string>
-    <string name="performance_settings_description">The game list loads rows as they become visible. Pages switch immediately, with no animated backgrounds or video decoding.</string>
+    <string name="performance_settings_description">Reduce unnecessary preview playback while browsing. These settings apply when game videos are enabled.</string>
     <string name="library_source">Library source</string>
     <string name="not_configured">Not configured</string>
     <string name="reduce_motion">Reduce motion</string>
@@ -143,4 +143,8 @@
     <string name="game_description">Game introduction</string>
     <string name="description_empty">No introduction available</string>
     <string name="description_hint">D-pad: scroll · B: return</string>
+    <string name="preview_delay_value">Preview delay: %1$.2f seconds</string>
+    <string name="preview_loop_on">Video looping: On</string>
+    <string name="preview_loop_off">Video looping: Off</string>
+    <string name="preview_performance_hint">Longer waits skip videos during quick browsing. Turn looping off to play once, return to the cover, and stop decoding.</string>
 </resources>

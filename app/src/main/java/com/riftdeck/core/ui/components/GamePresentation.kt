@@ -10,6 +10,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.*
 import androidx.compose.ui.graphics.graphicsLayer
@@ -45,12 +46,23 @@ fun GameStageCover(
         .focusProperties { this.left = left; this.right = right; this.up = up; this.down = down }
         .onFocusChanged { focused = it.isFocused; if (it.isFocused) onFocused() }
         .controllerClickable(onClick = onClick)
-    Box(modifier.graphicsLayer { scaleX = scale; scaleY = scale }.then(interactive)
-        .clip(CutCornerShape(topEnd = 16.dp, bottomStart = 16.dp))
-        .riftFrame(colors.outline, colors.focusBorder, colors.secondary, focused, cut = 16.dp).padding(6.dp)) {
-        GameArtwork(game, stringResource(R.string.artwork_description, game.title), Modifier.fillMaxSize()
-            .clip(CutCornerShape(topEnd = 12.dp, bottomStart = 12.dp)), showLabel = showLabel)
-        GameVideoPreview(game.videoUri, Modifier.fillMaxSize())
+    var coverRatio by remember(game.coverUri, game.coverVersion) { mutableFloatStateOf(0.83f) }
+    val videoEnabled = LocalVideoPreviews.current
+    var videoRatio by remember(game.videoUri, videoEnabled) { mutableStateOf<Float?>(null) }
+    val ratio = (videoRatio ?: coverRatio).coerceIn(0.2f, 5f)
+    // Keep the surrounding layout stable while the frame fits the displayed media.
+    BoxWithConstraints(modifier, contentAlignment = Alignment.Center) {
+        val inset = 12.dp
+        val mediaWidth = minOf((maxWidth - inset).coerceAtLeast(1.dp), (maxHeight - inset).coerceAtLeast(1.dp) * ratio)
+        Box(Modifier.size(mediaWidth + inset, mediaWidth / ratio + inset)
+            .graphicsLayer { scaleX = scale; scaleY = scale }.then(interactive)
+            .clip(CutCornerShape(topEnd = 16.dp, bottomStart = 16.dp))
+            .riftFrame(colors.outline, colors.focusBorder, colors.secondary, focused, cut = 16.dp).padding(6.dp)) {
+            GameArtwork(game, stringResource(R.string.artwork_description, game.title), Modifier.fillMaxSize()
+                .clip(CutCornerShape(topEnd = 12.dp, bottomStart = 12.dp)), showLabel = showLabel,
+                onAspectRatio = { coverRatio = it })
+            GameVideoPreview(game.videoUri, Modifier.fillMaxSize(), onAspectRatio = { videoRatio = it })
+        }
     }
 }
 

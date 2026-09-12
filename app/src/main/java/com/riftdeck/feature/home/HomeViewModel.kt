@@ -56,6 +56,8 @@ class HomeViewModel(
             navigationRailExpanded = prefs.navigationRailExpanded,
             reducedMotion = prefs.reducedMotion,
             videoPreviews = prefs.videoPreviews,
+            previewDelayMs = prefs.previewDelayMs,
+            loopVideoPreviews = prefs.loopVideoPreviews,
         )
     }.stateIn(viewModelScope, SharingStarted.Eagerly, HomeUiState())
 
@@ -64,6 +66,8 @@ class HomeViewModel(
     fun setFilter(value: LibraryFilter) { savedState["library_filter"] = value.name }
     fun toggleFavorite(gameId: Long) = updatePreference { gameRepository.toggleFavorite(gameId) }
     fun setNavigationRailExpanded(expanded: Boolean) = updatePreference { preferencesRepository.setNavigationRailExpanded(expanded) }
+    fun setPreviewDelay(delayMs: Int) = updatePreference { preferencesRepository.setPreviewDelay(delayMs) }
+    fun setLoopVideoPreviews(loop: Boolean) = updatePreference { preferencesRepository.setLoopVideoPreviews(loop) }
     fun setVideoPreviews(enabled: Boolean) = updatePreference { preferencesRepository.setVideoPreviews(enabled) }
     fun setReducedMotion(enabled: Boolean) = updatePreference { preferencesRepository.setReducedMotion(enabled) }
     fun toggleSort() = updatePreference { preferencesRepository.setSortDescending(!uiState.value.sortDescending) }

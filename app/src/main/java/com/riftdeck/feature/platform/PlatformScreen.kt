@@ -274,7 +274,7 @@ fun PlatformScreen(
                                 maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
                             if (!compact) Text(gamePlaytime(selected), color = colors.textSecondary, style = MaterialTheme.typography.bodyMedium)
                             NeonActionButton(stringResource(R.string.play_game), { onPlayGame(selected.id) }, Modifier.fillMaxWidth(),
-                                primary = true, glyph = "A", focusRequester = play, up = filters.getValue(uiState.filter),
+                                primary = true, focusRequester = play, up = filters.getValue(uiState.filter),
                                 onFocused = { focusArea = "play" })
                         }
                     }

@@ -16,6 +16,8 @@ data class HomeUiState(
     val navigationRailExpanded: Boolean = true,
     val reducedMotion: Boolean = false,
     val videoPreviews: Boolean = false,
+    val previewDelayMs: Int = 650,
+    val loopVideoPreviews: Boolean = true,
 ) {
     val focusedGame: Game?
         get() = games.firstOrNull { it.id == focusedGameId } ?: games.firstOrNull()

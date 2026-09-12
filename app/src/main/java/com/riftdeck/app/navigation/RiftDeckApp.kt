@@ -43,6 +43,8 @@ import com.riftdeck.feature.platform.LibraryFilter
 import com.riftdeck.feature.platform.PlatformScreen
 import com.riftdeck.feature.settings.SettingsScreen
 import com.riftdeck.core.ui.components.LocalVideoPreviews
+import com.riftdeck.core.ui.components.LocalPreviewDelayMs
+import com.riftdeck.core.ui.components.LocalLoopVideoPreviews
 import kotlinx.coroutines.flow.Flow
 
 private object Route {
@@ -114,6 +116,8 @@ fun RiftDeckApp(homeViewModel: HomeViewModel, libraryViewModel: LibraryViewModel
     val onPlay: (Long) -> Unit = { id -> homeViewModel.focusGame(id); uiState.games.firstOrNull { it.id == id }?.let(emulatorViewModel::launch) }
     val onOpenGame: (Long) -> Unit = { homeViewModel.focusGame(it); navigate(Route.game(it)) }
     CompositionLocalProvider(
+        LocalPreviewDelayMs provides uiState.previewDelayMs,
+        LocalLoopVideoPreviews provides uiState.loopVideoPreviews,
         LocalVideoPreviews provides (uiState.videoPreviews && !launchBusy && launchError == null),
         LocalNavigationRail provides NavigationRailState(uiState.navigationRailExpanded, homeViewModel::setNavigationRailExpanded),
         LocalAnalogActions provides analogActions, LocalReducedMotion provides uiState.reducedMotion,
@@ -151,6 +155,8 @@ fun RiftDeckApp(homeViewModel: HomeViewModel, libraryViewModel: LibraryViewModel
                 composable(Route.Settings, arguments = listOf(navArgument("section") { type = NavType.StringType })) { entry ->
                     if (uiState.isReady) SettingsScreen(entry.arguments?.getString("section") ?: "library", uiState.reducedMotion,
                         homeViewModel::setReducedMotion, ::addFolder, onNavigate, ::back,
+                        previewDelayMs = uiState.previewDelayMs, onPreviewDelay = homeViewModel::setPreviewDelay,
+                        loopVideoPreviews = uiState.loopVideoPreviews, onLoopVideoPreviews = homeViewModel::setLoopVideoPreviews,
                         hasGame = uiState.games.isNotEmpty(), videoPreviews = uiState.videoPreviews, onVideoPreviews = homeViewModel::setVideoPreviews,
                         emulatorTargets = emulatorTargets, selectedEmulator = selectedEmulator,
                         onChooseEmulator = emulatorViewModel::choose, onRefreshEmulators = emulatorViewModel::refresh,

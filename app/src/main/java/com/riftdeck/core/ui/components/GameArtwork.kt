@@ -38,6 +38,7 @@ fun GameArtwork(
     contentDescription: String,
     modifier: Modifier = Modifier,
     showLabel: Boolean = true,
+    onAspectRatio: (Float) -> Unit = {},
 ) {
     val colors = LocalFrontendTheme.current
     val context = LocalContext.current
@@ -89,7 +90,11 @@ fun GameArtwork(
         if (coverRequest != null) AsyncImage(
             model = coverRequest, contentDescription = null,
             modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Fit,
-            onSuccess = { coverLoaded = true }, onError = { coverLoaded = false },
+            onSuccess = {
+                coverLoaded = true
+                val image = it.result.image
+                if (image.width > 0 && image.height > 0) onAspectRatio(image.width.toFloat() / image.height)
+            }, onError = { coverLoaded = false },
         )
         if (showLabel && !coverLoaded) Text(
             text = stringResource(R.string.cover_placeholder),
