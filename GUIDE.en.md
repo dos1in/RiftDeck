@@ -6,7 +6,7 @@
 
 * Controller navigation with D-pad / stick, A/B/X/Y actions, L1/R1 categories, L2/R2 library paging and first-letter jumps in the displayed title order.
 * Home, game library, game details and controller-friendly settings.
-* System, light and dark appearance; Rift, Ocean and Ember palettes; reduced motion. Preferences use DataStore.
+* Fixed dark Rift palette, reduced motion and collapsible sidebar. Preferences use DataStore.
 * Android Home launcher support. Use **Settings → Home launcher → Set as default home**. Android asks you to confirm; the current Home app stays unchanged if you cancel.
 * Persistent SAF folder access, recursive `.gba` / `.zip` scanning, incremental updates, cancellation and removed-file detection.
 * Room library storage, favorites, recent games, sorting and name / filename search. Search includes a controller keyboard; touch input supports the system keyboard.
@@ -15,13 +15,13 @@
 
 New installations start with an empty library. Choose **Add ROM folder**, grant access in Android's folder picker, then select an installed GBA emulator in **Settings → Emulators**. Use game files you are entitled to run. Android's picker and the external emulator have their own input and storage settings. Configure a writable save directory in the emulator; RiftDeck shares ROMs with read access and does not manage emulator save files.
 
-ZIP files must contain one GBA ROM. Unsafe paths, ambiguous archives and oversized files are rejected. Extracted ROMs use a private temporary cache and a limited FileProvider read grant; older files are cleaned after 24 hours when the frontend resumes or prepares another ROM.
+The generic emulator ZIP extraction flow requires one GBA ROM per archive. Unsafe paths, ambiguous archives and oversized files are rejected. Extracted ROMs use a private temporary cache and a limited FileProvider read grant; older files are cleaned after 24 hours when the frontend resumes or prepares another ROM.
 
 Duplicate detection currently recognizes the same document imported through overlapping folders. Identical copies with different document IDs remain separate. Playtime estimates the interval between launch and return, capped at 24 hours per session; it cannot distinguish paused or backgrounded emulator time. A successful Android launch does not guarantee the emulator accepts every ROM.
 
 Local covers are loaded with Coil. Put a matching PNG, WebP, JPG or JPEG beside the ROM, then rescan (for example, `Game.gba` and `Game.png`). Matching ignores case, preserves region tags and prefers PNG, then WebP, JPG and JPEG when several exist. Replacing or deleting a cover updates the next scan; unavailable or damaged images fall back to a geometric placeholder.
 
-Metadata scraping, video previews, additional emulator-specific adapters and an Android app drawer are planned.
+Local Pegasus descriptions, covers and videos are supported. Settings control image/video previews, playback delay and looping. RetroArch G with mGBA reads the original GBA / ZIP directly: RiftDeck checks readability while RetroArch handles archive contents, preserving existing save-path associations. Online metadata scraping, additional emulator-specific adapters and an Android app drawer are planned.
 
 See [CORE_IMPLEMENTATION.md](CORE_IMPLEMENTATION.md) for verification evidence and remaining hardware checks.
 
@@ -69,7 +69,7 @@ Responsiveness and readability always take priority over decorative effects.
 
 Implemented: Kotlin, Jetpack Compose, Navigation Compose, Room / KSP, Coil, Coroutines / Flow and DataStore. ROM scanning and ZIP preparation run in Kotlin on background dispatchers.
 
-Media3 previews, Baseline Profiles and macrobenchmarks are planned. There is no native core; C++ will only be considered after profiling demonstrates a need.
+Media3 previews are implemented; Baseline Profiles and macrobenchmarks are planned. There is no native core; C++ will only be considered after profiling demonstrates a need.
 
 ## Architecture
 
@@ -165,7 +165,7 @@ RiftDeck does not upload ROM files.
 
 ## Roadmap
 
-The application shell, local GBA library and first external emulator launch flow are implemented. Remaining work focuses on target-handheld validation, metadata / artwork, optional video previews, performance profiling and more platforms.
+The application shell, local GBA library, external emulator launch flow, local metadata / artwork and optional video previews are implemented. Target-handheld checks cover D-pad navigation, SD card reinsertion and return after exiting RetroArch. Follow-up work includes release performance profiling, online metadata scraping and more platforms.
 
 ## Building
 

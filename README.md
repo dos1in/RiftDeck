@@ -3,9 +3,7 @@
 **简体中文** | [English](README.en.md)
 
 <p align="center">
-  <img src="app/src/main/res/drawable-nodpi/riftdeck_emblem.webp" alt="RiftDeck 标志：被黄色与青色裂隙分开的掌机" width="160">
-  <br>
-  <img src="app/src/main/res/drawable-nodpi/riftdeck_wordmark.webp" alt="RiftDeck" width="360">
+  <img src="branding/readme/riftdeck-logo.png" alt="RiftDeck" width="640">
 </p>
 
 **为 KPA 打造，手柄优先的复古游戏前端。**

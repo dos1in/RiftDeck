@@ -3,9 +3,7 @@
 [简体中文](README.md) | **English**
 
 <p align="center">
-  <img src="app/src/main/res/drawable-nodpi/riftdeck_emblem.webp" alt="RiftDeck logo: a handheld split by a yellow and cyan rift" width="160">
-  <br>
-  <img src="app/src/main/res/drawable-nodpi/riftdeck_wordmark.webp" alt="RiftDeck" width="360">
+  <img src="branding/readme/riftdeck-logo.png" alt="RiftDeck" width="640">
 </p>
 
 **A controller-first retro game frontend built for KPA.**
