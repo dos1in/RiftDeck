@@ -21,8 +21,6 @@ import kotlinx.coroutines.withContext
 data class BrandArtwork(
     val darkEmblem: ImageBitmap,
     val darkWordmark: ImageBitmap,
-    val lightEmblem: ImageBitmap,
-    val lightWordmark: ImageBitmap,
 )
 
 val LocalBrandArtwork = staticCompositionLocalOf<BrandArtwork?> { null }
@@ -36,10 +34,8 @@ internal fun rememberBrandArtwork(): BrandArtwork? {
         value = withContext(Dispatchers.IO) {
             val emblem = decodeBrandImage(resources, R.drawable.riftdeck_emblem, 72 * density)
             val wordmark = decodeBrandImage(resources, R.drawable.riftdeck_wordmark, 144 * density)
-            val lightEmblem = decodeBrandImage(resources, R.drawable.riftdeck_emblem_light, 72 * density)
-            val lightWordmark = decodeBrandImage(resources, R.drawable.riftdeck_wordmark_light, 144 * density)
-            if (emblem != null && wordmark != null && lightEmblem != null && lightWordmark != null) {
-                BrandArtwork(emblem, wordmark, lightEmblem, lightWordmark)
+            if (emblem != null && wordmark != null) {
+                BrandArtwork(emblem, wordmark)
             } else {
                 Log.w("Media", "Brand artwork unavailable")
                 null

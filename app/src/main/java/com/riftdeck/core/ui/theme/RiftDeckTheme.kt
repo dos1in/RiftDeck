@@ -4,18 +4,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.remember
-import com.riftdeck.core.model.ThemeMode
-import com.riftdeck.core.model.ThemePalette
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
-val LocalFrontendTheme = staticCompositionLocalOf { frontendTheme(isDark = true, ThemePalette.Rift) }
+val LocalFrontendTheme = staticCompositionLocalOf { frontendTheme() }
 val LocalReducedMotion = staticCompositionLocalOf { false }
 
 private val RiftDeckTypography = Typography(
@@ -81,15 +77,12 @@ private val RiftDeckTypography = Typography(
 
 @Composable
 fun RiftDeckTheme(
-    mode: ThemeMode = ThemeMode.System,
-    palette: ThemePalette = ThemePalette.Rift,
     content: @Composable () -> Unit,
 ) {
-    val isDark = mode.isDark(isSystemInDarkTheme())
-    val colors = remember(isDark, palette) { frontendTheme(isDark, palette) }
+    val colors = remember { frontendTheme() }
     val brandArtwork = rememberBrandArtwork()
     val materialColors = remember(colors) {
-        val base = if (isDark) darkColorScheme() else lightColorScheme()
+        val base = darkColorScheme()
         base.copy(
             primary = colors.primary,
             onPrimary = colors.onPrimary,

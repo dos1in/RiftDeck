@@ -17,8 +17,6 @@ import com.riftdeck.core.emulator.EmulatorConfig
 import com.riftdeck.R
 import com.riftdeck.data.scanner.ScanState
 import com.riftdeck.core.input.GameAction
-import com.riftdeck.core.model.ThemeMode
-import com.riftdeck.core.model.ThemePalette
 import com.riftdeck.core.ui.components.*
 import com.riftdeck.core.ui.theme.LocalFrontendTheme
 
@@ -35,8 +33,7 @@ private enum class SettingSection(val title: Int, val description: Int) {
 @Composable
 fun SettingsScreen(initialSection: String, reducedMotion: Boolean, onReducedMotion: (Boolean) -> Unit,
     onAddFolder: () -> Unit, onNavigate: (DeckSection) -> Unit,
-    onBack: () -> Unit, hasGame: Boolean, themeMode: ThemeMode, themePalette: ThemePalette,
-    onThemeMode: (ThemeMode) -> Unit, onThemePalette: (ThemePalette) -> Unit,
+    onBack: () -> Unit, hasGame: Boolean,
     emulatorTargets: List<EmulatorConfig>, selectedEmulator: EmulatorConfig?,
     onChooseEmulator: (EmulatorConfig) -> Unit, onRefreshEmulators: () -> Unit,
     folders: Set<String>, scanState: ScanState, onRescan: () -> Unit, onCancelScan: () -> Unit, onRemoveFolder: (String) -> Unit,
@@ -48,15 +45,15 @@ fun SettingsScreen(initialSection: String, reducedMotion: Boolean, onReducedMoti
     val action = remember { FocusRequester() }
     val systemSettings = remember { FocusRequester() }
     var systemSettingsFocused by rememberSaveable { mutableStateOf(false) }
-    val appearanceControls = remember { List(ThemeMode.entries.size + ThemePalette.entries.size + 2) { FocusRequester() } }
+    val appearanceControls = remember { List(2) { FocusRequester() } }
     var appearanceFocusIndex by rememberSaveable { mutableIntStateOf(0) }
     val section = SettingSection.entries[selectedIndex]
     fun entryAction(item: SettingSection): FocusRequester =
-        if (item == SettingSection.Appearance) appearanceControls[themeMode.ordinal] else action
+        if (item == SettingSection.Appearance) appearanceControls.first() else action
     LaunchedEffect(Unit) {
         withFrameNanos { }
         if (panelFocused) {
-            if (section == SettingSection.Appearance) appearanceControls[appearanceFocusIndex].requestFocus()
+            if (section == SettingSection.Appearance) appearanceControls[appearanceFocusIndex.coerceIn(0, appearanceControls.lastIndex)].requestFocus()
             else if (section == SettingSection.Launcher && systemSettingsFocused) systemSettings.requestFocus()
             else action.requestFocus()
         } else tabs[selectedIndex].requestFocus()
@@ -105,7 +102,7 @@ fun SettingsScreen(initialSection: String, reducedMotion: Boolean, onReducedMoti
                                 action, tabs[selectedIndex], panelFocused, onFocused = { panelFocused = true })
                         }
                         SettingSection.Appearance -> {
-                            AppearanceSettings(themeMode, themePalette, reducedMotion, onThemeMode, onThemePalette, onReducedMotion,
+                            AppearanceSettings(reducedMotion, onReducedMotion,
                                 appearanceControls, tabs[selectedIndex], onFocused = { index ->
                                     appearanceFocusIndex = index
                                     panelFocused = true

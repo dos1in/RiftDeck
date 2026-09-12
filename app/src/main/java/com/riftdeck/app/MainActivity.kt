@@ -9,7 +9,6 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -17,12 +16,10 @@ import androidx.compose.runtime.setValue
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.riftdeck.app.navigation.RiftDeckApp
 import com.riftdeck.core.input.GamepadInputManager
 import com.riftdeck.core.launcher.HomeLauncher
-import com.riftdeck.core.ui.theme.LocalFrontendTheme
 import com.riftdeck.core.ui.theme.RiftDeckTheme
 import com.riftdeck.feature.home.HomeViewModel
 import com.riftdeck.feature.home.HomeViewModelFactory
@@ -101,15 +98,7 @@ class MainActivity : ComponentActivity() {
             val libraryViewModel: LibraryViewModel = viewModel(factory = libraryFactory)
             val emulatorFactory = remember(launcher) { EmulatorViewModel.Factory(launcher.emulationRepository, launcher.uiPreferencesRepository) }
             val emulatorViewModel: EmulatorViewModel = viewModel(factory = emulatorFactory)
-            val uiState by homeViewModel.uiState.collectAsStateWithLifecycle()
-            RiftDeckTheme(mode = uiState.themeMode, palette = uiState.themePalette) {
-                val isDark = LocalFrontendTheme.current.isDark
-                SideEffect {
-                    WindowCompat.getInsetsController(window, window.decorView).apply {
-                        isAppearanceLightStatusBars = !isDark
-                        isAppearanceLightNavigationBars = !isDark
-                    }
-                }
+            RiftDeckTheme() {
                 RiftDeckApp(
                     homeViewModel = homeViewModel,
                     libraryViewModel = libraryViewModel,

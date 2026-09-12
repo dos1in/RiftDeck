@@ -149,8 +149,7 @@ fun RiftDeckApp(homeViewModel: HomeViewModel, libraryViewModel: LibraryViewModel
                 composable(Route.Settings, arguments = listOf(navArgument("section") { type = NavType.StringType })) { entry ->
                     if (uiState.isReady) SettingsScreen(entry.arguments?.getString("section") ?: "library", uiState.reducedMotion,
                         homeViewModel::setReducedMotion, ::addFolder, onNavigate, ::back,
-                        hasGame = uiState.games.isNotEmpty(), themeMode = uiState.themeMode, themePalette = uiState.themePalette,
-                        onThemeMode = homeViewModel::setThemeMode, onThemePalette = homeViewModel::setThemePalette,
+                        hasGame = uiState.games.isNotEmpty(),
                         emulatorTargets = emulatorTargets, selectedEmulator = selectedEmulator,
                         onChooseEmulator = emulatorViewModel::choose, onRefreshEmulators = emulatorViewModel::refresh,
                         folders = folders, scanState = scanState, onRescan = libraryViewModel::rescan,

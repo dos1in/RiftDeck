@@ -6,8 +6,6 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
-import com.riftdeck.core.model.ThemeMode
-import com.riftdeck.core.model.ThemePalette
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
@@ -21,8 +19,6 @@ private val Context.uiPreferences by preferencesDataStore(name = "ui_preferences
 data class UiPreferences(
     val reducedMotion: Boolean = false,
     val sortDescending: Boolean = false,
-    val themeMode: ThemeMode = ThemeMode.System,
-    val themePalette: ThemePalette = ThemePalette.Rift,
     val romFolders: Set<String> = emptySet(),
     val emulators: Map<Long, EmulatorConfig> = emptyMap(),
     val navigationRailExpanded: Boolean = true,
@@ -32,8 +28,6 @@ class UiPreferencesRepository internal constructor(private val store: DataStore<
     constructor(context: Context) : this(context.applicationContext.uiPreferences)
 
     private val foldersKey = stringSetPreferencesKey("rom_folders")
-    private val themeModeKey = stringPreferencesKey("theme_mode")
-    private val themePaletteKey = stringPreferencesKey("theme_palette")
     private val reducedMotionKey = booleanPreferencesKey("reduced_motion")
     private val sortDescendingKey = booleanPreferencesKey("sort_descending")
     // Preserve the stored choice from the earlier show/hide setting.
@@ -55,8 +49,6 @@ class UiPreferencesRepository internal constructor(private val store: DataStore<
             navigationRailExpanded = values[navigationRailExpandedKey] ?: true,
             reducedMotion = values[reducedMotionKey] ?: false,
             sortDescending = values[sortDescendingKey] ?: false,
-            themeMode = ThemeMode.fromStorage(values[themeModeKey]),
-            themePalette = ThemePalette.fromStorage(values[themePaletteKey]),
         )
     }
     suspend fun setEmulator(config: EmulatorConfig) {
@@ -71,8 +63,6 @@ class UiPreferencesRepository internal constructor(private val store: DataStore<
     }
     suspend fun addRomFolder(uri: String) { store.edit { it[foldersKey] = (it[foldersKey] ?: emptySet()) + uri } }
     suspend fun removeRomFolder(uri: String) { store.edit { it[foldersKey] = (it[foldersKey] ?: emptySet()) - uri } }
-    suspend fun setThemeMode(mode: ThemeMode) { store.edit { it[themeModeKey] = mode.storageValue } }
-    suspend fun setThemePalette(palette: ThemePalette) { store.edit { it[themePaletteKey] = palette.storageValue } }
     suspend fun setNavigationRailExpanded(expanded: Boolean) { store.edit { it[navigationRailExpandedKey] = expanded } }
     suspend fun setReducedMotion(enabled: Boolean) { store.edit { it[reducedMotionKey] = enabled } }
     suspend fun setSortDescending(enabled: Boolean) { store.edit { it[sortDescendingKey] = enabled } }

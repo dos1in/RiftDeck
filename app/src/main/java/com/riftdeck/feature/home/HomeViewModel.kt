@@ -7,8 +7,6 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.riftdeck.data.repository.UiPreferencesRepository
-import com.riftdeck.core.model.ThemeMode
-import com.riftdeck.core.model.ThemePalette
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
@@ -57,8 +55,6 @@ class HomeViewModel(
                 ?: state.recentGame?.id ?: state.games.firstOrNull()?.id,
             navigationRailExpanded = prefs.navigationRailExpanded,
             reducedMotion = prefs.reducedMotion,
-            themeMode = prefs.themeMode,
-            themePalette = prefs.themePalette,
         )
     }.stateIn(viewModelScope, SharingStarted.Eagerly, HomeUiState())
 
@@ -66,8 +62,6 @@ class HomeViewModel(
     fun setSearchQuery(value: String) { savedState["search_query"] = value.take(120) }
     fun setFilter(value: LibraryFilter) { savedState["library_filter"] = value.name }
     fun toggleFavorite(gameId: Long) = updatePreference { gameRepository.toggleFavorite(gameId) }
-    fun setThemeMode(mode: ThemeMode) = updatePreference { preferencesRepository.setThemeMode(mode) }
-    fun setThemePalette(palette: ThemePalette) = updatePreference { preferencesRepository.setThemePalette(palette) }
     fun setNavigationRailExpanded(expanded: Boolean) = updatePreference { preferencesRepository.setNavigationRailExpanded(expanded) }
     fun setReducedMotion(enabled: Boolean) = updatePreference { preferencesRepository.setReducedMotion(enabled) }
     fun toggleSort() = updatePreference { preferencesRepository.setSortDescending(!uiState.value.sortDescending) }

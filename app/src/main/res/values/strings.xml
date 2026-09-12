@@ -56,7 +56,7 @@
     <string name="back_to_library">Back</string>
     <string name="library_settings_description">Choose ROM folders. Matching PNG, WebP or JPG images are used as covers.</string>
     <string name="emulator_settings_description">Choose an installed app to open GBA ROMs.</string>
-    <string name="appearance_settings_description">Choose display mode, accent colors and motion.</string>
+    <string name="appearance_settings_description">Adjust motion and sidebar visibility.</string>
     <string name="input_settings_description">Use the D-pad or left stick to move. Every action is available with a controller; custom remapping is planned.</string>
     <string name="video_settings_description">Video previews are not connected in this demo. Artwork stays still while you browse.</string>
     <string name="performance_settings_description">The game list loads rows as they become visible. Pages switch immediately, with no animated backgrounds or video decoding.</string>
@@ -77,16 +77,6 @@
     <string name="cover_placeholder">NO COVER</string>
     <string name="previous_game">Previous game</string>
     <string name="next_game">Next game</string>
-    <string name="theme_mode">Display mode</string>
-    <string name="theme_mode_system">System</string>
-    <string name="theme_mode_light">Light</string>
-    <string name="theme_mode_dark">Dark</string>
-    <string name="theme_follows_system">Automatically follows the system appearance.</string>
-    <string name="theme_manual_mode">Always uses the selected display mode.</string>
-    <string name="theme_palette">Color palette</string>
-    <string name="theme_palette_rift">Rift</string>
-    <string name="theme_palette_ocean">Ocean</string>
-    <string name="theme_palette_ember">Ember</string>
 
     <string name="settings_launcher">Home launcher</string>
     <string name="launcher_settings_description">Choose RiftDeck as your home screen. Press Home to return here from another app.</string>

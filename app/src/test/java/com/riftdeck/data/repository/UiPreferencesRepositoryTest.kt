@@ -4,8 +4,6 @@ import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
-import com.riftdeck.core.model.ThemeMode
-import com.riftdeck.core.model.ThemePalette
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -20,34 +18,34 @@ import org.junit.rules.TemporaryFolder
 class UiPreferencesRepositoryTest {
     @get:Rule val folder = TemporaryFolder()
 
-    @Test fun newInstallFollowsSystemWithRiftPalette() = runBlocking {
+    @Test fun newInstallUsesDefaultPreferences() = runBlocking {
         withRepository { repository -> assertEquals(UiPreferences(), repository.preferences.first()) }
     }
 
-    @Test fun appearancePersistsAcrossStoreRecreationWithoutLosingOtherPreferences() = runBlocking {
+    @Test fun motionAndSortPersistAcrossStoreRecreation() = runBlocking {
         withRepository { repository ->
             repository.setReducedMotion(true)
             repository.setSortDescending(true)
-            repository.setThemeMode(ThemeMode.Light)
-            repository.setThemePalette(ThemePalette.Ocean)
         }
         withRepository { repository ->
-            assertEquals(UiPreferences(true, true, ThemeMode.Light, ThemePalette.Ocean), repository.preferences.first())
-            repository.setThemeMode(ThemeMode.System)
-            repository.setThemePalette(ThemePalette.Ember)
+            assertEquals(UiPreferences(true, true), repository.preferences.first())
         }
         withRepository { repository ->
-            assertEquals(UiPreferences(true, true, ThemeMode.System, ThemePalette.Ember), repository.preferences.first())
+            assertEquals(UiPreferences(true, true), repository.preferences.first())
         }
     }
 
-    @Test fun legacyAndUnknownAppearanceValuesFallBackWithoutLosingPreferences() = runBlocking {
+    @Test fun removedThemePreferencesAreIgnoredWithoutLosingOtherPreferences() = runBlocking {
         val job = SupervisorJob()
         val store = PreferenceDataStoreFactory.create(scope = CoroutineScope(job + Dispatchers.IO)) { file() }
         try {
             store.edit { values ->
                 values[booleanPreferencesKey("reduced_motion")] = true
                 values[booleanPreferencesKey("sort_descending")] = true
+            }
+            store.edit { values ->
+                values[stringPreferencesKey("theme_mode")] = "light"
+                values[stringPreferencesKey("theme_palette")] = "ocean"
             }
             val repository = UiPreferencesRepository(store)
             assertEquals(UiPreferences(true, true), repository.preferences.first())
@@ -56,31 +54,25 @@ class UiPreferencesRepositoryTest {
                 values[stringPreferencesKey("theme_palette")] = "unsupported-palette"
             }
             assertEquals(UiPreferences(true, true), repository.preferences.first())
-            repository.setThemeMode(ThemeMode.Dark)
-            repository.setThemePalette(ThemePalette.Rift)
-            assertEquals(UiPreferences(true, true, ThemeMode.Dark), repository.preferences.first())
+            assertEquals(UiPreferences(true, true), repository.preferences.first())
         } finally { job.cancelAndJoin() }
     }
 
-    @Test fun navigationExpansionPersistsAcrossRestartAndPreservesAppearance() = runBlocking {
+    @Test fun navigationExpansionPersistsAcrossRestart() = runBlocking {
         withRepository { repository ->
-            repository.setThemeMode(ThemeMode.Light)
             repository.setNavigationRailExpanded(false)
         }
         withRepository { repository ->
             assertEquals(false, repository.preferences.first().navigationRailExpanded)
-            assertEquals(ThemeMode.Light, repository.preferences.first().themeMode)
             repository.setNavigationRailExpanded(true)
         }
         withRepository { repository ->
             assertEquals(true, repository.preferences.first().navigationRailExpanded)
-            assertEquals(ThemeMode.Light, repository.preferences.first().themeMode)
         }
     }
 
-    @Test fun folderSelectionsPersistAndDeduplicateWithoutChangingAppearance() = runBlocking {
+    @Test fun folderSelectionsPersistAndDeduplicate() = runBlocking {
         withRepository { repository ->
-            repository.setThemeMode(ThemeMode.Light)
             repository.addRomFolder("content://provider/tree/one")
             repository.addRomFolder("content://provider/tree/two")
             repository.addRomFolder("content://provider/tree/one")
@@ -88,7 +80,6 @@ class UiPreferencesRepositoryTest {
         withRepository { repository ->
             assertEquals(setOf("content://provider/tree/one", "content://provider/tree/two"), repository.preferences.first().romFolders)
             repository.removeRomFolder("content://provider/tree/one")
-            assertEquals(ThemeMode.Light, repository.preferences.first().themeMode)
         }
         withRepository { repository ->
             assertEquals(setOf("content://provider/tree/two"), repository.preferences.first().romFolders)
