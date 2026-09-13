@@ -28,18 +28,15 @@ class EmulatorCatalog(private val context: Context) {
                 }
             }
         }
-        // GBA.emu accepts ACTION_VIEW on its main activity; discover its actual component.
-        pm.getLaunchIntentForPackage("com.explusalpha.GbaEmu")?.component?.let { component ->
-            candidates.add(EmulatorConfig(platformId, component.packageName, component.className, "GBA.emu"))
-        }
-        if (platformId == 1L) {
-            val component = android.content.ComponentName(RetroArchLaunch.packageName, RetroArchLaunch.activityName)
+        // Prefer explicit game-entry activities over generic file handlers from the same app.
+        GbaEmulatorProfiles.forPlatform(platformId).forEach { profile ->
+            val component = android.content.ComponentName(profile.packageName, profile.activityName)
             try {
                 @Suppress("DEPRECATION")
                 val activity = pm.getActivityInfo(component, 0)
                 if (activity.exported && activity.enabled && activity.applicationInfo.enabled) {
-                    candidates.add(EmulatorConfig(platformId, component.packageName, component.className,
-                        activity.applicationInfo.loadLabel(pm).toString() + " · mGBA"))
+                    candidates.removeAll { it.packageName == profile.packageName }
+                    candidates.add(profile)
                 }
             } catch (_: PackageManager.NameNotFoundException) { /* Optional external emulator. */ }
         }

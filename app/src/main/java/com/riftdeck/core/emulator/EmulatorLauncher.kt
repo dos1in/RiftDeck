@@ -64,13 +64,16 @@ class AndroidEmulatorLauncher(
             val intent = if (nativePath != null) {
                 Intent(Intent.ACTION_MAIN).setComponent(component).apply {
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                    RetroArchLaunch.extras(nativePath, Environment.getExternalStorageDirectory().absolutePath)
+                    RetroArchLaunch.extras(nativePath, Environment.getExternalStorageDirectory().absolutePath, config.packageName)
                         .forEach { (key, value) -> putExtra(key, value) }
                 }
             } else Intent(config.action).setComponent(component).apply {
                 setDataAndType(rom.uri, config.mimeType)
                 clipData = ClipData.newRawUri(rom.name, rom.uri)
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                if (config.packageName == "com.sky.SkyEmu") {
+                    addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                }
                 config.extras.forEach { (key, value) -> putExtra(key, value) }
             }
             withContext(Dispatchers.Main.immediate) { context.startActivity(intent) }

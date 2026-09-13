@@ -20,6 +20,10 @@
         </intent>
         <package android:name="com.explusalpha.GbaEmu" />
         <package android:name="com.retroarch.aarch64" />
+        <package android:name="com.retroarch" />
+        <package android:name="com.retroarch.ra32" />
+        <package android:name="com.fastemulator.gba" />
+        <package android:name="com.sky.SkyEmu" />
     </queries>
     <application
         android:name=".app.LauncherApplication"

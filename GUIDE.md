@@ -193,3 +193,11 @@ RiftDeck 仍处于早期开发阶段。
 RiftDeck 的灵感来自开源模拟器前端的长期积累，以及复古掌机社区。
 
 RiftDeck 本身是前端，不包含模拟器核心或受版权保护的游戏内容。
+
+### GBA 模拟器适配
+
+在「设置 → 模拟器」点击刷新，选择已安装的模拟器。当前内置游戏入口包括 My Boy!（付费版）、SkyEmu、GBA.emu，以及 RetroArch 标准版、32 位版和 64 位版／G。未安装或入口不可用的应用不会出现在预设列表中；其他应用仍可通过系统的 ROM 打开能力自动发现。
+
+My Boy!、SkyEmu 和 GBA.emu 使用带临时读取授权的 content URI；ZIP 会先按现有规则解压成 GBA 文件。RetroArch 各版本使用各自的 mGBA 核心和配置目录，需要先在对应模拟器中安装 mGBA 核心、配置 ROM 访问权限。RetroArch 直读保留原始 ZIP 文件名，仅支持系统外部存储提供器中的 ROM。
+
+启动入口参考 [Daijishou 启动参数](https://github.com/TapiocaFox/Daijishou/wiki/Start-Arguments) 和 [Pegasus Android 文档](https://pegasus-frontend.org/docs/user-guide/platform-android/)。新增适配已加入参数单元测试；各模拟器具体安装版本的游戏启动与返回仍需真机验收。My Boy! 免费版与 Pizza Boy 的路径式启动尚未纳入内置适配。

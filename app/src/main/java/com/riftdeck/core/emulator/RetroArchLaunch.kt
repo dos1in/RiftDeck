@@ -5,10 +5,12 @@ internal object RetroArchLaunch {
     const val packageName = "com.retroarch.aarch64"
     const val activityName = "com.retroarch.browser.retroactivity.RetroActivityFuture"
 
-    fun supports(config: EmulatorConfig) = config.packageName == packageName &&
+    val packageNames = listOf(packageName, "com.retroarch", "com.retroarch.ra32")
+
+    fun supports(config: EmulatorConfig) = config.packageName in packageNames &&
         config.activityName == activityName && config.platformId == 1L
 
-    fun extras(romPath: String, externalRoot: String): Map<String, String> = mapOf(
+    fun extras(romPath: String, externalRoot: String, packageName: String = RetroArchLaunch.packageName): Map<String, String> = mapOf(
         "ROM" to romPath,
         "LIBRETRO" to "/data/data/$packageName/cores/mgba_libretro_android.so",
         "CONFIGFILE" to "$externalRoot/Android/data/$packageName/files/retroarch.cfg",
