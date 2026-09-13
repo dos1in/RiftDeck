@@ -15,6 +15,8 @@ import com.riftdeck.core.ui.theme.LocalFrontendTheme
 
 @Composable
 internal fun AppearanceSettings(
+    language: String,
+    onLanguage: (String) -> Unit,
     defaultHomeCategory: String,
     onDefaultHomeCategory: (String) -> Unit,
     reducedMotion: Boolean,
@@ -37,8 +39,19 @@ internal fun AppearanceSettings(
     NeonActionButton(stringResource(R.string.default_home_category, defaultLabel), {
         controls[1].requestFocus()
         onDefaultHomeCategory(choices[(choices.indexOf(defaultHomeCategory).coerceAtLeast(0) + 1) % choices.size])
-    }, Modifier.fillMaxWidth(), focusRequester = controls[1], left = category, up = controls[0],
+    }, Modifier.fillMaxWidth(), focusRequester = controls[1], left = category, up = controls[0], down = controls[2],
         onFocused = { onFocused(1) })
     Text(stringResource(R.string.default_home_category_description), color = colors.textSecondary,
         style = MaterialTheme.typography.bodyMedium)
+    val languageLabel = stringResource(when (language) {
+        "zh-CN" -> R.string.language_chinese
+        "en" -> R.string.language_english
+        else -> R.string.language_system
+    })
+    NeonActionButton(stringResource(R.string.language_setting, languageLabel), {
+        controls[2].requestFocus()
+        val languages = listOf("system", "zh-CN", "en")
+        onLanguage(languages[(languages.indexOf(language).coerceAtLeast(0) + 1) % languages.size])
+    }, Modifier.fillMaxWidth(), focusRequester = controls[2], left = category, up = controls[1],
+        onFocused = { onFocused(2) })
 }

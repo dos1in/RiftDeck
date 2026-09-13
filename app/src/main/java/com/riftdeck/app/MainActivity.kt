@@ -24,6 +24,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.riftdeck.app.navigation.RiftDeckApp
 import com.riftdeck.core.input.GamepadInputManager
 import com.riftdeck.core.launcher.HomeLauncher
+import com.riftdeck.core.ui.theme.AppLanguage
 import com.riftdeck.core.ui.theme.RiftDeckTheme
 import com.riftdeck.feature.home.HomeViewModel
 import com.riftdeck.feature.home.HomeViewModelFactory
@@ -105,6 +106,8 @@ class MainActivity : ComponentActivity() {
             val emulatorFactory = remember(launcher) { EmulatorViewModel.Factory(launcher.emulationRepository, launcher.uiPreferencesRepository) }
             val emulatorViewModel: EmulatorViewModel = viewModel(factory = emulatorFactory)
             val screenActive by previewScreen.active.collectAsStateWithLifecycle()
+            val uiState by homeViewModel.uiState.collectAsStateWithLifecycle()
+            AppLanguage(uiState.language) {
             CompositionLocalProvider(LocalPreviewScreenActive provides screenActive) {
             RiftDeckTheme() {
                 RiftDeckApp(
@@ -123,6 +126,7 @@ class MainActivity : ComponentActivity() {
                     onDismissLauncherError = { launcherError = false },
                 )
             }
+        }
         }
         }
     }

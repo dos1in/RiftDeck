@@ -28,10 +28,11 @@ private enum class SettingSection(val title: Int, val description: Int) {
     Video(R.string.settings_video, R.string.video_settings_description),
     Performance(R.string.settings_performance, R.string.performance_settings_description),
     Launcher(R.string.settings_launcher, R.string.launcher_settings_description),
+    About(R.string.settings_about, R.string.about_description),
 }
 
 @Composable
-fun SettingsScreen(defaultHomeCategory: String, onDefaultHomeCategory: (String) -> Unit, initialSection: String, reducedMotion: Boolean, onReducedMotion: (Boolean) -> Unit,
+fun SettingsScreen(language: String, onLanguage: (String) -> Unit, defaultHomeCategory: String, onDefaultHomeCategory: (String) -> Unit, initialSection: String, reducedMotion: Boolean, onReducedMotion: (Boolean) -> Unit,
     onAddFolder: () -> Unit, onNavigate: (DeckSection) -> Unit,
     onBack: () -> Unit, hasGame: Boolean, videoPreviews: Boolean, onVideoPreviews: (Boolean) -> Unit,
     previewDelayMs: Int, onPreviewDelay: (Int) -> Unit,
@@ -49,7 +50,7 @@ fun SettingsScreen(defaultHomeCategory: String, onDefaultHomeCategory: (String) 
     var loopControlFocused by rememberSaveable { mutableStateOf(false) }
     val systemSettings = remember { FocusRequester() }
     var systemSettingsFocused by rememberSaveable { mutableStateOf(false) }
-    val appearanceControls = remember { List(2) { FocusRequester() } }
+    val appearanceControls = remember { List(3) { FocusRequester() } }
     var appearanceFocusIndex by rememberSaveable { mutableIntStateOf(0) }
     val section = SettingSection.entries[selectedIndex]
     fun entryAction(item: SettingSection): FocusRequester =
@@ -107,11 +108,14 @@ fun SettingsScreen(defaultHomeCategory: String, onDefaultHomeCategory: (String) 
                                 action, tabs[selectedIndex], panelFocused, onFocused = { panelFocused = true })
                         }
                         SettingSection.Appearance -> {
-                            AppearanceSettings(defaultHomeCategory, onDefaultHomeCategory, reducedMotion, onReducedMotion,
+                            AppearanceSettings(language, onLanguage, defaultHomeCategory, onDefaultHomeCategory, reducedMotion, onReducedMotion,
                                 appearanceControls, tabs[selectedIndex], onFocused = { index ->
                                     appearanceFocusIndex = index
                                     panelFocused = true
                                 })
+                        }
+                        SettingSection.About -> {
+                            AboutSettings(action, tabs[selectedIndex], onFocused = { panelFocused = true })
                         }
                         SettingSection.Video -> {
                             NeonActionButton(stringResource(if (videoPreviews) R.string.preview_video else R.string.preview_cover),

@@ -152,7 +152,7 @@ fun RiftDeckApp(homeViewModel: HomeViewModel, libraryViewModel: LibraryViewModel
                     )
                 }
                 composable(Route.Settings, arguments = listOf(navArgument("section") { type = NavType.StringType })) { entry ->
-                    if (uiState.isReady) SettingsScreen(uiState.defaultHomeCategory, homeViewModel::setDefaultHomeCategory, entry.arguments?.getString("section") ?: "library", uiState.reducedMotion,
+                    if (uiState.isReady) SettingsScreen(uiState.language, homeViewModel::setLanguage, uiState.defaultHomeCategory, homeViewModel::setDefaultHomeCategory, entry.arguments?.getString("section") ?: "library", uiState.reducedMotion,
                         homeViewModel::setReducedMotion, ::addFolder, onNavigate, ::back,
                         previewDelayMs = uiState.previewDelayMs, onPreviewDelay = homeViewModel::setPreviewDelay,
                         loopVideoPreviews = uiState.loopVideoPreviews, onLoopVideoPreviews = homeViewModel::setLoopVideoPreviews,

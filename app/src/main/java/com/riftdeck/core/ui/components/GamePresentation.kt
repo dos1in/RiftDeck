@@ -1,6 +1,5 @@
 package com.riftdeck.core.ui.components
 
-import android.text.format.DateUtils
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
@@ -16,6 +15,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.*
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.semantics.*
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -124,7 +124,13 @@ fun gamePlaytime(game: Game): String = stringResource(R.string.hours_minutes, ga
 
 @Composable
 fun gameLastPlayed(game: Game): String = game.lastPlayedAt?.let {
-    DateUtils.getRelativeTimeSpanString(it, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS).toString()
+    val minutes = ((System.currentTimeMillis() - it).coerceAtLeast(0) / 60_000).coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
+    when {
+        minutes == 0 -> stringResource(R.string.played_just_now)
+        minutes < 60 -> pluralStringResource(R.plurals.played_minutes_ago, minutes, minutes)
+        minutes < 1440 -> pluralStringResource(R.plurals.played_hours_ago, minutes / 60, minutes / 60)
+        else -> pluralStringResource(R.plurals.played_days_ago, minutes / 1440, minutes / 1440)
+    }
 } ?: stringResource(R.string.not_played)
 
 @Composable

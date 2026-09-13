@@ -179,6 +179,23 @@ class UiPreferencesRepositoryTest {
         } finally { job.cancelAndJoin() }
     }
 
+    @Test fun languageDefaultsToSystemAndPersistsAcrossRecreation() = runBlocking {
+        withRepository { assertEquals("system", it.preferences.first().language) }
+        for (language in listOf("zh-CN", "en", "system")) {
+            withRepository { it.setLanguage(language) }
+            withRepository { assertEquals(language, it.preferences.first().language) }
+        }
+    }
+
+    @Test fun unknownStoredLanguageFallsBackToSystem() = runBlocking {
+        val job = SupervisorJob()
+        val store = PreferenceDataStoreFactory.create(scope = CoroutineScope(job + Dispatchers.IO)) { file() }
+        try {
+            store.edit { it[stringPreferencesKey("app_language")] = "unknown" }
+            assertEquals("system", UiPreferencesRepository(store).preferences.first().language)
+        } finally { job.cancelAndJoin() }
+    }
+
     private fun file() = folder.root.resolve("ui.preferences_pb")
 
     private suspend fun withRepository(block: suspend (UiPreferencesRepository) -> Unit) {

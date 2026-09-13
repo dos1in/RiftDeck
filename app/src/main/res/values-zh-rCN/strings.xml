@@ -148,4 +148,18 @@
     <string name="preview_performance_hint">延长等待可跳过快速浏览中的视频。关闭循环后只播放一次，播完回到封面并停止解码。</string>
     <string name="default_home_category">默认进入：%1$s</string>
     <string name="default_home_category_description">点击切换首页（全部游戏）、最近游玩、收藏。下次全新启动时生效；从游戏返回仍保留浏览位置。</string>
+    <string name="settings_about">关于</string>
+    <string name="about_description">RiftDeck 是开源 Android 复古掌机前端，用于浏览本地 ROM 并启动已安装的模拟器。</string>
+    <string name="about_version">版本</string>
+    <string name="about_license">源码协议</string>
+    <string name="about_repository">打开 GitHub 仓库</string>
+    <string name="about_link_error">未找到可以打开链接的浏览器。</string>
+    <string name="language_setting">语言：%1$s</string>
+    <string name="language_system">跟随系统</string>
+    <string name="language_chinese">简体中文</string>
+    <string name="language_english">English</string>
+    <string name="played_just_now">刚刚</string>
+    <plurals name="played_minutes_ago"><item quantity="one">%1$d分钟前</item><item quantity="other">%1$d分钟前</item></plurals>
+    <plurals name="played_hours_ago"><item quantity="one">%1$d小时前</item><item quantity="other">%1$d小时前</item></plurals>
+    <plurals name="played_days_ago"><item quantity="one">%1$d天前</item><item quantity="other">%1$d天前</item></plurals>
 </resources>

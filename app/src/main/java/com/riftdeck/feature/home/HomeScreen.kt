@@ -135,7 +135,7 @@ fun HomeScreen(
                         LibraryFilter.Recent -> R.string.recent_title
                         LibraryFilter.All -> R.string.all_games
                         LibraryFilter.Favorites -> R.string.favorites_title
-                    }), { filter = category }, Modifier.width(if (compact) 86.dp else 116.dp),
+                    }), { filter = category }, Modifier.width(if (compact) 104.dp else 116.dp),
                         selected = filter == category, emphasizeSelection = true, focusRequester = focus.getValue(category.name),
                         left = categories.getOrNull(i - 1)?.let { focus.getValue(it.name) } ?: rail,
                         right = categories.getOrNull(i + 1)?.let { focus.getValue(it.name) } ?: rail, up = FocusRequester.Cancel,
@@ -159,11 +159,11 @@ fun HomeScreen(
                     onSort, Modifier.width(74.dp), enabled = sorted, focusRequester = focus.getValue("sort"),
                     left = focus.getValue(filter.name), right = focus.getValue(if (games.isEmpty()) "search" else "alphabet"),
                     up = focus.getValue(filter.name), down = entry, onFocused = { focusedKey = "sort" })
-                NeonActionButton(stringResource(R.string.alphabet_jump), { alphabetOpen = true }, Modifier.width(68.dp),
+                NeonActionButton(stringResource(R.string.alphabet_jump), { alphabetOpen = true }, Modifier.width(84.dp),
                     enabled = sorted && games.isNotEmpty(), focusRequester = focus.getValue("alphabet"),
                     left = focus.getValue("sort"), right = focus.getValue("search"), up = focus.getValue(filter.name), down = entry,
                     onFocused = { focusedKey = "alphabet" })
-                NeonActionButton(stringResource(R.string.search_apply), onSearch, Modifier.width(68.dp),
+                NeonActionButton(stringResource(R.string.search_apply), onSearch, Modifier.width(84.dp),
                     selected = uiState.searchQuery.isNotBlank(), focusRequester = focus.getValue("search"),
                     left = if (!sorted) focus.getValue(filter.name) else focus.getValue(if (games.isEmpty()) "sort" else "alphabet"),
                     up = focus.getValue(filter.name), down = entry, onFocused = { focusedKey = "search" })

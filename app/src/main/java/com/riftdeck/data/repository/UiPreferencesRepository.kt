@@ -27,11 +27,13 @@ data class UiPreferences(
     val previewDelayMs: Int = 650,
     val loopVideoPreviews: Boolean = true,
     val defaultHomeCategory: String = "All",
+    val language: String = "system",
 )
 
 class UiPreferencesRepository internal constructor(private val store: DataStore<Preferences>) {
     constructor(context: Context) : this(context.applicationContext.uiPreferences)
 
+    private val languageKey = stringPreferencesKey("app_language")
     private val defaultHomeCategoryKey = stringPreferencesKey("default_home_category")
     private val foldersKey = stringSetPreferencesKey("rom_folders")
     private val previewDelayKey = intPreferencesKey("preview_delay_ms")
@@ -45,6 +47,7 @@ class UiPreferencesRepository internal constructor(private val store: DataStore<
         if (error is IOException) emit(emptyPreferences()) else throw error
     }.map { values ->
         UiPreferences(
+            language = values[languageKey]?.takeIf { it in listOf("system", "zh-CN", "en") } ?: "system",
             defaultHomeCategory = values[defaultHomeCategoryKey]?.takeIf { it in listOf("All", "Recent", "Favorites") } ?: "All",
             romFolders = values[foldersKey] ?: emptySet(),
             emulators = values.asMap().keys.mapNotNull { key ->
@@ -90,6 +93,10 @@ class UiPreferencesRepository internal constructor(private val store: DataStore<
     }
     suspend fun setLoopVideoPreviews(loop: Boolean) { store.edit { it[loopVideoKey] = loop } }
     suspend fun setVideoPreviews(enabled: Boolean) { store.edit { it[videoPreviewsKey] = enabled } }
+    suspend fun setLanguage(value: String) {
+        require(value in listOf("system", "zh-CN", "en"))
+        store.edit { it[languageKey] = value }
+    }
     suspend fun setDefaultHomeCategory(value: String) {
         require(value in listOf("All", "Recent", "Favorites"))
         store.edit { it[defaultHomeCategoryKey] = value }

@@ -123,7 +123,7 @@
     <string name="archive_multiple_roms">This archive contains multiple GBA games. Extract and import the game you want to play.</string>
     <string name="archive_invalid">This archive is damaged or contains no supported GBA ROM.</string>
     <string name="history_save_error">Settings or play history could not be saved. Check available storage.</string>
-    <string name="alphabet_jump">A–Z</string>
+    <string name="alphabet_jump">Letters</string>
     <string name="alphabet_jump_title">Jump to letter</string>
     <string name="alphabet_jump_hint">Choose a starting letter. # includes numbers and other scripts.</string>
     <string name="sort_ascending_short">A–Z</string>
@@ -149,4 +149,20 @@
     <string name="preview_performance_hint">Longer waits skip videos during quick browsing. Turn looping off to play once, return to the cover, and stop decoding.</string>
     <string name="default_home_category">Default start: %1$s</string>
     <string name="default_home_category_description">Choose Home (all games), Recently played, or Favorites. Applies on the next fresh launch; returning from a game keeps your browsing position.</string>
+    <string name="settings_about">About</string>
+    <string name="about_description">RiftDeck is an open-source Android retro handheld frontend. Browse local ROMs and launch your installed emulators.</string>
+    <string name="about_version">Version</string>
+    <string name="about_license">Source license</string>
+    <string name="about_repository">Open GitHub repository</string>
+    <string name="about_link_error">No browser is available to open this link.</string>
+    <string name="language_setting">Language: %1$s</string>
+    <string name="language_system">Follow system</string>
+    <string name="language_chinese">简体中文</string>
+    <string name="language_english">English</string>
+    <string name="repository_url" translatable="false">https://github.com/dos1in/RiftDeck</string>
+    <string name="license_name" translatable="false">MPL-2.0</string>
+    <string name="played_just_now">Just now</string>
+    <plurals name="played_minutes_ago"><item quantity="one">%1$d minute ago</item><item quantity="other">%1$d minutes ago</item></plurals>
+    <plurals name="played_hours_ago"><item quantity="one">%1$d hour ago</item><item quantity="other">%1$d hours ago</item></plurals>
+    <plurals name="played_days_ago"><item quantity="one">%1$d day ago</item><item quantity="other">%1$d days ago</item></plurals>
 </resources>
