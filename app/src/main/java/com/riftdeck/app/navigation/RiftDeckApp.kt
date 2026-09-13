@@ -71,6 +71,10 @@ fun RiftDeckApp(homeViewModel: HomeViewModel, libraryViewModel: LibraryViewModel
     val historyError by emulatorViewModel.historyError.collectAsStateWithLifecycle()
     val folders by libraryViewModel.folders.collectAsStateWithLifecycle()
     val scanState by libraryViewModel.scanState.collectAsStateWithLifecycle()
+    val importStatus by libraryViewModel.importStatus.collectAsStateWithLifecycle()
+    val importPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
+        uri?.let(libraryViewModel::importRetroArch)
+    }
     val libraryError by libraryViewModel.error.collectAsStateWithLifecycle()
     var searchOpen by rememberSaveable { mutableStateOf(false) }
     var removeFolder by rememberSaveable { mutableStateOf<String?>(null) }
@@ -161,7 +165,12 @@ fun RiftDeckApp(homeViewModel: HomeViewModel, libraryViewModel: LibraryViewModel
                         onChooseEmulator = emulatorViewModel::choose, onRefreshEmulators = emulatorViewModel::refresh,
                         folders = folders, scanState = scanState, onRescan = libraryViewModel::rescan,
                         onCancelScan = libraryViewModel::cancelScan, onRemoveFolder = { removeFolder = it },
-                        isDefaultHome = isDefaultHome, onChooseHome = onChooseHome, onSystemSettings = onSystemSettings)
+                        isDefaultHome = isDefaultHome, onChooseHome = onChooseHome, onSystemSettings = onSystemSettings,
+                        importStatus = importStatus, onImportRetroArch = {
+                            try { importPicker.launch(null) }
+                            catch (_: android.content.ActivityNotFoundException) { libraryViewModel.reportFolderPickerError() }
+                            catch (_: SecurityException) { libraryViewModel.reportFolderPickerError() }
+                        })
                 }
             }
             if (!uiState.isReady) Text(stringResource(R.string.loading_library), color = colors.textSecondary,

@@ -165,4 +165,9 @@
     <plurals name="played_minutes_ago"><item quantity="one">%1$d minute ago</item><item quantity="other">%1$d minutes ago</item></plurals>
     <plurals name="played_hours_ago"><item quantity="one">%1$d hour ago</item><item quantity="other">%1$d hours ago</item></plurals>
     <plurals name="played_days_ago"><item quantity="one">%1$d day ago</item><item quantity="other">%1$d days ago</item></plurals>
+    <string name="import_retroarch">Import RetroArch metadata</string>
+    <string name="import_retroarch_running">Importing…</string>
+    <string name="import_retroarch_error">Import failed. Select an accessible RetroArch folder containing valid .lpl playlists.</string>
+    <string name="import_retroarch_hint">Scan your ROM folder first, then select the RetroArch folder containing playlists and thumbnails.</string>
+    <string name="import_retroarch_result">Updated %1$d games · skipped %2$d entries</string>
 </resources>

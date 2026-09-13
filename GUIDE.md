@@ -201,3 +201,15 @@ RiftDeck 本身是前端，不包含模拟器核心或受版权保护的游戏�
 My Boy!、SkyEmu 和 GBA.emu 使用带临时读取授权的 content URI；ZIP 会先按现有规则解压成 GBA 文件。RetroArch 各版本使用各自的 mGBA 核心和配置目录，需要先在对应模拟器中安装 mGBA 核心、配置 ROM 访问权限。RetroArch 直读保留原始 ZIP 文件名，仅支持系统外部存储提供器中的 ROM。
 
 启动入口参考 [Daijishou 启动参数](https://github.com/TapiocaFox/Daijishou/wiki/Start-Arguments) 和 [Pegasus Android 文档](https://pegasus-frontend.org/docs/user-guide/platform-android/)。新增适配已加入参数单元测试；各模拟器具体安装版本的游戏启动与返回仍需真机验收。My Boy! 免费版与 Pizza Boy 的路径式启动尚未纳入内置适配。
+
+### 导入 RetroArch 游戏资料
+
+1. 先通过「添加 ROM 文件夹」扫描 GBA 游戏。
+2. 准备可通过 Android 文件选择器访问的 RetroArch 目录，其中包含 `playlists/*.lpl` 和 `thumbnails/<数据库名>/Named_Boxarts/*.png`。私有目录无法选择时，先从 RetroArch 导出或复制到可访问目录。
+3. 在「设置 → 游戏库」选择「导入 RetroArch 资料」，授权上述目录；导入完成后查看更新和跳过数量。
+
+支持未压缩的 JSON `.lpl` 和旧式六行格式。使用条目标题匹配标准 PNG 缩略图，优先盒绘，再尝试游戏截图和标题截图。优先匹配原始 ROM 路径；导出路径改变时，只在库中存在唯一同名文件时匹配，重名且路径不符的记录跳过。未入库的 ROM 不会仅凭播放列表新增，需要先扫描实际文件。
+
+导入更新名称和封面，不导入核心路径、启动命令、收藏、历史、存档或即时存档；不会清空现有资料。导入封面引用单独保存，后续 ROM 扫描不会覆盖它。封面保持在授权目录中，移动或删除目录后需要重新导入。数据库自动从版本 4 迁移到版本 5。
+
+标准 `.lpl` 不包含完整简介、开发商和发行年份，本次不解析 RetroArch 的数据库文件。格式依据 [Libretro 播放列表与缩略图文档](https://docs.libretro.com/guides/roms-playlists-thumbnails/)。导入全程在后台执行；损坏、超限或不可访问的列表会中止本次事务，已存在的游戏记录保持不变。

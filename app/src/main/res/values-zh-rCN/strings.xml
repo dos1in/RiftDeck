@@ -162,4 +162,9 @@
     <plurals name="played_minutes_ago"><item quantity="one">%1$d分钟前</item><item quantity="other">%1$d分钟前</item></plurals>
     <plurals name="played_hours_ago"><item quantity="one">%1$d小时前</item><item quantity="other">%1$d小时前</item></plurals>
     <plurals name="played_days_ago"><item quantity="one">%1$d天前</item><item quantity="other">%1$d天前</item></plurals>
+    <string name="import_retroarch">导入 RetroArch 资料</string>
+    <string name="import_retroarch_running">正在导入…</string>
+    <string name="import_retroarch_error">导入失败，请选择包含有效 .lpl 播放列表且可访问的 RetroArch 目录。</string>
+    <string name="import_retroarch_hint">先扫描 ROM 文件夹，再选择包含 playlists 和 thumbnails 的 RetroArch 目录。</string>
+    <string name="import_retroarch_result">已更新 %1$d 款游戏 · 跳过 %2$d 条记录</string>
 </resources>

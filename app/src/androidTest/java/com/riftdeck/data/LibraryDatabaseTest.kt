@@ -24,6 +24,27 @@ class LibraryDatabaseTest {
     private var cancel = false
     private lateinit var scanner: LibraryScanner
 
+    @Test fun retroArchJsonAndImportedMetadataSurviveRescan() = runBlocking {
+        val parsed = com.riftdeck.data.scanner.RetroArchPlaylist.parse(
+            """{"items":[{"path":"/roms/Game_1.gba","label":"Imported title","db_name":"Nintendo - Game Boy Advance.lpl"},{"path":"/roms/other.nes","label":"Other"}]}""", "gba.lpl")
+        assertEquals(1, parsed.size)
+        files["a"] = listOf(file(1))
+        scanner.scan(listOf("a"))
+        val id = dao.findByIdentity("provider:rom/1")!!.id
+        dao.toggleFavorite(id)
+        dao.recordLaunch(id, 123L)
+        dao.importRetroArchMetadata(id, parsed.single().label, "imported title", "content://covers/1", "1:2")
+        scanner.scan(listOf("a"))
+        val game = dao.findById(id)!!.toGame()
+        assertEquals("Imported title", game.title)
+        assertEquals("content://covers/1", game.coverUri)
+        assertTrue(game.favorite)
+        assertEquals(1, game.playCount)
+        assertEquals(123L, game.lastPlayedAt)
+        dao.importRetroArchMetadata(id, "New title", "new title", null, null)
+        assertEquals("content://covers/1", dao.findById(id)!!.toGame().coverUri)
+    }
+
     @Before fun setup() {
         database = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(), LibraryDatabase::class.java).build()
         scanner = LibraryScanner(object : RomDocumentSource {

@@ -22,6 +22,7 @@ class LibraryRepository(
     private val preferences: UiPreferencesRepository,
     private val scanner: LibraryScanner,
     private val scope: CoroutineScope,
+    private val retroArchImporter: RetroArchImporter,
 ) {
     val folders = preferences.preferences.map { it.romFolders }.distinctUntilChanged()
     val scanState = scanner.state
@@ -33,6 +34,8 @@ class LibraryRepository(
         resolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
         preferences.addRomFolder(uri.toString())
     }
+
+    suspend fun importRetroArch(uri: Uri) = operations.withLock { retroArchImporter.import(uri) }
 
     fun rescan() {
         scanJob?.cancel()

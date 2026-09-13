@@ -40,7 +40,7 @@ fun SettingsScreen(language: String, onLanguage: (String) -> Unit, defaultHomeCa
     emulatorTargets: List<EmulatorConfig>, selectedEmulator: EmulatorConfig?,
     onChooseEmulator: (EmulatorConfig) -> Unit, onRefreshEmulators: () -> Unit,
     folders: Set<String>, scanState: ScanState, onRescan: () -> Unit, onCancelScan: () -> Unit, onRemoveFolder: (String) -> Unit,
-    isDefaultHome: Boolean, onChooseHome: () -> Unit, onSystemSettings: () -> Unit, modifier: Modifier = Modifier) {
+    isDefaultHome: Boolean, onChooseHome: () -> Unit, onSystemSettings: () -> Unit, onImportRetroArch: () -> Unit, importStatus: String?, modifier: Modifier = Modifier) {
     val colors = LocalFrontendTheme.current
     var selectedIndex by rememberSaveable { mutableIntStateOf(if (initialSection == "emulators") 1 else 0) }
     var panelFocused by rememberSaveable { mutableStateOf(false) }
@@ -101,7 +101,7 @@ fun SettingsScreen(language: String, onLanguage: (String) -> Unit, defaultHomeCa
                     when (section) {
                         SettingSection.Library -> {
                             LibrarySettings(folders, scanState, onAddFolder, onRescan, onCancelScan, onRemoveFolder,
-                                action, tabs[selectedIndex], onFocused = { panelFocused = true })
+                                action, tabs[selectedIndex], onFocused = { panelFocused = true }, onImportRetroArch = onImportRetroArch, importStatus = importStatus)
                         }
                         SettingSection.Emulators -> {
                             EmulatorSettings(emulatorTargets, selectedEmulator, onChooseEmulator, onRefreshEmulators,

@@ -18,6 +18,22 @@ class LibraryViewModel(private val repository: LibraryRepository) : ViewModel() 
     private val mutableError = MutableStateFlow(false)
     val error = mutableError.asStateFlow()
 
+    private val mutableImportStatus = MutableStateFlow<String?>(null)
+    val importStatus = mutableImportStatus.asStateFlow()
+    fun importRetroArch(uri: Uri) {
+        if (mutableImportStatus.value == "running") return
+        mutableImportStatus.value = "running"
+        viewModelScope.launch {
+            try {
+                val result = repository.importRetroArch(uri)
+                mutableImportStatus.value = "${result.matched}:${result.skipped}"
+            } catch (cancelled: CancellationException) {
+                mutableImportStatus.value = null
+                throw cancelled
+            } catch (_: Exception) { mutableImportStatus.value = "error" }
+        }
+    }
+
     fun addFolder(uri: Uri) = runOperation { repository.addFolder(uri); repository.rescan() }
     fun removeFolder(uri: String) = runOperation { repository.cancelScan(); repository.removeFolder(uri) }
     fun rescan() = repository.rescan()

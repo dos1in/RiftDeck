@@ -14,6 +14,9 @@ abstract class GameDao {
     @Query("SELECT * FROM games ORDER BY sortTitle COLLATE NOCASE, id")
     abstract fun observeGames(): Flow<List<GameEntity>>
 
+    @Query("UPDATE games SET title = :title, sortTitle = :sortTitle, importedCoverUri = COALESCE(:cover, importedCoverUri), importedCoverVersion = COALESCE(:version, importedCoverVersion) WHERE id = :id")
+    abstract suspend fun importRetroArchMetadata(id: Long, title: String, sortTitle: String, cover: String?, version: String?)
+
     @Query("SELECT * FROM games WHERE identity = :identity")
     abstract suspend fun findByIdentity(identity: String): GameEntity?
 

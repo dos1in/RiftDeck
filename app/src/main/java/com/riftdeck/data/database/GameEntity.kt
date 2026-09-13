@@ -32,10 +32,12 @@ data class GameEntity(
     val genre: String? = null,
     val coverVersion: String? = null,
     val description: String? = null,
+    val importedCoverUri: String? = null,
+    val importedCoverVersion: String? = null,
 ) {
     fun toGame() = Game(id, platformId, title, sortTitle, romUri, fileName, fileSize, crc32, sha1,
-        favorite, hidden, playCount, playTimeSeconds, lastPlayedAt, coverUri, screenshotUri, videoUri,
-        releaseYear, developer, genre, coverVersion, description)
+        favorite, hidden, playCount, playTimeSeconds, lastPlayedAt, importedCoverUri ?: coverUri, screenshotUri, videoUri,
+        releaseYear, developer, genre, importedCoverVersion ?: coverVersion, description)
 }
 
 /** One document may be reachable through more than one selected SAF tree. */

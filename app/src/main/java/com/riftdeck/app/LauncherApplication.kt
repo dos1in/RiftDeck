@@ -29,6 +29,7 @@ class LauncherApplication : Application() {
     }
     val libraryRepository by lazy {
         LibraryRepository(contentResolver, uiPreferencesRepository,
-            LibraryScanner(SafRomDocumentSource(contentResolver), database.games()), applicationScope)
+            LibraryScanner(SafRomDocumentSource(contentResolver), database.games()), applicationScope,
+            com.riftdeck.data.repository.RetroArchImporter(contentResolver, database))
     }
 }
