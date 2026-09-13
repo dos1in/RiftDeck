@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
@@ -16,6 +17,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
+import coil3.compose.AsyncImagePainter
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
+import androidx.compose.ui.draw.alpha
+import com.riftdeck.core.ui.theme.LocalReducedMotion
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
@@ -39,13 +46,18 @@ fun GameArtwork(
     modifier: Modifier = Modifier,
     showLabel: Boolean = true,
     onAspectRatio: (Float) -> Unit = {},
+    retainDuringLoading: Boolean = false,
 ) {
     val colors = LocalFrontendTheme.current
     val context = LocalContext.current
-    val coverRequest = remember(context, game.coverUri, game.coverVersion) {
+    var displayedCover by remember { mutableStateOf<AsyncImagePainter.State.Success?>(null) }
+    val reduced = LocalReducedMotion.current
+    val coverRequest = remember(context, game.coverUri, game.coverVersion, retainDuringLoading, reduced) {
         game.coverUri?.let { uri -> ImageRequest.Builder(context).data(uri)
-            .memoryCacheKey("$uri:${game.coverVersion}").diskCacheKey("$uri:${game.coverVersion}").build() }
+            .memoryCacheKey("$uri:${game.coverVersion}").diskCacheKey("$uri:${game.coverVersion}")
+            .build() }
     }
+    LaunchedEffect(coverRequest) { if (coverRequest == null) displayedCover = null }
     var coverLoaded by remember(coverRequest) { mutableStateOf(false) }
     val accent = when ((game.id % 3).toInt()) {
         0 -> colors.primary
@@ -59,7 +71,7 @@ fun GameArtwork(
             .background(colors.surfaceElevated)
             .semantics { this.contentDescription = contentDescription },
     ) {
-        if (!coverLoaded) Canvas(Modifier.fillMaxSize()) {
+        if (!coverLoaded && !retainDuringLoading) Canvas(Modifier.fillMaxSize()) {
             if (size.minDimension <= 0f) return@Canvas
             val gridColor = colors.outline.copy(alpha = 0.46f)
             val step = size.minDimension / 6f
@@ -89,14 +101,18 @@ fun GameArtwork(
         }
         if (coverRequest != null) AsyncImage(
             model = coverRequest, contentDescription = null,
-            modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Fit,
+            modifier = Modifier.fillMaxSize().alpha(if (retainDuringLoading) 0f else 1f), contentScale = ContentScale.Fit,
             onSuccess = {
                 coverLoaded = true
+                if (retainDuringLoading) displayedCover = it
                 val image = it.result.image
                 if (image.width > 0 && image.height > 0) onAspectRatio(image.width.toFloat() / image.height)
-            }, onError = { coverLoaded = false },
+            }, onError = { coverLoaded = false; displayedCover = null },
         )
-        if (showLabel && !coverLoaded) Text(
+        if (retainDuringLoading) Crossfade(displayedCover, animationSpec = tween(if (reduced) 0 else 180), label = "cover fade") { ready ->
+            ready?.let { Image(it.painter, null, Modifier.fillMaxSize(), contentScale = ContentScale.Fit) }
+        }
+        if (showLabel && !coverLoaded && !retainDuringLoading) Text(
             text = stringResource(R.string.cover_placeholder),
             modifier = Modifier
                 .align(Alignment.BottomStart)

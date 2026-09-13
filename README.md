@@ -12,17 +12,11 @@ RiftDeck 是专为 KPA（KONKR Pocket Advance）打造的开源游戏库与模�
 
 目前正在积极开发，优先支持 **Game Boy Advance**。核心功能无需账号，ROM 保留在本地。
 
-## 真机运行截图
+## 界面预览
 
-首页和游戏详情运行于 **KONKR Pocket Advance**，采用横屏布局。以下开发阶段截图使用示例游戏库和占位封面。
+新版首页采用紧凑的左右分栏：左侧浏览游戏，右侧展示封面与资料，顶部切换全部游戏、收藏和最近游玩。以下预览使用示例游戏库和占位封面。
 
-**首页 — 继续游戏、收藏与最近游玩**
-
-![KONKR Pocket Advance 上的 RiftDeck 首页，展示高亮的开始游戏按钮和手柄操作提示](design-demos/screenshots/brand-assets/home-phone.png)
-
-**游戏详情 — 启动游戏、查看资料与管理收藏**
-
-![KONKR Pocket Advance 上的 RiftDeck 游戏详情，展示示例封面、游玩记录和获得焦点的开始游戏按钮](design-demos/screenshots/brand-assets/detail-phone.png)
+![RiftDeck 新版首页：左侧游戏列表、右侧封面与游戏资料，底部显示手柄操作提示](design-demos/home-compact/A.png)
 
 ## 核心功能
 

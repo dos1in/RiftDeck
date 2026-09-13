@@ -3,6 +3,9 @@
 package com.riftdeck.core.ui.components
 
 import android.view.TextureView
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import com.riftdeck.core.ui.theme.LocalReducedMotion
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.background
 import androidx.compose.ui.graphics.Color
@@ -95,11 +98,14 @@ fun GameVideoPreview(uri: String?, modifier: Modifier = Modifier, onAspectRatio:
             }
         }
     }
+    val reduced = LocalReducedMotion.current
+    val opacity = key(uri) { animateFloatAsState(if (rendered) 1f else 0f,
+        tween(if (reduced) 0 else 180), label = "preview fade").value }
     val active = player
-    if (active != null) BoxWithConstraints(modifier.clipToBounds().background(if (rendered) Color.Black else Color.Transparent), contentAlignment = Alignment.Center) {
+    if (active != null) BoxWithConstraints(modifier.clipToBounds().graphicsLayer { alpha = opacity }.background(Color.Black), contentAlignment = Alignment.Center) {
         val width = minOf(maxWidth, maxHeight * ratio)
         AndroidView(factory = { TextureView(it).apply { isFocusable = false; isClickable = false } },
             update = { active.setVideoTextureView(it) },
-            modifier = Modifier.size(width, width / ratio).graphicsLayer { alpha = if (rendered) 1f else 0f })
+            modifier = Modifier.size(width, width / ratio))
     }
 }

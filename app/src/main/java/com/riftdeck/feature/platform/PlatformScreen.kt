@@ -2,9 +2,10 @@ package com.riftdeck.feature.platform
 
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -21,7 +22,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.riftdeck.R
 import com.riftdeck.core.input.GameAction
@@ -63,7 +63,8 @@ fun PlatformScreen(
     var pendingJump by remember { mutableStateOf<Int?>(null) }
     val sort = remember { FocusRequester() }
     val play = remember { FocusRequester() }
-    val listState = rememberLazyListState()
+    val columns = 3
+    val listState = rememberLazyGridState()
     val rowFocus = remember { mutableStateMapOf<Long, FocusRequester>() }
     val scope = rememberCoroutineScope()
     var moveJob by remember { mutableStateOf<Job?>(null) }
@@ -174,7 +175,12 @@ fun PlatformScreen(
                 GameAction.Search -> { onSearch(); true }
                 GameAction.PreviousPage, GameAction.NextPage -> {
                     if (games.isNotEmpty()) {
-                        val page = listState.layoutInfo.visibleItemsInfo.size.coerceAtLeast(1)
+                        val layout = listState.layoutInfo
+                        val visibleRows = layout.visibleItemsInfo.filter {
+                            it.offset.y >= layout.viewportStartOffset &&
+                                it.offset.y + it.size.height <= layout.viewportEndOffset
+                        }.map { it.row }.distinct().size.coerceAtLeast(1)
+                        val page = visibleRows * columns
                         val index = games.indexOfFirst { it.id == cursorId }.coerceAtLeast(0)
                         val delta = if (action == GameAction.PreviousPage) -page else page
                         requestRow((index + delta).coerceIn(0, games.lastIndex))
@@ -191,15 +197,28 @@ fun PlatformScreen(
                     uiState.games.isEmpty() && action == GameAction.Down && filterFocused -> { addFolder.requestFocus(); true }
                     inList && selected != null -> {
                         val index = games.indexOfFirst { it.id == cursorId }.coerceAtLeast(0)
-                        if (action == GameAction.Up && index == 0) filters.getValue(uiState.filter).requestFocus()
-                        else requestRow((index + if (action == GameAction.Up) -1 else 1).coerceIn(0, games.lastIndex))
+                        when {
+                            action == GameAction.Up && index < columns -> { moveJob?.cancel(); filters.getValue(uiState.filter).requestFocus() }
+                            action == GameAction.Up -> requestRow(index - columns)
+                            index / columns == games.lastIndex / columns -> { moveJob?.cancel(); play.requestFocus() }
+                            else -> requestRow((index + columns).coerceAtMost(games.lastIndex))
+                        }
                         true
                     }
+                    focusArea == "play" && action == GameAction.Up && selected != null -> { requestRow(games.indexOf(selected)); true }
+                    focusArea == "play" && action == GameAction.Down -> true
                     filterFocused && action == GameAction.Down && selected != null -> { requestRow(games.indexOf(selected)); true }
                     else -> false
                 }
-                GameAction.Left -> if (focusArea == "play" && !listFocused && selected != null) {
-                    requestRow(games.indexOf(selected)); true
+                GameAction.Left, GameAction.Right -> if (inList && selected != null) {
+                    val index = games.indexOfFirst { it.id == cursorId }.coerceAtLeast(0)
+                    if (action == GameAction.Left && index % columns == 0) {
+                        moveJob?.cancel()
+                        false // Explicit card focusProperties sends the left edge to the rail.
+                    } else {
+                        requestRow((index + if (action == GameAction.Left) -1 else 1).coerceAtMost(games.lastIndex))
+                        true
+                    }
                 } else false
                 else -> false
             }
@@ -257,36 +276,40 @@ fun PlatformScreen(
                     }
                 }
             } else {
-                Row(Modifier.weight(1f).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(if (compact) 16.dp else 32.dp)) {
-                    LazyColumn(state = listState,
-                        modifier = Modifier.weight(1.1f).fillMaxHeight().onFocusChanged { listFocused = it.hasFocus }.focusGroup(),
-                        verticalArrangement = Arrangement.spacedBy(6.dp), contentPadding = PaddingValues(vertical = 3.dp)) {
-                        itemsIndexed(games, key = { _, game -> game.id }) { index, game ->
+                BoxWithConstraints(Modifier.weight(1f).fillMaxWidth()) {
+                    val gap = if (compact) 8.dp else 12.dp
+                    // Keep two rows readable, while allowing the grid to scroll on short displays.
+                    val cardHeight = ((maxHeight - gap - 6.dp) / 2).coerceAtLeast(80.dp)
+                    LazyVerticalGrid(columns = GridCells.Fixed(columns), state = listState,
+                        modifier = Modifier.fillMaxSize().onFocusChanged { listFocused = it.hasFocus }.focusGroup(),
+                        horizontalArrangement = Arrangement.spacedBy(gap),
+                        verticalArrangement = Arrangement.spacedBy(gap), contentPadding = PaddingValues(vertical = 3.dp)) {
+                        itemsIndexed(games, key = { _, game -> game.id }) { _, game ->
                             val requester = remember(game.id) { FocusRequester() }
                             DisposableEffect(game.id) {
                                 rowFocus[game.id] = requester
                                 onDispose { rowFocus.remove(game.id) }
                             }
-                            LibraryRow(game, index + 1, selected.id == game.id, requester, rail, play, compact,
+                            LibraryCoverCard(game, selected.id == game.id, requester,
+                                rail,
+                                Modifier.height(cardHeight), compact,
                                 onFocused = { cursorId = game.id; onFocusGame(game.id); focusArea = "list"; pendingImport = false },
                                 onClick = { onOpenGame(game.id) })
                         }
                     }
-                    BoxWithConstraints(Modifier.weight(0.9f).fillMaxHeight()) {
-                        val artworkHeight = (maxHeight - if (compact) 90.dp else 118.dp).coerceIn(64.dp, 310.dp)
-                        val artworkWidth = maxWidth
-                        Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(if (compact) 6.dp else 12.dp)) {
-                            GameStageCover(selected, Modifier.size(artworkWidth, artworkHeight), showLabel = artworkWidth >= 100.dp)
-                            Text(selected.title, color = colors.textPrimary, style = MaterialTheme.typography.titleLarge,
-                                maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
-                            if (!compact) Text(gamePlaytime(selected), color = colors.textSecondary, style = MaterialTheme.typography.bodyMedium)
-                            NeonActionButton(stringResource(R.string.play_game), { onPlayGame(selected.id) }, Modifier.fillMaxWidth(),
-                                primary = true, focusRequester = play, up = filters.getValue(uiState.filter),
-                                onFocused = { focusArea = "play" })
-                        }
+                }
+                Row(Modifier.fillMaxWidth().padding(top = if (compact) 8.dp else 14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                        Text(selected.title, color = colors.textPrimary, style = MaterialTheme.typography.titleLarge,
+                            maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        if (!compact) Text(gamePlaytime(selected), color = colors.textSecondary, style = MaterialTheme.typography.bodyMedium)
                     }
+                    NeonActionButton(stringResource(R.string.play_game), { onPlayGame(selected.id) },
+                        Modifier.width(if (compact) 112.dp else 154.dp), primary = true, focusRequester = play, left = rail,
+                        up = FocusRequester.Cancel, down = FocusRequester.Cancel,
+                        onFocused = { focusArea = "play" })
                 }
             }
         }
@@ -299,25 +322,25 @@ fun PlatformScreen(
 }
 
 @Composable
-private fun LibraryRow(game: Game, position: Int, selected: Boolean, requester: FocusRequester,
-    rail: FocusRequester, play: FocusRequester, compact: Boolean, onFocused: () -> Unit, onClick: () -> Unit) {
+private fun LibraryCoverCard(game: Game, selected: Boolean, requester: FocusRequester,
+    left: FocusRequester, modifier: Modifier, compact: Boolean, onFocused: () -> Unit, onClick: () -> Unit) {
     val colors = LocalFrontendTheme.current
     var focused by remember { mutableStateOf(false) }
     val favoriteState = if (game.favorite) stringResource(R.string.favorite_saved) else ""
-    Row(Modifier.fillMaxWidth().focusRequester(requester)
-        .focusProperties { left = rail; right = play; up = FocusRequester.Cancel; down = FocusRequester.Cancel }
+    Column(modifier.fillMaxWidth().focusRequester(requester)
+        .focusProperties { this.left = left; right = FocusRequester.Cancel; up = FocusRequester.Cancel; down = FocusRequester.Cancel }
         .onFocusChanged { focused = it.isFocused; if (it.isFocused) onFocused() }
         .riftSelectionFrame(focused, selected)
         .semantics { this.selected = selected; stateDescription = favoriteState }
-        .controllerClickable(onClick = onClick).padding(if (compact) 8.dp else 12.dp),
-        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        GameArtwork(game, stringResource(R.string.artwork_description, game.title), Modifier.size(if (compact) 40.dp else 54.dp, if (compact) 46.dp else 64.dp), showLabel = false)
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(game.title, color = if (selected) colors.secondary else colors.textPrimary, style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text(listOfNotNull(game.releaseYear?.toString(), game.genre).joinToString(" · "), color = colors.textSecondary,
-                style = MaterialTheme.typography.labelMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        .controllerClickable(onClick = onClick).padding(if (compact) 5.dp else 8.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        GameArtwork(game, stringResource(R.string.artwork_description, game.title),
+            Modifier.fillMaxWidth().weight(1f), showLabel = false)
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(game.title, color = if (selected) colors.secondary else colors.textPrimary,
+                style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f))
+            if (game.favorite) Text("★", color = colors.accentText, style = MaterialTheme.typography.labelMedium)
         }
-        Text(if (game.favorite) "★" else position.toString(), color = if (game.favorite) colors.accentText else colors.textSecondary,
-            style = MaterialTheme.typography.labelMedium)
     }
 }

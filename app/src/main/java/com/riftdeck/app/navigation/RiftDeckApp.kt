@@ -95,7 +95,6 @@ fun RiftDeckApp(homeViewModel: HomeViewModel, libraryViewModel: LibraryViewModel
     }
     fun navigate(route: String) { nav.navigate(route) { launchSingleTop = true } }
     fun back() { if (!nav.popBackStack()) onExit() }
-    fun openLibrary(filter: LibraryFilter) { homeViewModel.setFilter(filter); navigate(Route.Platform) }
     val onNavigate: (DeckSection) -> Unit = navigateSection@{ section ->
         val currentSection = when (nav.currentDestination?.route) {
             Route.Home -> DeckSection.Home
@@ -108,7 +107,7 @@ fun RiftDeckApp(homeViewModel: HomeViewModel, libraryViewModel: LibraryViewModel
         if (section == currentSection) return@navigateSection
         when (section) {
             DeckSection.Home -> if (!nav.popBackStack(Route.Home, false)) navigate(Route.Home)
-            DeckSection.Library -> if (!nav.popBackStack(Route.Platform, false)) openLibrary(LibraryFilter.All)
+            DeckSection.Library -> if (!nav.popBackStack(Route.Home, false)) navigate(Route.Home)
             DeckSection.Detail -> uiState.focusedGameId?.let { navigate(Route.game(it)) }
             DeckSection.Settings -> navigate(Route.settings())
         }
@@ -134,12 +133,12 @@ fun RiftDeckApp(homeViewModel: HomeViewModel, libraryViewModel: LibraryViewModel
                 composable(Route.Home) {
                     BackHandler(enabled = !preferenceError && !launcherError && !libraryError && removeFolder == null && !searchOpen && !launchBusy && launchError == null && !historyError, onBack = onExit)
                     if (uiState.isReady) HomeScreen(uiState, homeViewModel::focusGame, homeViewModel::toggleFavorite, onOpenGame,
-                        onPlay, ::openLibrary, onNavigate, onExit, onSearch = { searchOpen = true }, onAddFolder = ::addFolder)
+                        onPlay, homeViewModel::toggleSort, onNavigate, onExit, onSearch = { searchOpen = true }, onAddFolder = ::addFolder)
                 }
                 composable(Route.Platform) {
-                    if (uiState.isReady) PlatformScreen(uiState, homeViewModel::focusGame, homeViewModel::toggleFavorite, onOpenGame,
-                        onPlay, homeViewModel::setFilter, homeViewModel::toggleSort, onNavigate, ::back,
-                        onSearch = { searchOpen = true }, onAddFolder = ::addFolder)
+                    LaunchedEffect(Unit) {
+                        if (!nav.popBackStack(Route.Home, false)) navigate(Route.Home)
+                    }
                 }
                 composable(Route.Game, arguments = listOf(navArgument("gameId") { type = NavType.LongType })) { entry ->
                     val game = uiState.games.firstOrNull { it.id == entry.arguments?.getLong("gameId") }
@@ -153,7 +152,7 @@ fun RiftDeckApp(homeViewModel: HomeViewModel, libraryViewModel: LibraryViewModel
                     )
                 }
                 composable(Route.Settings, arguments = listOf(navArgument("section") { type = NavType.StringType })) { entry ->
-                    if (uiState.isReady) SettingsScreen(entry.arguments?.getString("section") ?: "library", uiState.reducedMotion,
+                    if (uiState.isReady) SettingsScreen(uiState.defaultHomeCategory, homeViewModel::setDefaultHomeCategory, entry.arguments?.getString("section") ?: "library", uiState.reducedMotion,
                         homeViewModel::setReducedMotion, ::addFolder, onNavigate, ::back,
                         previewDelayMs = uiState.previewDelayMs, onPreviewDelay = homeViewModel::setPreviewDelay,
                         loopVideoPreviews = uiState.loopVideoPreviews, onLoopVideoPreviews = homeViewModel::setLoopVideoPreviews,
@@ -192,7 +191,9 @@ fun RiftDeckApp(homeViewModel: HomeViewModel, libraryViewModel: LibraryViewModel
             if (searchOpen) GameSearchDialog(uiState.searchQuery, onSearch = {
                 homeViewModel.setSearchQuery(it)
                 searchOpen = false
-                if (nav.currentDestination?.route != Route.Platform) openLibrary(LibraryFilter.All)
+                if (nav.currentDestination?.route != Route.Home) {
+                    if (!nav.popBackStack(Route.Home, false)) navigate(Route.Home)
+                }
             }, onDismiss = { searchOpen = false })
             if (removeFolder != null) {
                 DeckNoticeDialog(title = stringResource(R.string.remove_folder_title),

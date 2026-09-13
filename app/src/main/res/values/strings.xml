@@ -56,7 +56,7 @@
     <string name="back_to_library">Back</string>
     <string name="library_settings_description">Choose ROM folders. Matching PNG, WebP or JPG images are used as covers.</string>
     <string name="emulator_settings_description">Choose an installed app to open GBA ROMs.</string>
-    <string name="appearance_settings_description">Adjust motion and sidebar visibility.</string>
+    <string name="appearance_settings_description">Adjust interface motion.</string>
     <string name="input_settings_description">Use the D-pad or left stick to move. Every action is available with a controller; custom remapping is planned.</string>
     <string name="video_settings_description">Choose cover images or muted game videos. Videos start after a brief pause and fall back to covers when unavailable.</string>
     <string name="performance_settings_description">Reduce unnecessary preview playback while browsing. These settings apply when game videos are enabled.</string>
@@ -147,4 +147,6 @@
     <string name="preview_loop_on">Video looping: On</string>
     <string name="preview_loop_off">Video looping: Off</string>
     <string name="preview_performance_hint">Longer waits skip videos during quick browsing. Turn looping off to play once, return to the cover, and stop decoding.</string>
+    <string name="default_home_category">Default start: %1$s</string>
+    <string name="default_home_category_description">Choose Home (all games), Recently played, or Favorites. Applies on the next fresh launch; returning from a game keeps your browsing position.</string>
 </resources>

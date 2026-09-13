@@ -55,7 +55,7 @@
     <string name="back_to_library">返回</string>
     <string name="library_settings_description">选择 ROM 文件夹。同名 PNG、WebP 或 JPG 图片会作为封面。</string>
     <string name="emulator_settings_description">选择已安装的应用来打开 GBA ROM。</string>
-    <string name="appearance_settings_description">调整动效与左侧导航显示。</string>
+    <string name="appearance_settings_description">调整界面动效。</string>
     <string name="input_settings_description">方向键或左摇杆移动焦点，使用手柄即可完成操作。自定义按键映射将在后续开放。</string>
     <string name="video_settings_description">选择封面图片或静音游戏视频。停留片刻后播放，无视频时显示封面。</string>
     <string name="performance_settings_description">减少浏览时不必要的视频播放。以下设置在启用游戏视频时生效。</string>
@@ -146,4 +146,6 @@
     <string name="preview_loop_on">视频循环：开启</string>
     <string name="preview_loop_off">视频循环：关闭</string>
     <string name="preview_performance_hint">延长等待可跳过快速浏览中的视频。关闭循环后只播放一次，播完回到封面并停止解码。</string>
+    <string name="default_home_category">默认进入：%1$s</string>
+    <string name="default_home_category_description">点击切换首页（全部游戏）、最近游玩、收藏。下次全新启动时生效；从游戏返回仍保留浏览位置。</string>
 </resources>

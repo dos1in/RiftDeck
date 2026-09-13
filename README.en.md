@@ -12,17 +12,11 @@ RiftDeck is an open-source game library and emulator frontend built for KPA (KON
 
 Actively developed, with **Game Boy Advance** as the first supported platform. Core features need no account, and ROMs stay on your device.
 
-## On-device Screenshots
+## Interface Preview
 
-Home and game details running on **KONKR Pocket Advance** in landscape. These development screenshots use a sample library and placeholder artwork.
+The updated home screen uses a compact split layout: browse games on the left, view artwork and metadata on the right, and switch between all games, favorites and recent games at the top. This preview uses a sample library and placeholder artwork.
 
-**Home — continue playing, favorites and recent games**
-
-![RiftDeck home running on KONKR Pocket Advance, with a highlighted Play action and controller button hints](design-demos/screenshots/brand-assets/home-phone.png)
-
-**Game details — play, check metadata and manage favorites**
-
-![RiftDeck game details running on KONKR Pocket Advance, showing sample artwork, play history and a focused Play button](design-demos/screenshots/brand-assets/detail-phone.png)
+![Updated RiftDeck home screen with a game list on the left, artwork and metadata on the right, and controller hints along the bottom](design-demos/home-compact/A.png)
 
 ## Core Features
 

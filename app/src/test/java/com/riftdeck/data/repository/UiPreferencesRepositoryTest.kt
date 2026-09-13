@@ -163,6 +163,22 @@ class UiPreferencesRepositoryTest {
         } finally { job.cancelAndJoin() }
     }
 
+    @Test fun defaultHomeCategorySurvivesStoreRecreation() = runBlocking {
+        for (category in listOf("Recent", "Favorites", "All")) {
+            withRepository { it.setDefaultHomeCategory(category) }
+            withRepository { assertEquals(category, it.preferences.first().defaultHomeCategory) }
+        }
+    }
+
+    @Test fun unknownDefaultHomeCategoryFallsBackToAll() = runBlocking {
+        val job = SupervisorJob()
+        val store = PreferenceDataStoreFactory.create(scope = CoroutineScope(job + Dispatchers.IO)) { file() }
+        try {
+            store.edit { it[stringPreferencesKey("default_home_category")] = "unknown" }
+            assertEquals("All", UiPreferencesRepository(store).preferences.first().defaultHomeCategory)
+        } finally { job.cancelAndJoin() }
+    }
+
     private fun file() = folder.root.resolve("ui.preferences_pb")
 
     private suspend fun withRepository(block: suspend (UiPreferencesRepository) -> Unit) {

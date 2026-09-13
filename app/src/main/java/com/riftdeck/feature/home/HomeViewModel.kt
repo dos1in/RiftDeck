@@ -54,6 +54,7 @@ class HomeViewModel(
             focusedGameId = focusedId?.takeIf { id -> state.games.any { it.id == id } }
                 ?: state.recentGame?.id ?: state.games.firstOrNull()?.id,
             navigationRailExpanded = prefs.navigationRailExpanded,
+            defaultHomeCategory = prefs.defaultHomeCategory,
             reducedMotion = prefs.reducedMotion,
             videoPreviews = prefs.videoPreviews,
             previewDelayMs = prefs.previewDelayMs,
@@ -69,6 +70,7 @@ class HomeViewModel(
     fun setPreviewDelay(delayMs: Int) = updatePreference { preferencesRepository.setPreviewDelay(delayMs) }
     fun setLoopVideoPreviews(loop: Boolean) = updatePreference { preferencesRepository.setLoopVideoPreviews(loop) }
     fun setVideoPreviews(enabled: Boolean) = updatePreference { preferencesRepository.setVideoPreviews(enabled) }
+    fun setDefaultHomeCategory(value: String) = updatePreference { preferencesRepository.setDefaultHomeCategory(value) }
     fun setReducedMotion(enabled: Boolean) = updatePreference { preferencesRepository.setReducedMotion(enabled) }
     fun toggleSort() = updatePreference { preferencesRepository.setSortDescending(!uiState.value.sortDescending) }
     fun dismissPreferenceError() { mutablePreferenceError.value = false }

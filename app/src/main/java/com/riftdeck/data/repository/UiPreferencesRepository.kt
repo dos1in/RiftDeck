@@ -26,11 +26,13 @@ data class UiPreferences(
     val videoPreviews: Boolean = false,
     val previewDelayMs: Int = 650,
     val loopVideoPreviews: Boolean = true,
+    val defaultHomeCategory: String = "All",
 )
 
 class UiPreferencesRepository internal constructor(private val store: DataStore<Preferences>) {
     constructor(context: Context) : this(context.applicationContext.uiPreferences)
 
+    private val defaultHomeCategoryKey = stringPreferencesKey("default_home_category")
     private val foldersKey = stringSetPreferencesKey("rom_folders")
     private val previewDelayKey = intPreferencesKey("preview_delay_ms")
     private val loopVideoKey = booleanPreferencesKey("loop_video_previews")
@@ -43,6 +45,7 @@ class UiPreferencesRepository internal constructor(private val store: DataStore<
         if (error is IOException) emit(emptyPreferences()) else throw error
     }.map { values ->
         UiPreferences(
+            defaultHomeCategory = values[defaultHomeCategoryKey]?.takeIf { it in listOf("All", "Recent", "Favorites") } ?: "All",
             romFolders = values[foldersKey] ?: emptySet(),
             emulators = values.asMap().keys.mapNotNull { key ->
                 val platform = key.name.removePrefix("emulator_package_").toLongOrNull()
@@ -87,6 +90,10 @@ class UiPreferencesRepository internal constructor(private val store: DataStore<
     }
     suspend fun setLoopVideoPreviews(loop: Boolean) { store.edit { it[loopVideoKey] = loop } }
     suspend fun setVideoPreviews(enabled: Boolean) { store.edit { it[videoPreviewsKey] = enabled } }
+    suspend fun setDefaultHomeCategory(value: String) {
+        require(value in listOf("All", "Recent", "Favorites"))
+        store.edit { it[defaultHomeCategoryKey] = value }
+    }
     suspend fun setReducedMotion(enabled: Boolean) { store.edit { it[reducedMotionKey] = enabled } }
     suspend fun setSortDescending(enabled: Boolean) { store.edit { it[sortDescendingKey] = enabled } }
 }

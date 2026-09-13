@@ -6,6 +6,7 @@ import com.riftdeck.feature.platform.LibraryFilter
 
 @Immutable
 data class HomeUiState(
+    val defaultHomeCategory: String = "All",
     val isReady: Boolean = false,
     val games: List<Game> = emptyList(),
     val focusedGameId: Long? = null,

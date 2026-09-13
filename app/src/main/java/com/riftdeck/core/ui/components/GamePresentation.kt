@@ -69,11 +69,9 @@ fun GameStageCover(
             .riftFrame(colors.outline, colors.focusBorder, colors.secondary, focused, cut = 16.dp).padding(6.dp)) {
             GameArtwork(game, stringResource(R.string.artwork_description, game.title), Modifier.fillMaxSize()
                 .clip(CutCornerShape(topEnd = 12.dp, bottomStart = 12.dp)), showLabel = showLabel,
-                onAspectRatio = { coverRatio = it })
-            key(game.videoUri, videoEnabled) {
+                onAspectRatio = { coverRatio = it }, retainDuringLoading = true)
                 GameVideoPreview(game.videoUri, Modifier.fillMaxSize(), onAspectRatio = { videoRatio = it },
                     onFallback = { videoUnavailable = true })
-            }
         }
     }
 }

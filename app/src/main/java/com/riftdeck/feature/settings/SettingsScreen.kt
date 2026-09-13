@@ -31,7 +31,7 @@ private enum class SettingSection(val title: Int, val description: Int) {
 }
 
 @Composable
-fun SettingsScreen(initialSection: String, reducedMotion: Boolean, onReducedMotion: (Boolean) -> Unit,
+fun SettingsScreen(defaultHomeCategory: String, onDefaultHomeCategory: (String) -> Unit, initialSection: String, reducedMotion: Boolean, onReducedMotion: (Boolean) -> Unit,
     onAddFolder: () -> Unit, onNavigate: (DeckSection) -> Unit,
     onBack: () -> Unit, hasGame: Boolean, videoPreviews: Boolean, onVideoPreviews: (Boolean) -> Unit,
     previewDelayMs: Int, onPreviewDelay: (Int) -> Unit,
@@ -107,7 +107,7 @@ fun SettingsScreen(initialSection: String, reducedMotion: Boolean, onReducedMoti
                                 action, tabs[selectedIndex], panelFocused, onFocused = { panelFocused = true })
                         }
                         SettingSection.Appearance -> {
-                            AppearanceSettings(reducedMotion, onReducedMotion,
+                            AppearanceSettings(defaultHomeCategory, onDefaultHomeCategory, reducedMotion, onReducedMotion,
                                 appearanceControls, tabs[selectedIndex], onFocused = { index ->
                                     appearanceFocusIndex = index
                                     panelFocused = true
