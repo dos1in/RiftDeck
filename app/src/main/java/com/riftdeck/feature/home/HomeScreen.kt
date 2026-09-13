@@ -82,6 +82,7 @@ fun HomeScreen(
     }
     fun changeCategory(delta: Int) {
         filter = categories[(categories.indexOf(filter) + delta + categories.size) % categories.size]
+        if (!listFocused && categories.any { it.name == focusedKey }) focus.getValue(filter.name).requestFocus()
     }
     LaunchedEffect(filter) {
         if (filter == LibraryFilter.Recent && focusedKey in listOf("sort", "alphabet")) {
@@ -135,7 +136,7 @@ fun HomeScreen(
                         LibraryFilter.All -> R.string.all_games
                         LibraryFilter.Favorites -> R.string.favorites_title
                     }), { filter = category }, Modifier.width(if (compact) 86.dp else 116.dp),
-                        selected = filter == category, focusRequester = focus.getValue(category.name),
+                        selected = filter == category, emphasizeSelection = true, focusRequester = focus.getValue(category.name),
                         left = categories.getOrNull(i - 1)?.let { focus.getValue(it.name) } ?: rail,
                         right = categories.getOrNull(i + 1)?.let { focus.getValue(it.name) } ?: rail, up = FocusRequester.Cancel,
                         down = focus.getValue(if (filter == LibraryFilter.Recent) "search" else "sort"),
@@ -228,7 +229,8 @@ fun HomeScreen(
                     Column(Modifier.weight(0.6f).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         GameStageCover(game, Modifier.weight(1f).fillMaxWidth(), focus.getValue("cover"),
                             left = focus.getValue("list"), up = focus.getValue(filter.name), showLabel = false,
-                            onFocused = { focusedKey = "cover" }, onClick = { onOpenGame(game.id) })
+                            onFocused = { focusedKey = "cover" }, onClick = { onOpenGame(game.id) },
+                            positionLabel = stringResource(R.string.game_position, index + 1, games.size))
                         Text(game.title, color = colors.textPrimary, style = MaterialTheme.typography.titleLarge,
                             maxLines = 3, overflow = TextOverflow.Ellipsis, modifier = Modifier.fillMaxWidth())
                         Text(listOfNotNull(game.developer, game.releaseYear?.toString(), game.genre).joinToString(" · ")

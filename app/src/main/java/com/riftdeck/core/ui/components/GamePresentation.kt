@@ -4,6 +4,7 @@ import android.text.format.DateUtils
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -36,6 +37,7 @@ fun GameStageCover(
     showLabel: Boolean = true,
     onFocused: () -> Unit = {},
     onClick: (() -> Unit)? = null,
+    positionLabel: String? = null,
 ) {
     val colors = LocalFrontendTheme.current
     var focused by remember { mutableStateOf(false) }
@@ -72,6 +74,12 @@ fun GameStageCover(
                 onAspectRatio = { coverRatio = it }, retainDuringLoading = true)
                 GameVideoPreview(game.videoUri, Modifier.fillMaxSize(), onAspectRatio = { videoRatio = it },
                     onFallback = { videoUnavailable = true })
+            positionLabel?.let { label ->
+                Text(label, color = colors.textPrimary, style = MaterialTheme.typography.labelMedium,
+                    maxLines = 1, modifier = Modifier.align(Alignment.TopEnd).padding(8.dp)
+                        .background(colors.background.copy(alpha = 0.8f), CutCornerShape(3.dp))
+                        .padding(horizontal = 8.dp, vertical = 4.dp))
+            }
         }
     }
 }

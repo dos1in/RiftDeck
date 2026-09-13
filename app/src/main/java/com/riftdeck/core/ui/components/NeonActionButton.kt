@@ -33,6 +33,7 @@ fun NeonActionButton(
     onFocused: () -> Unit = {},
     glyph: String? = null,
     selected: Boolean = false,
+    emphasizeSelection: Boolean = false,
     onConfirm: (() -> Unit)? = null,
 ) {
     val colors = LocalFrontendTheme.current
@@ -54,7 +55,7 @@ fun NeonActionButton(
             .then(if (primary) Modifier.clip(shape).background(colors.primary, shape)
                 .riftFrame(colors.primary, if (focused) colors.textPrimary else colors.focusBorder,
                     colors.secondary, focused, cut)
-                else Modifier.riftSelectionFrame(focused, selected))
+                else Modifier.riftSelectionFrame(focused || (selected && emphasizeSelection), selected))
             .heightIn(min = 42.dp)
             .semantics { this.selected = selected; if (!enabled) disabled() }
             .controllerClickable(enabled = enabled, onConfirm = onConfirm, onClick = onClick)
