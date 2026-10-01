@@ -57,7 +57,7 @@ fun HomeScreen(
     var focusedKey by rememberSaveable { mutableStateOf("list") }
     var listFocused by remember { mutableStateOf(false) }
     var selectedId by rememberSaveable { mutableStateOf(uiState.focusedGameId) }
-    val game = games.firstOrNull { it.id == selectedId }
+    val game = selectedId?.let { id -> games.firstOrNull { it.matchesId(id) } }
         ?: games.firstOrNull { it.id == uiState.focusedGameId } ?: games.firstOrNull()
     val index = games.indexOfFirst { it.id == game?.id }.coerceAtLeast(0)
     val listState = rememberLazyListState(initialFirstVisibleItemIndex = index)

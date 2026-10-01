@@ -74,7 +74,7 @@ fun PlatformScreen(
     var focusArea by rememberSaveable { mutableStateOf("list") }
     var pendingImport by rememberSaveable { mutableStateOf(false) }
     var previousQuery by rememberSaveable { mutableStateOf(uiState.searchQuery) }
-    val selected = games.firstOrNull { it.id == cursorId } ?: games.firstOrNull()
+    val selected = cursorId?.let { id -> games.firstOrNull { it.matchesId(id) } } ?: games.firstOrNull()
 
     fun requestRow(index: Int) {
         val target = games.getOrNull(index) ?: return
@@ -131,7 +131,7 @@ fun PlatformScreen(
             withFrameNanos { }
             if (games.isNotEmpty()) {
                 focusArea = "list"
-                requestRow(games.indexOfFirst { it.id == cursorId }.coerceAtLeast(0))
+                requestRow(games.indexOf(selected).coerceAtLeast(0))
             } else {
                 focusArea = "filter"
                 search.requestFocus()
@@ -139,9 +139,10 @@ fun PlatformScreen(
             return@LaunchedEffect
         }
         if (games.isNotEmpty() && games.none { it.id == cursorId }) {
-            cursorId = games.first().id
-            onFocusGame(games.first().id)
-            if (focusArea == "list" || focusArea == "empty") requestRow(0)
+            val target = selected ?: games.first()
+            cursorId = target.id
+            onFocusGame(target.id)
+            if (focusArea == "list" || focusArea == "empty") requestRow(games.indexOf(target))
         } else if (games.isEmpty() && (focusArea == "list" || focusArea == "empty")) {
             filters.getValue(uiState.filter).requestFocus()
         }

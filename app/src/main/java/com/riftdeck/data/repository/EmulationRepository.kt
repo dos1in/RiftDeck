@@ -8,6 +8,7 @@ import com.riftdeck.core.emulator.EmulatorConfig
 import com.riftdeck.core.emulator.EmulatorLauncher
 import com.riftdeck.core.emulator.LaunchResult
 import com.riftdeck.core.emulator.RomLaunchPreparer
+import com.riftdeck.core.emulator.launchWithCopies
 import com.riftdeck.core.model.Game
 import com.riftdeck.data.database.GameDao
 import kotlinx.coroutines.CancellationException
@@ -45,7 +46,7 @@ class EmulationRepository(
         val config = preferences.preferences.first().emulators[game.platformId] ?: return@withLock LaunchResult.NotConfigured
         try { dao.finishSession(SystemClock.elapsedRealtime(), bootCount()) }
         catch (_: android.database.sqlite.SQLiteException) { mutableHistoryError.value = true }
-        val result = launcher.launch(config, game)
+        val result = launcher.launchWithCopies(config, game)
         if (result == LaunchResult.Started) {
             // Complete the history transaction even if Android recreates the frontend on departure.
             withContext(NonCancellable) {

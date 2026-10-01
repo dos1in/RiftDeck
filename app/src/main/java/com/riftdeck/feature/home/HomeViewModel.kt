@@ -51,7 +51,7 @@ class HomeViewModel(
     }.flowOn(Dispatchers.Default)
     val uiState = combine(library, focusedGameId, preferences) { state, focusedId, prefs ->
         state.copy(
-            focusedGameId = focusedId?.takeIf { id -> state.games.any { it.id == id } }
+            focusedGameId = focusedId?.let { id -> state.games.firstOrNull { it.matchesId(id) }?.id }
                 ?: state.recentGame?.id ?: state.games.firstOrNull()?.id,
             navigationRailExpanded = prefs.navigationRailExpanded,
             language = prefs.language,

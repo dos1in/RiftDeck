@@ -145,7 +145,8 @@ fun RiftDeckApp(homeViewModel: HomeViewModel, libraryViewModel: LibraryViewModel
                     }
                 }
                 composable(Route.Game, arguments = listOf(navArgument("gameId") { type = NavType.LongType })) { entry ->
-                    val game = uiState.games.firstOrNull { it.id == entry.arguments?.getLong("gameId") }
+                    val gameId = entry.arguments?.getLong("gameId")
+                    val game = gameId?.let { id -> uiState.games.firstOrNull { it.matchesId(id) } }
                     if (game != null) GameDetailScreen(game, { homeViewModel.toggleFavorite(game.id) }, { onPlay(game.id) }, onNavigate, ::back)
                     else if (uiState.isReady) DeckNoticeDialog(
                         title = stringResource(R.string.game_removed_title),

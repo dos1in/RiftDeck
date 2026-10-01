@@ -29,13 +29,21 @@ class LibraryRepository(
     private var scanJob: Job? = null
     private val operations = Mutex()
 
+    init {
+        scanJob = scope.launch { operations.withLock { scanner.identifyDuplicates() } }
+    }
+
     suspend fun addFolder(uri: Uri) = withContext(Dispatchers.IO) {
         require(DocumentsContract.isTreeUri(uri))
         resolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
         preferences.addRomFolder(uri.toString())
     }
 
-    suspend fun importRetroArch(uri: Uri) = operations.withLock { retroArchImporter.import(uri) }
+    suspend fun importRetroArch(uri: Uri) = operations.withLock {
+        val result = retroArchImporter.import(uri)
+        scanner.identifyDuplicates()
+        result
+    }
 
     fun rescan() {
         scanJob?.cancel()

@@ -26,4 +26,11 @@ data class Game(
     val genre: String?,
     val coverVersion: String? = null,
     val description: String? = null,
-)
+    val sourceGameIds: List<Long> = emptyList(),
+    val romCopies: List<RomCopy> = emptyList(),
+) {
+    fun matchesId(gameId: Long): Boolean = id == gameId || gameId in sourceGameIds
+}
+
+@Immutable
+data class RomCopy(val uri: String, val fileName: String, val fileSize: Long)

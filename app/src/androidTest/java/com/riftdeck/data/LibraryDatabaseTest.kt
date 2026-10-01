@@ -7,6 +7,9 @@ import com.riftdeck.data.database.LibraryDatabase
 import com.riftdeck.data.scanner.LibraryScanner
 import com.riftdeck.data.scanner.RomDocument
 import com.riftdeck.data.scanner.RomDocumentSource
+import com.riftdeck.data.scanner.RomFingerprintReader
+import com.riftdeck.data.scanner.romFingerprint
+import com.riftdeck.data.repository.LocalGameRepository
 import java.io.IOException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.first
@@ -23,6 +26,8 @@ class LibraryDatabaseTest {
     private var failAfter: Int? = null
     private var cancel = false
     private lateinit var scanner: LibraryScanner
+    private val fingerprintContents = mutableMapOf<String, ByteArray>()
+    private val fingerprintReads = mutableListOf<String>()
 
     @Test fun retroArchJsonAndImportedMetadataSurviveRescan() = runBlocking {
         val parsed = com.riftdeck.data.scanner.RetroArchPlaylist.parse(
@@ -57,13 +62,128 @@ class LibraryDatabaseTest {
                     onDocument(file)
                 }
             }
-        }, dao)
+        }, dao, RomFingerprintReader { document ->
+            fingerprintReads.add(document.identity)
+            fingerprintContents[document.identity]?.inputStream()?.use { romFingerprint(it, document.name) }
+        })
     }
 
     @After fun close() { database.close() }
 
     private fun file(id: Int, tree: String = "a") = RomDocument("provider:rom/$id", "content://provider/tree/$tree/document/rom/$id",
         "Game_$id.gba", 1024, 1, 1)
+
+    @Test fun identicalCopiesDisplayOnceAndFavoriteAppliesToEveryCopy() = runBlocking {
+        val original = file(1)
+        val copy = file(2, "b").copy(name = original.name, title = original.title, sortTitle = original.sortTitle)
+        files["a"] = listOf(original)
+        files["b"] = listOf(copy)
+        fingerprintContents[original.identity] = "same ROM".toByteArray()
+        fingerprintContents[copy.identity] = "same ROM".toByteArray()
+        scanner.scan(listOf("a", "b"))
+        val stored = dao.observeGames().first()
+        assertEquals(2, stored.size)
+        dao.toggleFavorite(stored[1].id)
+        dao.recordLaunch(stored[0].id, 10)
+        dao.addPlayTime(stored[0].id, 20)
+        dao.recordLaunch(stored[1].id, 100)
+        dao.addPlayTime(stored[1].id, 30)
+        val repository = LocalGameRepository(dao)
+        val game = repository.games.first().single()
+        assertEquals(stored.minOf { it.id }, game.id)
+        assertTrue(game.favorite)
+        assertEquals(2, game.playCount)
+        assertEquals(50L, game.playTimeSeconds)
+        assertEquals(100L, game.lastPlayedAt)
+        assertTrue(game.matchesId(stored[1].id))
+        repository.toggleFavorite(game.id)
+        assertTrue(dao.observeGames().first().none { it.favorite })
+        repository.toggleFavorite(game.id)
+        assertTrue(dao.observeGames().first().all { it.favorite })
+        scanner.scan(listOf("a", "b"))
+        assertEquals(2, fingerprintReads.size)
+        assertEquals(game.id, repository.games.first().single().id)
+        scanner.removeFolder("a")
+        assertEquals(copy.uri, repository.games.first().single().romUri)
+        assertTrue(repository.games.first().single().favorite)
+        assertEquals(2, repository.games.first().single().playCount)
+        assertEquals(50L, repository.games.first().single().playTimeSeconds)
+    }
+
+    @Test fun changedCopyInvalidatesItsHashAndDistinctContentRemainsVisible() = runBlocking {
+        val original = file(1)
+        val copy = file(2).copy(name = original.name)
+        files["a"] = listOf(original, copy)
+        fingerprintContents[original.identity] = "same ROM".toByteArray()
+        fingerprintContents[copy.identity] = "same ROM".toByteArray()
+        scanner.scan(listOf("a"))
+        val repository = LocalGameRepository(dao)
+        assertEquals(1, repository.games.first().size)
+        files["a"] = listOf(original, copy.copy(modifiedAt = 2))
+        fingerprintContents[copy.identity] = "new version".toByteArray()
+        scanner.scan(listOf("a"))
+        assertEquals(2, repository.games.first().size)
+        assertEquals(listOf(original.identity, copy.identity, copy.identity), fingerprintReads)
+    }
+
+    @Test fun rawAndZipCopiesAndImportedMatchingTitlesAreDeduplicated() = runBlocking {
+        val payload = "diagnostic ROM".toByteArray()
+        val zip = java.io.ByteArrayOutputStream().also { output ->
+            java.util.zip.ZipOutputStream(output).use { archive ->
+                archive.putNextEntry(java.util.zip.ZipEntry("nested/Game.gba"))
+                archive.write(payload)
+                archive.closeEntry()
+            }
+        }.toByteArray()
+        val raw = file(1).copy(name = "original.gba", size = payload.size.toLong())
+        val compressed = file(2).copy(name = "export.zip", size = zip.size.toLong())
+        dao.importBatch("a", "old", listOf(raw, compressed))
+        for (game in dao.observeGames().first()) dao.importRetroArchMetadata(game.id, "Same imported title", "same", null, null)
+        fingerprintContents[raw.identity] = payload
+        fingerprintContents[compressed.identity] = zip
+        scanner.identifyDuplicates()
+        assertEquals(1, LocalGameRepository(dao).games.first().size)
+    }
+
+    @Test fun removingACopyTransfersAnActiveSessionAndHistoryToTheRemainingRom() = runBlocking {
+        val original = file(1)
+        val copy = file(2, "b").copy(name = original.name)
+        files["a"] = listOf(original)
+        files["b"] = listOf(copy)
+        fingerprintContents[original.identity] = "same ROM".toByteArray()
+        fingerprintContents[copy.identity] = "same ROM".toByteArray()
+        scanner.scan(listOf("a", "b"))
+        val first = dao.findByIdentity(original.identity)!!
+        dao.beginSession(first.id, 100, 1000, 1)
+        scanner.removeFolder("a")
+        val remaining = dao.observeGames().first().single()
+        assertEquals(remaining.id, dao.session()!!.gameId)
+        dao.finishSession(5000, 1)
+        assertEquals(1, dao.findById(remaining.id)!!.playCount)
+        assertEquals(4L, dao.findById(remaining.id)!!.playTimeSeconds)
+    }
+
+    @Test fun backgroundAuditRepairsExistingCopiesWithoutScanningFolders() = runBlocking {
+        val original = file(1)
+        val copy = file(2).copy(name = original.name)
+        dao.importBatch("a", "old", listOf(original, copy))
+        fingerprintContents[original.identity] = "same ROM".toByteArray()
+        fingerprintContents[copy.identity] = "same ROM".toByteArray()
+        scanner.identifyDuplicates()
+        assertEquals(1, LocalGameRepository(dao).games.first().size)
+        assertEquals(2, dao.observeGames().first().size)
+    }
+
+    @Test fun unreadableCandidateDoesNotHideUnverifiedGames() = runBlocking {
+        val original = file(1)
+        files["a"] = listOf(original, file(2).copy(name = original.name))
+        scanner.scan(listOf("a"))
+        val audit = LibraryScanner(object : RomDocumentSource {
+            override suspend fun enumerate(folder: String, onDocument: suspend (RomDocument) -> Unit) = Unit
+        }, dao, RomFingerprintReader { throw IOException("Storage disconnected") })
+        audit.identifyDuplicates()
+        assertEquals(2, LocalGameRepository(dao).games.first().size)
+    }
 
     @Test fun rescanRefreshesIntroductionAndVideoWithoutLosingFavorites() = runBlocking {
         files["a"] = listOf(file(1).copy(description = "Old", videoUri = "content://video/old"))
@@ -183,6 +303,7 @@ class LibraryDatabaseTest {
         scanner.scan(listOf("a"))
         assertEquals(before, dao.observeGames().first().map { it.id })
         assertEquals(5000, scanner.state.value.discovered)
+        assertTrue(fingerprintReads.isEmpty())
     }
     @Test fun playSessionIsSettledOnlyOnceAndIgnoresStaleResume() = runBlocking {
         files["a"] = listOf(file(1))

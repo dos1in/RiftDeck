@@ -12,6 +12,7 @@ import com.riftdeck.data.repository.LocalGameRepository
 import com.riftdeck.data.repository.UiPreferencesRepository
 import com.riftdeck.data.scanner.LibraryScanner
 import com.riftdeck.data.scanner.SafRomDocumentSource
+import com.riftdeck.data.scanner.SafRomFingerprintReader
 import com.riftdeck.domain.repository.GameRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -29,7 +30,7 @@ class LauncherApplication : Application() {
     }
     val libraryRepository by lazy {
         LibraryRepository(contentResolver, uiPreferencesRepository,
-            LibraryScanner(SafRomDocumentSource(contentResolver), database.games()), applicationScope,
+            LibraryScanner(SafRomDocumentSource(contentResolver), database.games(), SafRomFingerprintReader(contentResolver)), applicationScope,
             com.riftdeck.data.repository.RetroArchImporter(contentResolver, database))
     }
 }
