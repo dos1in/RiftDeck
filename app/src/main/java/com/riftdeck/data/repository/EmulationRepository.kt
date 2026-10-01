@@ -10,6 +10,8 @@ import com.riftdeck.core.emulator.LaunchResult
 import com.riftdeck.core.emulator.RomLaunchPreparer
 import com.riftdeck.core.emulator.launchWithCopies
 import com.riftdeck.core.model.Game
+import com.riftdeck.core.sharing.SaveAccessGate
+import kotlinx.coroutines.Dispatchers
 import com.riftdeck.data.database.GameDao
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -30,12 +32,15 @@ class EmulationRepository(
     private val roms: RomLaunchPreparer,
     private val dao: GameDao,
     private val scope: CoroutineScope,
+    private val saveAccess: SaveAccessGate,
 ) {
     private val sessionLock = Mutex()
     private val mutableTargets = MutableStateFlow<List<EmulatorConfig>>(emptyList())
     val targets = mutableTargets.asStateFlow()
     private val mutableHistoryError = MutableStateFlow(false)
     val historyError = mutableHistoryError.asStateFlow()
+    private val mutablePlaying = MutableStateFlow(false)
+    val isPlaying = mutablePlaying.asStateFlow()
     private fun bootCount() = Settings.Global.getInt(context.contentResolver, Settings.Global.BOOT_COUNT, -1)
 
     fun refreshTargets() { scope.launch { mutableTargets.value = catalog.installedFor(1L) } }
@@ -44,17 +49,25 @@ class EmulationRepository(
 
     suspend fun launch(game: Game): LaunchResult = sessionLock.withLock {
         val config = preferences.preferences.first().emulators[game.platformId] ?: return@withLock LaunchResult.NotConfigured
-        try { dao.finishSession(SystemClock.elapsedRealtime(), bootCount()) }
-        catch (_: android.database.sqlite.SQLiteException) { mutableHistoryError.value = true }
-        val result = launcher.launchWithCopies(config, game)
-        if (result == LaunchResult.Started) {
-            // Complete the history transaction even if Android recreates the frontend on departure.
-            withContext(NonCancellable) {
-                try { dao.beginSession(game.id, System.currentTimeMillis(), SystemClock.elapsedRealtime(), bootCount()) }
-                catch (_: android.database.sqlite.SQLiteException) { mutableHistoryError.value = true }
+        mutablePlaying.value = true
+        var started = false
+        try {
+            withContext(Dispatchers.IO) { saveAccess.pauseForEmulator() }
+            try { dao.finishSession(SystemClock.elapsedRealtime(), bootCount()) }
+            catch (_: android.database.sqlite.SQLiteException) { mutableHistoryError.value = true }
+            val result = launcher.launchWithCopies(config, game)
+            started = result == LaunchResult.Started
+            if (started) {
+                // Complete the history transaction even if Android recreates the frontend on departure.
+                withContext(NonCancellable) {
+                    try { dao.beginSession(game.id, System.currentTimeMillis(), SystemClock.elapsedRealtime(), bootCount()) }
+                    catch (_: android.database.sqlite.SQLiteException) { mutableHistoryError.value = true }
+                }
             }
+            result
+        } finally {
+            if (!started) { mutablePlaying.value = false; saveAccess.resumeAfterEmulator() }
         }
-        result
     }
 
     fun onFrontendResumed() {
@@ -65,6 +78,8 @@ class EmulationRepository(
                 try { dao.finishSession(elapsed, boot) }
                 catch (cancelled: CancellationException) { throw cancelled }
                 catch (_: android.database.sqlite.SQLiteException) { mutableHistoryError.value = true }
+                mutablePlaying.value = false
+                saveAccess.resumeAfterEmulator()
             }
             roms.clearExpiredFiles()
         }

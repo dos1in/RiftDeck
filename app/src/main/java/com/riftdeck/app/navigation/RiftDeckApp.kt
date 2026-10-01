@@ -42,6 +42,8 @@ import com.riftdeck.feature.home.HomeViewModel
 import com.riftdeck.feature.platform.LibraryFilter
 import com.riftdeck.feature.platform.PlatformScreen
 import com.riftdeck.feature.settings.SettingsScreen
+import com.riftdeck.feature.sharing.SharingViewModel
+import com.riftdeck.feature.sharing.SharingScreen
 import com.riftdeck.core.ui.components.LocalVideoPreviews
 import com.riftdeck.core.ui.components.LocalPreviewDelayMs
 import com.riftdeck.core.ui.components.LocalLoopVideoPreviews
@@ -52,12 +54,13 @@ private object Route {
     const val Platform = "platform"
     const val Settings = "settings/{section}"
     const val Game = "game/{gameId}"
+    const val Sharing = "sharing"
     fun game(id: Long) = "game/$id"
     fun settings(section: String = "library") = "settings/$section"
 }
 
 @Composable
-fun RiftDeckApp(homeViewModel: HomeViewModel, libraryViewModel: LibraryViewModel, emulatorViewModel: EmulatorViewModel, analogActions: Flow<GameAction>, onExit: () -> Unit,
+fun RiftDeckApp(homeViewModel: HomeViewModel, libraryViewModel: LibraryViewModel, emulatorViewModel: EmulatorViewModel, sharingViewModel: SharingViewModel, analogActions: Flow<GameAction>, onExit: () -> Unit,
     homeRequests: Flow<Unit>, isDefaultHome: Boolean, onChooseHome: () -> Unit, onSystemSettings: () -> Unit,
     launcherError: Boolean, onDismissLauncherError: () -> Unit, modifier: Modifier = Modifier) {
     val colors = LocalFrontendTheme.current
@@ -72,6 +75,21 @@ fun RiftDeckApp(homeViewModel: HomeViewModel, libraryViewModel: LibraryViewModel
     val folders by libraryViewModel.folders.collectAsStateWithLifecycle()
     val scanState by libraryViewModel.scanState.collectAsStateWithLifecycle()
     val importStatus by libraryViewModel.importStatus.collectAsStateWithLifecycle()
+    val sharingState by sharingViewModel.uiState.collectAsStateWithLifecycle()
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val sharingNotifications = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { sharingViewModel.setEnabled(true) }
+    fun setSharingEnabled(enabled: Boolean) {
+        if (enabled && android.os.Build.VERSION.SDK_INT >= 33 && androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED)
+            sharingNotifications.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+        else sharingViewModel.setEnabled(enabled)
+    }
+    val sharedRomPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri -> uri?.let { sharingViewModel.chooseFolder(it, saves = false) } }
+    val sharedSavePicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri -> uri?.let { sharingViewModel.chooseFolder(it, saves = true) } }
+    fun chooseSharedFolder(saves: Boolean) {
+        try { if (saves) sharedSavePicker.launch(null) else sharedRomPicker.launch(null) }
+        catch (_: android.content.ActivityNotFoundException) { sharingViewModel.reportFolderError() }
+        catch (_: SecurityException) { sharingViewModel.reportFolderError() }
+    }
     val importPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
         uri?.let(libraryViewModel::importRetroArch)
     }
@@ -167,11 +185,21 @@ fun RiftDeckApp(homeViewModel: HomeViewModel, libraryViewModel: LibraryViewModel
                         folders = folders, scanState = scanState, onRescan = libraryViewModel::rescan,
                         onCancelScan = libraryViewModel::cancelScan, onRemoveFolder = { removeFolder = it },
                         isDefaultHome = isDefaultHome, onChooseHome = onChooseHome, onSystemSettings = onSystemSettings,
-                        importStatus = importStatus, onImportRetroArch = {
+                        importStatus = importStatus, onSharing = { navigate(Route.Sharing) }, onImportRetroArch = {
                             try { importPicker.launch(null) }
                             catch (_: android.content.ActivityNotFoundException) { libraryViewModel.reportFolderPickerError() }
                             catch (_: SecurityException) { libraryViewModel.reportFolderPickerError() }
                         })
+                }
+                composable(Route.Sharing) {
+                    BackHandler(onBack = ::back)
+                    SharingScreen(sharingState, ::setSharingEnabled,
+                        onChooseRomFolder = { chooseSharedFolder(false) }, onChooseSaveFolder = { chooseSharedFolder(true) },
+                        onAutoSync = sharingViewModel::setAutoSync, onPairingEnabled = sharingViewModel::setPairing,
+                        onPair = sharingViewModel::pair, onRefreshRoms = sharingViewModel::refreshRoms,
+                        onDownloadRom = sharingViewModel::downloadRom, onSync = sharingViewModel::sync,
+                        onForget = sharingViewModel::forget, onResolveConflict = sharingViewModel::resolveConflict,
+                        onConnectAddress = sharingViewModel::connectAddress, onBack = ::back)
                 }
             }
             if (!uiState.isReady) Text(stringResource(R.string.loading_library), color = colors.textSecondary,

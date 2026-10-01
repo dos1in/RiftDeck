@@ -24,6 +24,7 @@ The updated home screen uses a compact split layout: browse games on the left, v
 * Local `.gba` / `.zip` scanning, incremental updates, search, sorting and local covers.
 * Favorites and recent games, launch counts and estimated playtime, with selection and scroll restoration on return.
 * Saved external-emulator configuration, with the GBA.emu launch flow verified.
+* LAN handheld pairing and ROM transfers, with automatic save sync and preserved conflict copies.
 * Light and dark appearance, multiple palettes, reduced motion and optional Android Home launcher support.
 
 ## Quick Start
@@ -32,7 +33,7 @@ The updated home screen uses a compact split layout: browse games on the left, v
 2. Choose **Add ROM folder** and grant access.
 3. Select your installed emulator in **Settings → Emulators**, then choose a game to launch.
 
-Each ZIP must contain one GBA ROM. Configure the save directory in your emulator; RiftDeck does not manage saves. For local covers, place a matching image beside the ROM, such as `Game.gba` and `Game.png`, then rescan.
+Each ZIP must contain one GBA ROM. Configure the save directory in your emulator; for multi-device sync, authorize that folder and pair devices in **Settings → LAN sharing**. For local covers, place a matching image beside the ROM, such as `Game.gba` and `Game.png`, then rescan.
 
 ## Documentation
 

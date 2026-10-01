@@ -28,6 +28,7 @@ private enum class SettingSection(val title: Int, val description: Int) {
     Video(R.string.settings_video, R.string.video_settings_description),
     Performance(R.string.settings_performance, R.string.performance_settings_description),
     Launcher(R.string.settings_launcher, R.string.launcher_settings_description),
+    Sharing(R.string.sharing_title, R.string.sharing_settings_description),
     About(R.string.settings_about, R.string.about_description),
 }
 
@@ -40,9 +41,9 @@ fun SettingsScreen(language: String, onLanguage: (String) -> Unit, defaultHomeCa
     emulatorTargets: List<EmulatorConfig>, selectedEmulator: EmulatorConfig?,
     onChooseEmulator: (EmulatorConfig) -> Unit, onRefreshEmulators: () -> Unit,
     folders: Set<String>, scanState: ScanState, onRescan: () -> Unit, onCancelScan: () -> Unit, onRemoveFolder: (String) -> Unit,
-    isDefaultHome: Boolean, onChooseHome: () -> Unit, onSystemSettings: () -> Unit, onImportRetroArch: () -> Unit, importStatus: String?, modifier: Modifier = Modifier) {
+    isDefaultHome: Boolean, onChooseHome: () -> Unit, onSystemSettings: () -> Unit, onImportRetroArch: () -> Unit, importStatus: String?, onSharing: () -> Unit, modifier: Modifier = Modifier) {
     val colors = LocalFrontendTheme.current
-    var selectedIndex by rememberSaveable { mutableIntStateOf(if (initialSection == "emulators") 1 else 0) }
+    var selectedIndex by rememberSaveable { mutableIntStateOf(when (initialSection) { "emulators" -> 1; "sharing" -> SettingSection.Sharing.ordinal; else -> 0 }) }
     var panelFocused by rememberSaveable { mutableStateOf(false) }
     val tabs = remember { SettingSection.entries.map { FocusRequester() } }
     val action = remember { FocusRequester() }
@@ -99,6 +100,10 @@ fun SettingsScreen(language: String, onLanguage: (String) -> Unit, defaultHomeCa
                         Text(stringResource(section.description), color = colors.textSecondary, style = MaterialTheme.typography.bodyMedium)
                     }
                     when (section) {
+                        SettingSection.Sharing -> {
+                            NeonActionButton(stringResource(R.string.sharing_open), onSharing, Modifier.fillMaxWidth(),
+                                primary = true, focusRequester = action, left = tabs[selectedIndex], onFocused = { panelFocused = true })
+                        }
                         SettingSection.Library -> {
                             LibrarySettings(folders, scanState, onAddFolder, onRescan, onCancelScan, onRemoveFolder,
                                 action, tabs[selectedIndex], onFocused = { panelFocused = true }, onImportRetroArch = onImportRetroArch, importStatus = importStatus)

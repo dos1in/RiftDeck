@@ -12,12 +12,13 @@
 * Room library storage, favorites, recent games, sorting and name / filename search. Search includes a controller keyboard; touch input supports the system keyboard.
 * Installed-emulator selection and saved configuration. GBA.emu has been tested with an original diagnostic ROM through both SAF and ZIP extraction.
 * Launch count, last-played time and estimated session duration, with page, selection and scroll restoration when returning.
+* LAN handheld pairing, ROM transfers on request and automatic save sync with preserved conflict versions.
 
-New installations start with an empty library. Choose **Add ROM folder**, grant access in Android's folder picker, then select an installed GBA emulator in **Settings → Emulators**. Use game files you are entitled to run. Android's picker and the external emulator have their own input and storage settings. Configure a writable save directory in the emulator; RiftDeck shares ROMs with read access and does not manage emulator save files.
+New installations start with an empty library. Choose **Add ROM folder**, grant access in Android's folder picker, then select an installed GBA emulator in **Settings → Emulators**. Use game files you are entitled to run. Android's picker and the external emulator have their own input and storage settings. Configure a writable save directory in the emulator; emulator launches grant ROM read access, while save sync requires a separately authorized folder in LAN sharing.
 
 The generic emulator ZIP extraction flow requires one GBA ROM per archive. Unsafe paths, ambiguous archives and oversized files are rejected. Extracted ROMs use a private temporary cache and a limited FileProvider read grant; older files are cleaned after 24 hours when the frontend resumes or prepares another ROM.
 
-Duplicate detection currently recognizes the same document imported through overlapping folders. Identical copies with different document IDs remain separate. Playtime estimates the interval between launch and return, capped at 24 hours per session; it cannot distinguish paused or backgrounded emulator time. A successful Android launch does not guarantee the emulator accepts every ROM.
+Duplicate detection recognizes the same document imported through overlapping folders. Candidates with matching filenames or titles are checked in the background; verified identical content appears once while the database retains each location. Different versions remain separate. Playtime estimates the interval between launch and return, capped at 24 hours per session; it cannot distinguish paused or backgrounded emulator time. A successful Android launch does not guarantee the emulator accepts every ROM.
 
 Local covers are loaded with Coil. Put a matching PNG, WebP, JPG or JPEG beside the ROM, then rescan (for example, `Game.gba` and `Game.png`). Matching ignores case, preserves region tags and prefers PNG, then WebP, JPG and JPEG when several exist. Replacing or deleting a cover updates the next scan; unavailable or damaged images fall back to a geometric placeholder.
 
@@ -147,6 +148,19 @@ ROM files remain on the user's device.
 
 ## Local-First
 
+### ROM sharing and automatic save sync between handhelds
+
+Connect both handhelds to the same LAN and open **Settings → LAN sharing**. Enable sharing on each device, select writable ROM folders and the folders actually used by your emulators for saves. Save paths must match relative to the selected folders. Configure an accessible save location in your emulator first; Android prevents selecting another app's private folders.
+
+On one device choose **Allow a new pairing**, then enter its 16-character code on the other device's **Devices** page. The code lasts two minutes and is single-use. Discovery is automatic; a displayed address and port can be entered if discovery is unavailable. Paired transfers use encryption and content checksums and stay on your LAN.
+
+- Browse a paired device's ROMs and choose files to receive. Downloads are scanned into the local library; different files with the same name are preserved.
+- Enable automatic save sync on both devices. A foreground service checks every 15 seconds, preserves files while offline and retries on reconnect. Its notification offers Stop sharing.
+- Different initial saves or changes on both devices produce a conflict. Both originals and `.riftdeck-conflict-` copies are retained. Choose the local or peer version in **Conflicts**; a stale choice is rejected if the files changed. Deletions never delete files on the peer.
+- Save writes pause before launching an emulator through RiftDeck and resume on return. Stopping sharing cancels transfers. Configuration, pairings and sync history persist; reopening the app restores enabled sharing after process termination.
+
+Supported ROMs are `.gba` / `.zip`, up to 2 GiB per file. Common battery saves and save states are supported up to 64 MiB per file. Only supported files in the selected save folder are synchronized; conflict copies are excluded from automatic sync. The SAF provider must support creation and rename; a failed safe replacement leaves the original intact.
+
 RiftDeck is designed as a local-first application.
 
 Core functionality does not require an account or online service.
@@ -161,7 +175,7 @@ Metadata services may optionally be used to retrieve information such as:
 * descriptions
 * release information
 
-RiftDeck does not upload ROM files.
+RiftDeck does not upload ROM files to online services; ROM transfers take place only between paired LAN devices.
 
 ## Roadmap
 

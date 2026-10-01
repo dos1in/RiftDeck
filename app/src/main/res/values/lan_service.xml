@@ -1,0 +1,6 @@
+<resources>
+    <string name="lan_notification_channel">Nearby handhelds</string>
+    <string name="lan_notification_title">RiftDeck LAN sharing is on</string>
+    <string name="lan_notification_message">Paired handhelds can share ROMs and synchronize saves.</string>
+    <string name="lan_notification_stop">Stop sharing</string>
+</resources>

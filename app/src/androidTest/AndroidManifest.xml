@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <provider
+            android:name="com.riftdeck.data.sharing.SharingTestDocumentsProvider"
+            android:authorities="com.riftdeck.tests.sharing.documents"
+            android:exported="true"
+            android:grantUriPermissions="true"
+            android:permission="android.permission.MANAGE_DOCUMENTS" />
+        <provider
+            android:name="com.riftdeck.data.sharing.SharingTestControlProvider"
+            android:authorities="com.riftdeck.tests.sharing.control"
+            android:exported="true" />
+    </application>
+</manifest>

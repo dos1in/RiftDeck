@@ -17,8 +17,12 @@ import com.riftdeck.domain.repository.GameRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import com.riftdeck.data.repository.SharingPreferencesRepository
+import com.riftdeck.data.repository.SharingRepository
 
 class LauncherApplication : Application() {
+    private val saveAccess by lazy { com.riftdeck.core.sharing.SaveAccessGate() }
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     val database by lazy { Room.databaseBuilder(this, LibraryDatabase::class.java, "library.db").build() }
     val uiPreferencesRepository by lazy { UiPreferencesRepository(this) }
@@ -26,11 +30,15 @@ class LauncherApplication : Application() {
     private val romLaunchPreparer by lazy { RomLaunchPreparer(this) }
     val emulationRepository by lazy {
         EmulationRepository(this, uiPreferencesRepository, EmulatorCatalog(this),
-            AndroidEmulatorLauncher(this, romLaunchPreparer), romLaunchPreparer, database.games(), applicationScope)
+            AndroidEmulatorLauncher(this, romLaunchPreparer), romLaunchPreparer, database.games(), applicationScope, saveAccess)
     }
     val libraryRepository by lazy {
         LibraryRepository(contentResolver, uiPreferencesRepository,
             LibraryScanner(SafRomDocumentSource(contentResolver), database.games(), SafRomFingerprintReader(contentResolver)), applicationScope,
             com.riftdeck.data.repository.RetroArchImporter(contentResolver, database))
     }
+    val sharingRepository by lazy {
+        SharingRepository(this, SharingPreferencesRepository(this), libraryRepository, database.games(), emulationRepository, applicationScope, saveAccess)
+    }
+    fun stopSharingSession(owner: String) { applicationScope.launch { sharingRepository.stop(owner) } }
 }
