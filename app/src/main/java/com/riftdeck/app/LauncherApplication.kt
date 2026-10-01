@@ -26,6 +26,7 @@ class LauncherApplication : Application() {
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     val database by lazy { Room.databaseBuilder(this, LibraryDatabase::class.java, "library.db").build() }
     val uiPreferencesRepository by lazy { UiPreferencesRepository(this) }
+    val updateRepository by lazy { com.riftdeck.data.repository.AppUpdateRepository.create(this, applicationScope) }
     val gameRepository: GameRepository by lazy { LocalGameRepository(database.games()) }
     private val romLaunchPreparer by lazy { RomLaunchPreparer(this) }
     val emulationRepository by lazy {

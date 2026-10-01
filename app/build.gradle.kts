@@ -13,14 +13,34 @@ android {
         applicationId = "com.riftdeck"
         minSdk = 29
         targetSdk = 36
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = providers.gradleProperty("appVersionCode").orElse("1").get().toInt().also {
+            require(it in 1..2_100_000_000) { "appVersionCode must be a positive Android version code" }
+        }
+        versionName = providers.gradleProperty("appVersionName").orElse("0.1.0").get().also {
+            require(it.matches(Regex("(0|[1-9][0-9]{0,8})\\.(0|[1-9][0-9]{0,8})\\.(0|[1-9][0-9]{0,8})"))) {
+                "appVersionName must be a stable major.minor.patch version"
+            }
+        }
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = if (providers.gradleProperty("updateUiFixtures").orNull == "true") {
+            "com.riftdeck.UpdateUiFixtureRunner"
+        } else {
+            "androidx.test.runner.AndroidJUnitRunner"
+        }
     }
 
+    val releaseKeyStore = providers.environmentVariable("RIFTDECK_SIGNING_KEYSTORE").orNull
+    if (releaseKeyStore != null) {
+        signingConfigs.create("officialRelease") {
+            storeFile = file(releaseKeyStore)
+            storePassword = providers.environmentVariable("RIFTDECK_SIGNING_STORE_PASSWORD").get()
+            keyAlias = providers.environmentVariable("RIFTDECK_SIGNING_KEY_ALIAS").get()
+            keyPassword = providers.environmentVariable("RIFTDECK_SIGNING_KEY_PASSWORD").get()
+        }
+    }
     buildTypes {
         release {
+            if (releaseKeyStore != null) signingConfig = signingConfigs.getByName("officialRelease")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -40,6 +60,7 @@ android {
     }
 
     sourceSets.getByName("androidTest").assets.srcDir("$projectDir/schemas")
+    sourceSets.getByName("androidTest").assets.srcDir(layout.buildDirectory.dir("generated/update-fixtures-assets"))
 
     packaging {
         resources.excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -80,3 +101,22 @@ dependencies {
 }
 
 ksp { arg("room.schemaLocation", "$projectDir/schemas") }
+
+// Small manifest-only APKs exercise PackageManager certificate and version validation.
+val generateUpdateTestFixtures by tasks.registering(Exec::class) {
+    dependsOn("validateSigningDebug")
+    val output = layout.buildDirectory.dir("generated/update-fixtures-assets/update-fixtures")
+    inputs.file(rootProject.file("tools/test-fixtures/make_update_apks.py"))
+    inputs.file(android.signingConfigs.getByName("debug").storeFile!!)
+    inputs.property("versionCode", android.defaultConfig.versionCode!!)
+    inputs.property("versionName", android.defaultConfig.versionName!!)
+    outputs.dir(output)
+    commandLine("python3", rootProject.file("tools/test-fixtures/make_update_apks.py"),
+        "--sdk", android.sdkDirectory, "--keystore", android.signingConfigs.getByName("debug").storeFile!!,
+        "--base-code", android.defaultConfig.versionCode!!, "--base-version", android.defaultConfig.versionName!!,
+        "--output", output.get().asFile)
+}
+tasks.matching { it.name in setOf("mergeDebugAndroidTestAssets", "generateDebugAndroidTestLintModel",
+    "lintAnalyzeDebugAndroidTest") }.configureEach {
+    dependsOn(generateUpdateTestFixtures)
+}

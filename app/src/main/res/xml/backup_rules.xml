@@ -1,4 +1,5 @@
 <full-backup-content>
     <exclude domain="file" path="datastore/lan_sharing.preferences_pb" />
     <exclude domain="file" path="sharing-recovery/" />
+    <exclude domain="file" path="updates/" />
 </full-backup-content>

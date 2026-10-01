@@ -31,6 +31,7 @@ import com.riftdeck.feature.home.HomeViewModelFactory
 import com.riftdeck.feature.settings.LibraryViewModel
 import com.riftdeck.feature.emulator.EmulatorViewModel
 import com.riftdeck.feature.sharing.SharingViewModel
+import com.riftdeck.feature.update.UpdateViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 
@@ -64,6 +65,7 @@ class MainActivity : ComponentActivity() {
         previewScreen.resume()
         defaultHome = homeLauncher.isDefault()
         (application as LauncherApplication).emulationRepository.onFrontendResumed()
+        (application as LauncherApplication).updateRepository.onForeground()
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -108,6 +110,8 @@ class MainActivity : ComponentActivity() {
             val emulatorViewModel: EmulatorViewModel = viewModel(factory = emulatorFactory)
             val sharingFactory = remember(launcher) { SharingViewModel.Factory(launcher.sharingRepository) }
             val sharingViewModel: SharingViewModel = viewModel(factory = sharingFactory)
+            val updateFactory = remember(launcher) { UpdateViewModel.Factory(launcher.updateRepository) }
+            val updateViewModel: UpdateViewModel = viewModel(factory = updateFactory)
             val screenActive by previewScreen.active.collectAsStateWithLifecycle()
             val uiState by homeViewModel.uiState.collectAsStateWithLifecycle()
             AppLanguage(uiState.language) {
@@ -118,6 +122,7 @@ class MainActivity : ComponentActivity() {
                     libraryViewModel = libraryViewModel,
                     emulatorViewModel = emulatorViewModel,
                     sharingViewModel = sharingViewModel,
+                    updateViewModel = updateViewModel,
                     analogActions = gamepadInputManager.actions,
                     onExit = {
                         if (!defaultHome && !intent.hasCategory(Intent.CATEGORY_HOME)) finish()

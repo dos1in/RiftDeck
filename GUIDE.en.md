@@ -161,6 +161,16 @@ On one device choose **Allow a new pairing**, then enter its 16-character code o
 
 Supported ROMs are `.gba` / `.zip`, up to 2 GiB per file. Common battery saves and save states are supported up to 64 MiB per file. Only supported files in the selected save folder are synchronized; conflict copies are excluded from automatic sync. The SAF provider must support creation and rename; a failed safe replacement leaves the original intact.
 
+### Automatic APK updates
+
+By default, entering or returning to the frontend checks the latest stable GitHub release in the background. Successful checks are limited to once per 24 hours; failed network checks retry after at least one hour. Checks do not block the library, download APKs or install them automatically. A notice appears on Home when other dialogs are closed, and deferring a version suppresses repeated notices for that version.
+
+**Settings → About** provides manual checks, the automatic-check toggle, release notes, download cancellation and installation. Downloads are checked for SHA-256, size, package identity, Android compatibility, increasing version code and signing compatibility before Android asks for installation confirmation. If permission is required, allow RiftDeck to install unknown apps and choose Install APK again after returning. Cancelling installation leaves the existing app usable; verified downloads survive process recreation.
+
+The source is public `dos1in/RiftDeck` GitHub Releases. Only stable `vmajor.minor.patch` tags with a compatible APK and GitHub SHA-256 digest are accepted. Debug, unsigned, prerelease and ambiguous assets are excluded. An unavailable release is reported explicitly. Checks request release information without sending ROMs, saves or folder contents.
+
+Publishers must use a signing key compatible with existing installations and increase Android's `versionCode`. The manual **Publish Android release** workflow tests and publishes signed APKs after signing Secrets and version inputs are configured; see [.github/CI.md](.github/CI.md). Local builds accept `-PappVersionName=0.1.1 -PappVersionCode=2`. Without signing configuration, a Release build remains unsigned and cannot be used for an in-app installation.
+
 RiftDeck is designed as a local-first application.
 
 Core functionality does not require an account or online service.

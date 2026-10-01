@@ -30,6 +30,8 @@ jobs:
         run: sdkmanager 'platforms;android-36' 'build-tools;35.0.0'
       - name: Test profile conversion
         run: python3 -m unittest discover -s tools/performance -p 'test_*.py' -v
+      - name: Test release version validation
+        run: python3 -m unittest discover -s tools/release -p 'test_*.py' -v
       - name: Unit tests, lint and APK builds
         run: ./gradlew :app:testDebugUnitTest :app:lintDebug :app:assembleDebug :app:assembleRelease :app:assembleDebugAndroidTest --continue --no-daemon --console=plain
       - name: Upload test and lint reports
@@ -50,7 +52,7 @@ jobs:
           retention-days: 7
 
   instrumentation:
-    name: Database integration (API 31)
+    name: Android integration (API 31)
     runs-on: ubuntu-latest
     timeout-minutes: 35
     steps:
@@ -69,14 +71,14 @@ jobs:
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
-      - name: Run database integration tests
+      - name: Run Android integration tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 31
           target: default
           arch: x86_64
           disable-animations: true
-          script: ./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.riftdeck.data.LibraryDatabaseTest --no-daemon --console=plain
+          script: ./gradlew :app:connectedDebugAndroidTest --no-daemon --console=plain
       - name: Upload instrumentation reports
         if: always()
         uses: actions/upload-artifact@v4

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="update_source_hint">Updates come from stable releases in the official RiftDeck GitHub repository.</string>
+    <string name="update_check_now">Check for updates</string>
+    <string name="update_checking">Checking for updates…</string>
+    <string name="update_auto_on">Automatic update checks: on</string>
+    <string name="update_auto_off">Automatic update checks: off</string>
+    <string name="update_auto_hint">Check when you return to RiftDeck and show a notice when a new version is available.</string>
+    <string name="update_last_checked">Last checked: %1$s</string>
+    <string name="update_release_info">Version %1$s · %2$.1f MiB</string>
+    <string name="update_download">Download APK</string>
+    <string name="update_cancel_download">Cancel download</string>
+    <string name="update_install">Install APK</string>
+    <string name="update_install_hint">Android will ask you to confirm the installation.</string>
+    <string name="update_release_notes">Read release notes</string>
+    <string name="update_notes_title">Release notes · %1$s</string>
+    <string name="update_no_notes">No release notes were provided for this version.</string>
+    <string name="update_notes_close">Close release notes</string>
+    <string name="update_download_progress">%1$d%% · %2$.1f / %3$.1f MiB</string>
+    <string name="update_download_bytes">%1$.1f MiB downloaded</string>
+    <string name="update_status_idle">Ready to check for updates</string>
+    <string name="update_status_available">A new version is available</string>
+    <string name="update_status_latest">You have the latest stable version</string>
+    <string name="update_status_no_release">No compatible APK release is available yet</string>
+    <string name="update_status_downloading">Downloading update…</string>
+    <string name="update_status_ready">APK verified and ready to install</string>
+    <string name="update_status_error">Update could not be completed</string>
+    <string name="update_error_network">Cannot reach the update server. Check your network and try again.</string>
+    <string name="update_error_storage">Cannot save the update. Free some storage and download again.</string>
+    <string name="update_error_invalid_apk">APK validation failed. Check for updates and download again.</string>
+    <string name="update_error_signature">The APK has a different signing key. Choose an APK signed with the same key as your installed RiftDeck.</string>
+    <string name="update_error_permission">Allow RiftDeck to install apps in Android settings, then return and choose “Install APK” again.</string>
+    <string name="update_error_installer">Android cannot open the installer. Check the system app installation settings and try again.</string>
+    <string name="update_available_title">RiftDeck update available</string>
+    <string name="update_available_message">Version %1$s is available. Open About to view release notes and download the APK.</string>
+    <string name="update_open_settings">View update</string>
+    <string name="update_later">Later</string>
+</resources>

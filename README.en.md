@@ -25,6 +25,7 @@ The updated home screen uses a compact split layout: browse games on the left, v
 * Favorites and recent games, launch counts and estimated playtime, with selection and scroll restoration on return.
 * Saved external-emulator configuration, with the GBA.emu launch flow verified.
 * LAN handheld pairing and ROM transfers, with automatic save sync and preserved conflict copies.
+* APK updates: automatic GitHub release checks, manual checks, verified downloads and system installation.
 * Light and dark appearance, multiple palettes, reduced motion and optional Android Home launcher support.
 
 ## Quick Start

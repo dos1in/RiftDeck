@@ -25,6 +25,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 import com.riftdeck.R
 import com.riftdeck.core.input.GameAction
@@ -44,6 +45,11 @@ import com.riftdeck.feature.platform.PlatformScreen
 import com.riftdeck.feature.settings.SettingsScreen
 import com.riftdeck.feature.sharing.SharingViewModel
 import com.riftdeck.feature.sharing.SharingScreen
+import com.riftdeck.feature.update.UpdateViewModel
+import com.riftdeck.feature.update.UpdateAvailableDialog
+import com.riftdeck.core.update.AndroidUpdateInstaller
+import com.riftdeck.core.update.InstallResult
+import com.riftdeck.data.repository.UpdateError
 import com.riftdeck.core.ui.components.LocalVideoPreviews
 import com.riftdeck.core.ui.components.LocalPreviewDelayMs
 import com.riftdeck.core.ui.components.LocalLoopVideoPreviews
@@ -60,11 +66,12 @@ private object Route {
 }
 
 @Composable
-fun RiftDeckApp(homeViewModel: HomeViewModel, libraryViewModel: LibraryViewModel, emulatorViewModel: EmulatorViewModel, sharingViewModel: SharingViewModel, analogActions: Flow<GameAction>, onExit: () -> Unit,
+fun RiftDeckApp(homeViewModel: HomeViewModel, libraryViewModel: LibraryViewModel, emulatorViewModel: EmulatorViewModel, sharingViewModel: SharingViewModel, updateViewModel: UpdateViewModel, analogActions: Flow<GameAction>, onExit: () -> Unit,
     homeRequests: Flow<Unit>, isDefaultHome: Boolean, onChooseHome: () -> Unit, onSystemSettings: () -> Unit,
     launcherError: Boolean, onDismissLauncherError: () -> Unit, modifier: Modifier = Modifier) {
     val colors = LocalFrontendTheme.current
     val nav = rememberNavController()
+    val currentEntry by nav.currentBackStackEntryAsState()
     val uiState by homeViewModel.uiState.collectAsStateWithLifecycle()
     val preferenceError by homeViewModel.preferenceError.collectAsStateWithLifecycle()
     val emulatorTargets by emulatorViewModel.targets.collectAsStateWithLifecycle()
@@ -76,7 +83,24 @@ fun RiftDeckApp(homeViewModel: HomeViewModel, libraryViewModel: LibraryViewModel
     val scanState by libraryViewModel.scanState.collectAsStateWithLifecycle()
     val importStatus by libraryViewModel.importStatus.collectAsStateWithLifecycle()
     val sharingState by sharingViewModel.uiState.collectAsStateWithLifecycle()
+    val updateState by updateViewModel.uiState.collectAsStateWithLifecycle()
+    var updateAboutVisible by remember { mutableStateOf(false) }
+    LaunchedEffect(updateAboutVisible, updateState.prompt) {
+        if (updateAboutVisible && updateState.prompt) updateViewModel.dismissPrompt()
+    }
     val context = androidx.compose.ui.platform.LocalContext.current
+    val updateInstaller = remember(context) { AndroidUpdateInstaller(context) }
+    fun installUpdate() {
+        val activity = context.findActivity()
+        if (activity == null) { updateViewModel.reportInstallError(UpdateError.InstallerUnavailable); return }
+        updateViewModel.prepareInstall { apk ->
+            when (updateInstaller.install(activity, apk)) {
+                InstallResult.PermissionRequired -> updateViewModel.reportInstallError(UpdateError.PermissionRequired)
+                InstallResult.Unavailable -> updateViewModel.reportInstallError(UpdateError.InstallerUnavailable)
+                InstallResult.Started -> Unit
+            }
+        }
+    }
     val sharingNotifications = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { sharingViewModel.setEnabled(true) }
     fun setSharingEnabled(enabled: Boolean) {
         if (enabled && android.os.Build.VERSION.SDK_INT >= 33 && androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED)
@@ -117,6 +141,9 @@ fun RiftDeckApp(homeViewModel: HomeViewModel, libraryViewModel: LibraryViewModel
     }
     fun navigate(route: String) { nav.navigate(route) { launchSingleTop = true } }
     fun back() { if (!nav.popBackStack()) onExit() }
+    val showUpdateNotice = currentEntry?.destination?.route == Route.Home && updateState.autoCheck && updateState.prompt && updateState.release != null && uiState.isReady &&
+        !updateAboutVisible && !preferenceError && !launcherError && !libraryError && removeFolder == null &&
+        !searchOpen && !launchBusy && launchError == null && !historyError
     val onNavigate: (DeckSection) -> Unit = navigateSection@{ section ->
         val currentSection = when (nav.currentDestination?.route) {
             Route.Home -> DeckSection.Home
@@ -142,7 +169,7 @@ fun RiftDeckApp(homeViewModel: HomeViewModel, libraryViewModel: LibraryViewModel
         LocalVideoPreviews provides (uiState.videoPreviews && !launchBusy && launchError == null),
         LocalNavigationRail provides NavigationRailState(uiState.navigationRailExpanded, homeViewModel::setNavigationRailExpanded),
         LocalAnalogActions provides analogActions, LocalReducedMotion provides uiState.reducedMotion,
-        LocalControllerInputEnabled provides (!preferenceError && !launcherError && !libraryError && removeFolder == null && !searchOpen && !launchBusy && launchError == null && !historyError)) {
+        LocalControllerInputEnabled provides (!showUpdateNotice && !preferenceError && !launcherError && !libraryError && removeFolder == null && !searchOpen && !launchBusy && launchError == null && !historyError)) {
         // Transient system bars overlay the immersive UI instead of resizing it as they hide.
         // Hardware cutouts and an explicitly opened keyboard still need safe space.
         val contentInsets = WindowInsets.displayCutout.union(WindowInsets.waterfall).union(WindowInsets.ime)
@@ -185,6 +212,10 @@ fun RiftDeckApp(homeViewModel: HomeViewModel, libraryViewModel: LibraryViewModel
                         folders = folders, scanState = scanState, onRescan = libraryViewModel::rescan,
                         onCancelScan = libraryViewModel::cancelScan, onRemoveFolder = { removeFolder = it },
                         isDefaultHome = isDefaultHome, onChooseHome = onChooseHome, onSystemSettings = onSystemSettings,
+                        updateState = updateState, onCheckUpdate = updateViewModel::check,
+                        onAutoCheckUpdates = updateViewModel::setAutoCheck, onDownloadUpdate = updateViewModel::download,
+                        onCancelUpdate = updateViewModel::cancelDownload, onInstallUpdate = ::installUpdate,
+                        onAboutVisible = { updateAboutVisible = it },
                         importStatus = importStatus, onSharing = { navigate(Route.Sharing) }, onImportRetroArch = {
                             try { importPicker.launch(null) }
                             catch (_: android.content.ActivityNotFoundException) { libraryViewModel.reportFolderPickerError() }
@@ -240,6 +271,9 @@ fun RiftDeckApp(homeViewModel: HomeViewModel, libraryViewModel: LibraryViewModel
                     onConfirm = { removeFolder?.let(libraryViewModel::removeFolder); removeFolder = null },
                     onDismiss = { removeFolder = null }, focusCancel = true)
             }
+            if (showUpdateNotice) UpdateAvailableDialog(updateState,
+                onOpenSettings = { updateViewModel.dismissPrompt(); navigate(Route.settings("about")) },
+                onLater = updateViewModel::dismissPrompt)
             if (preferenceError || launcherError || libraryError) {
                 DeckNoticeDialog(
                     title = stringResource(when {
@@ -259,4 +293,10 @@ fun RiftDeckApp(homeViewModel: HomeViewModel, libraryViewModel: LibraryViewModel
             }
         }
     }
+}
+
+private fun android.content.Context.findActivity(): android.app.Activity? = when (this) {
+    is android.app.Activity -> this
+    is android.content.ContextWrapper -> baseContext.takeIf { it !== this }?.findActivity()
+    else -> null
 }

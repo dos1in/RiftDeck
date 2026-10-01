@@ -20,7 +20,7 @@ import com.riftdeck.core.input.GameAction
 import com.riftdeck.core.ui.theme.LocalFrontendTheme
 
 @Composable
-fun DeckNoticeDialog(title: String, message: String, primaryLabel: String, onConfirm: () -> Unit, onDismiss: () -> Unit, focusCancel: Boolean = false, showBackButton: Boolean = true) {
+fun DeckNoticeDialog(title: String, message: String, primaryLabel: String, onConfirm: () -> Unit, onDismiss: () -> Unit, focusCancel: Boolean = false, showBackButton: Boolean = true, secondaryLabel: String? = null) {
     val colors = LocalFrontendTheme.current
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         val confirm = remember { FocusRequester() }
@@ -39,7 +39,7 @@ fun DeckNoticeDialog(title: String, message: String, primaryLabel: String, onCon
                 Text(message, color = colors.textSecondary, style = MaterialTheme.typography.bodyLarge)
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     NeonActionButton(primaryLabel, onConfirm, Modifier.weight(1f), primary = true, focusRequester = confirm, right = if (showBackButton) cancel else null)
-                    if (showBackButton) NeonActionButton(stringResource(R.string.hint_back), onDismiss, Modifier.weight(0.6f), focusRequester = cancel, left = confirm)
+                    if (showBackButton) NeonActionButton(secondaryLabel ?: stringResource(R.string.hint_back), onDismiss, Modifier.weight(0.6f), focusRequester = cancel, left = confirm)
                 }
             }
         }
