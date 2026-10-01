@@ -115,7 +115,8 @@ fun HomeScreen(
                 GameAction.Up, GameAction.Down -> if (listFocused && game != null) {
                     if (action == GameAction.Up && index == 0) false
                     else {
-                        games.getOrNull(index + if (action == GameAction.Up) -1 else 1)?.let { select(it.id) }
+                        val nextIndex = if (action == GameAction.Up) index - 1 else (index + 1) % games.size
+                        select(games[nextIndex].id)
                         true
                     }
                 } else false
