@@ -103,6 +103,11 @@
     <string name="library_error_message">Check storage access and free space, then select the folder again.</string>
     <string name="search_games">Search games</string>
     <string name="search_hint">Title or ROM filename</string>
+    <string name="search_system_input">Chinese / System input</string>
+    <string name="search_controller_keyboard">Controller keyboard</string>
+    <string name="search_system_input_hint">Choose Chinese in your system keyboard. If it stays hidden, enable the on-screen keyboard in Android input settings. B returns to the controller keyboard.</string>
+    <string name="search_keyboard_settings">Keyboard settings</string>
+    <string name="search_keyboard_unavailable">Open Android Settings to enable a Chinese keyboard and the on-screen keyboard. B returns to the controller keyboard.</string>
     <string name="search_delete">Delete</string>
     <string name="search_space">Space</string>
     <string name="search_clear">Clear</string>

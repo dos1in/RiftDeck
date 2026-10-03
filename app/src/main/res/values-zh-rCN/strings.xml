@@ -102,6 +102,11 @@
     <string name="library_error_message">请检查存储授权和剩余空间，然后重新选择文件夹。</string>
     <string name="search_games">搜索游戏</string>
     <string name="search_hint">游戏名称或 ROM 文件名</string>
+    <string name="search_system_input">中文 / 系统输入</string>
+    <string name="search_controller_keyboard">手柄键盘</string>
+    <string name="search_system_input_hint">请在系统键盘中切换中文。键盘未显示时，请在 Android 输入设置中启用屏幕键盘。按 B 返回手柄键盘。</string>
+    <string name="search_keyboard_settings">键盘设置</string>
+    <string name="search_keyboard_unavailable">请打开 Android 设置，启用中文输入法和屏幕键盘。按 B 返回手柄键盘。</string>
     <string name="search_delete">删除</string>
     <string name="search_space">空格</string>
     <string name="search_clear">清空</string>
