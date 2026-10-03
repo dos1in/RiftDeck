@@ -202,6 +202,8 @@ Use JDK 17 and Android SDK 36. The repository includes the Gradle wrapper; Room 
 
 The second command requires a connected Android test device or emulator. Use an isolated test device for instrumentation. See `tools/test-fixtures` for a source-built diagnostic ROM without third-party game data.
 
+For development across computers, securely distribute the same signing key and fill in the local signing configuration on each machine. Debug and Release use the same signing configuration. The key and local password configuration are excluded from Git. See [.github/CI.md](.github/CI.md) for configuration, environment overrides and certificate checks.
+
 ## Contributing
 
 RiftDeck is still in an early stage of development.

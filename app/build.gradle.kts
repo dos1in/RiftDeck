@@ -1,3 +1,6 @@
+import java.io.File
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -29,18 +32,52 @@ android {
         }
     }
 
-    val releaseKeyStore = providers.environmentVariable("RIFTDECK_SIGNING_KEYSTORE").orNull
-    if (releaseKeyStore != null) {
-        signingConfigs.create("officialRelease") {
-            storeFile = file(releaseKeyStore)
-            storePassword = providers.environmentVariable("RIFTDECK_SIGNING_STORE_PASSWORD").get()
-            keyAlias = providers.environmentVariable("RIFTDECK_SIGNING_KEY_ALIAS").get()
-            keyPassword = providers.environmentVariable("RIFTDECK_SIGNING_KEY_PASSWORD").get()
+    // Keep the key outside Git. Environment configuration takes precedence as a whole.
+    val environmentKeyStore = providers.environmentVariable("RIFTDECK_SIGNING_KEYSTORE").orNull
+    val localSigningText = if (environmentKeyStore == null) {
+        providers.fileContents(rootProject.layout.projectDirectory.file("signing.properties")).asText.orNull
+    } else {
+        null
+    }
+    val localSigning = Properties().apply {
+        localSigningText?.reader()?.use { load(it) }
+    }
+    val fixedSigning = if (environmentKeyStore != null || localSigningText != null) {
+        fun signingValue(property: String, environment: String): String {
+            val value = if (environmentKeyStore != null) {
+                providers.environmentVariable(environment).orNull
+            } else {
+                localSigning.getProperty(property)
+            }
+            require(!value.isNullOrBlank()) {
+                "Missing signing configuration: set $environment or signing.properties $property in the selected source"
+            }
+            return value
         }
+        val keyStorePath = signingValue("storeFile", "RIFTDECK_SIGNING_KEYSTORE")
+        val keyStoreFile = if (keyStorePath.startsWith("~/")) {
+            File(System.getProperty("user.home"), keyStorePath.removePrefix("~/"))
+        } else {
+            rootProject.file(keyStorePath)
+        }
+        require(keyStoreFile.isFile && keyStoreFile.canRead()) {
+            "Configured signing keystore is missing or unreadable; check RIFTDECK_SIGNING_KEYSTORE or signing.properties storeFile"
+        }
+        signingConfigs.create("fixedSigning") {
+            storeFile = keyStoreFile
+            storePassword = signingValue("storePassword", "RIFTDECK_SIGNING_STORE_PASSWORD")
+            keyAlias = signingValue("keyAlias", "RIFTDECK_SIGNING_KEY_ALIAS")
+            keyPassword = signingValue("keyPassword", "RIFTDECK_SIGNING_KEY_PASSWORD")
+        }
+    } else {
+        null
     }
     buildTypes {
+        debug {
+            if (fixedSigning != null) signingConfig = fixedSigning
+        }
         release {
-            if (releaseKeyStore != null) signingConfig = signingConfigs.getByName("officialRelease")
+            if (fixedSigning != null) signingConfig = fixedSigning
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -105,14 +142,19 @@ ksp { arg("room.schemaLocation", "$projectDir/schemas") }
 // Small manifest-only APKs exercise PackageManager certificate and version validation.
 val generateUpdateTestFixtures by tasks.registering(Exec::class) {
     dependsOn("validateSigningDebug")
+    val debugSigning = android.buildTypes.getByName("debug").signingConfig!!
     val output = layout.buildDirectory.dir("generated/update-fixtures-assets/update-fixtures")
     inputs.file(rootProject.file("tools/test-fixtures/make_update_apks.py"))
-    inputs.file(android.signingConfigs.getByName("debug").storeFile!!)
+    inputs.file(debugSigning.storeFile!!)
+    inputs.property("keyAlias", debugSigning.keyAlias!!)
     inputs.property("versionCode", android.defaultConfig.versionCode!!)
     inputs.property("versionName", android.defaultConfig.versionName!!)
     outputs.dir(output)
+    environment("RIFTDECK_FIXTURE_STORE_PASSWORD", debugSigning.storePassword!!)
+    environment("RIFTDECK_FIXTURE_KEY_PASSWORD", debugSigning.keyPassword!!)
     commandLine("python3", rootProject.file("tools/test-fixtures/make_update_apks.py"),
-        "--sdk", android.sdkDirectory, "--keystore", android.signingConfigs.getByName("debug").storeFile!!,
+        "--sdk", android.sdkDirectory, "--keystore", debugSigning.storeFile!!,
+        "--key-alias", debugSigning.keyAlias!!,
         "--base-code", android.defaultConfig.versionCode!!, "--base-version", android.defaultConfig.versionName!!,
         "--output", output.get().asFile)
 }

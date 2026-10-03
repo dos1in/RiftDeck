@@ -1,0 +1,6 @@
+# Copy to signing.properties (ignored by Git), and securely copy the SAME key to each computer.
+# ~/ expands to the current user's home. Other relative paths are resolved from the repository root.
+storeFile=REPLACE_WITH_PRIVATE_KEYSTORE_PATH
+storePassword=REPLACE_WITH_STORE_PASSWORD
+keyAlias=REPLACE_WITH_KEY_ALIAS
+keyPassword=REPLACE_WITH_KEY_PASSWORD

@@ -9,14 +9,15 @@ import subprocess
 import tempfile
 
 
-def run(*arguments):
-    subprocess.run([str(value) for value in arguments], check=True, capture_output=True)
+def run(*arguments, env=None):
+    subprocess.run([str(value) for value in arguments], check=True, capture_output=True, env=env)
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--sdk", type=Path, required=True)
     parser.add_argument("--keystore", type=Path, required=True)
+    parser.add_argument("--key-alias", default="androiddebugkey")
     parser.add_argument("--base-code", type=int, default=1)
     parser.add_argument("--base-version", default="0.1.0")
     parser.add_argument("--output", type=Path, required=True)
@@ -32,13 +33,20 @@ def main():
     java_home = os.environ.get("JAVA_HOME")
     keytool = Path(java_home) / "bin" / "keytool" if java_home else shutil.which("keytool")
     assert keytool, "JDK keytool is required"
+    signing_environment = os.environ.copy()
+    signing_environment.setdefault("RIFTDECK_FIXTURE_STORE_PASSWORD", "android")
+    signing_environment.setdefault("RIFTDECK_FIXTURE_KEY_PASSWORD", "android")
+    test_signing_environment = signing_environment.copy()
+    test_signing_environment["RIFTDECK_FIXTURE_STORE_PASSWORD"] = "android"
+    test_signing_environment["RIFTDECK_FIXTURE_KEY_PASSWORD"] = "android"
     args.output.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="update-fixtures-", dir=args.output.parent) as temporary:
         work = Path(temporary)
         other_key = work / "other.jks"
         run(keytool, "-genkeypair", "-keystore", other_key, "-alias", "androiddebugkey",
-            "-storepass", "android", "-keypass", "android", "-keyalg", "RSA", "-keysize", "2048",
-            "-validity", "3650", "-dname", "CN=RiftDeck Update Test")
+            "-storepass:env", "RIFTDECK_FIXTURE_STORE_PASSWORD", "-keypass:env", "RIFTDECK_FIXTURE_KEY_PASSWORD",
+            "-keyalg", "RSA", "-keysize", "2048", "-validity", "3650", "-dname", "CN=RiftDeck Update Test",
+            env=test_signing_environment)
         fixtures = (
             ("matching.apk", "com.riftdeck", args.base_code + 1, args.keystore),
             ("wrong-signature.apk", "com.riftdeck", args.base_code + 1, other_key),
@@ -57,9 +65,12 @@ def main():
             run(tools / "aapt2", "link", "-I", args.sdk / "platforms/android-36/android.jar",
                 "--manifest", manifest, "-o", unsigned)
             run(tools / "zipalign", "-f", "-p", "4", unsigned, aligned)
-            run(tools / "apksigner", "sign", "--ks", key, "--ks-key-alias", "androiddebugkey",
-                "--ks-pass", "pass:android", "--key-pass", "pass:android", "--v4-signing-enabled", "false",
-                "--out", args.output / name, aligned)
+            independent_test_key = key == other_key
+            run(tools / "apksigner", "sign", "--ks", key,
+                "--ks-key-alias", "androiddebugkey" if independent_test_key else args.key_alias,
+                "--ks-pass", "env:RIFTDECK_FIXTURE_STORE_PASSWORD", "--key-pass", "env:RIFTDECK_FIXTURE_KEY_PASSWORD",
+                "--v4-signing-enabled", "false", "--out", args.output / name, aligned,
+                env=test_signing_environment if independent_test_key else signing_environment)
             print(f"Generated update-fixtures/{name}")
 
 

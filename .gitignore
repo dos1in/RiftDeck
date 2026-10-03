@@ -8,3 +8,8 @@ captures/
 *.iml
 .hallmark/
 .kotlin/
+signing.properties
+*.keystore
+*.jks
+*.p12
+*.pfx
