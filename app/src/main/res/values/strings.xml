@@ -107,6 +107,7 @@
     <string name="search_controller_keyboard">Controller keyboard</string>
     <string name="search_system_input_hint">Choose Chinese in your system keyboard. If it stays hidden, enable the on-screen keyboard in Android input settings. B returns to the controller keyboard.</string>
     <string name="search_keyboard_settings">Keyboard settings</string>
+    <string name="search_screen_keyboard_settings">On-screen keyboard</string>
     <string name="search_keyboard_unavailable">Open Android Settings to enable a Chinese keyboard and the on-screen keyboard. B returns to the controller keyboard.</string>
     <string name="search_delete">Delete</string>
     <string name="search_space">Space</string>

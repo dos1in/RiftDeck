@@ -9,7 +9,7 @@
 * Fixed dark Rift palette, reduced motion and collapsible sidebar. Preferences use DataStore.
 * Android Home launcher support. Use **Settings → Home launcher → Set as default home**. Android asks you to confirm; the current Home app stays unchanged if you cancel.
 * Persistent SAF folder access, recursive `.gba` / `.zip` scanning, incremental updates, cancellation and removed-file detection.
-* Room library storage, favorites, recent games, sorting and name / filename search. Search includes a controller keyboard; touch input supports the system keyboard.
+* Room library storage, favorites, recent games, sorting and name / filename search. Select “Chinese / System input” and press A to open the system keyboard, then switch to Chinese Pinyin to enter Chinese text. B returns to the controller keyboard without losing the draft. Use “Keyboard settings” or “On-screen keyboard” in the search dialog if Chinese or the software keyboard is not enabled.
 * Installed-emulator selection and saved configuration. GBA.emu has been tested with an original diagnostic ROM through both SAF and ZIP extraction.
 * Launch count, last-played time and estimated session duration, with page, selection and scroll restoration when returning.
 * LAN handheld pairing, ROM transfers on request and automatic save sync with preserved conflict versions.

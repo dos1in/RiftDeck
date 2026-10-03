@@ -5,6 +5,8 @@ import android.content.Intent
 import android.provider.Settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
@@ -23,11 +25,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.focus.*
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.input.key.KeyEventType
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onPreviewKeyEvent
-import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
@@ -41,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.repeatOnLifecycle
 import com.riftdeck.R
@@ -55,16 +55,20 @@ fun GameSearchDialog(initialQuery: String, onSearch: (String) -> Unit, onDismiss
     val colors = LocalFrontendTheme.current
     val query = rememberTextFieldState(initialText = initialQuery.take(120))
     var systemInput by rememberSaveable { mutableStateOf(false) }
-    var returnToKeyboardEntry by remember { mutableStateOf(false) }
+    var focusedControl by rememberSaveable { mutableStateOf("key:0") }
+    var restoringFocus by remember { mutableStateOf(true) }
     val characters = remember { "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".toList() }
     val keys = remember { characters.map { FocusRequester() } }
     val actions = remember { List(5) { FocusRequester() } }
     val input = remember { FocusRequester() }
     val keyboardEntry = remember { FocusRequester() }
     val keyboardSettings = remember { FocusRequester() }
+    val screenKeyboardSettings = remember { FocusRequester() }
     var inputFocused by remember { mutableStateOf(false) }
     val searchLabel = stringResource(R.string.search_games)
-    fun leaveSystemInput() { returnToKeyboardEntry = true; systemInput = false }
+    fun markFocus(control: String) { if (!restoringFocus) focusedControl = control }
+    fun enterSystemInput() { restoringFocus = true; focusedControl = "input"; systemInput = true }
+    fun leaveSystemInput() { restoringFocus = true; focusedControl = "keyboard"; systemInput = false }
     fun insert(text: String) {
         query.edit {
             if (length - selection.length + text.length <= 120) {
@@ -83,42 +87,72 @@ fun GameSearchDialog(initialQuery: String, onSearch: (String) -> Unit, onDismiss
         var settingsUnavailable by remember { mutableStateOf(false) }
         fun submit() { keyboard?.hide(); onSearch(query.text.toString().trim()) }
         fun dismiss() { keyboard?.hide(); onDismiss() }
+        fun openKeyboardSettings(action: String) {
+            keyboard?.hide()
+            try {
+                context.startActivity(Intent(action))
+                settingsUnavailable = false
+                focusedControl = "input"
+            } catch (_: ActivityNotFoundException) { settingsUnavailable = true }
+            catch (_: SecurityException) { settingsUnavailable = true }
+        }
+        DisposableEffect(lifecycle) {
+            val observer = LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_PAUSE) restoringFocus = true
+            }
+            lifecycle.addObserver(observer)
+            onDispose { lifecycle.removeObserver(observer) }
+        }
         LaunchedEffect(systemInput, lifecycle) {
             lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                restoringFocus = true
+                val savedControl = focusedControl
                 withFrameNanos { }
-                if (systemInput) {
-                    input.requestFocus()
+                val target = when {
+                    savedControl == "keyboard" -> keyboardEntry
+                    savedControl == "input" -> input
+                    systemInput && savedControl == "settings" -> keyboardSettings
+                    systemInput && savedControl == "screen-keyboard" -> screenKeyboardSettings
+                    savedControl.startsWith("action:") -> actions[savedControl.substringAfter(':').toInt().coerceIn(0, 4)]
+                    !systemInput && savedControl.startsWith("key:") -> keys[savedControl.substringAfter(':').toInt().coerceIn(0, keys.lastIndex)]
+                    systemInput -> input
+                    else -> keyboardEntry
+                }
+                target.requestFocus()
+                restoringFocus = false
+                if (systemInput && target == input) {
                     withFrameNanos { }
                     keyboard?.show()
-                } else {
-                    keyboard?.hide()
-                    if (returnToKeyboardEntry) keyboardEntry.requestFocus() else keys.first().requestFocus()
-                }
+                } else keyboard?.hide()
                 awaitCancellation()
             }
         }
         DisposableEffect(keyboard) { onDispose { keyboard?.hide() } }
-        ControllerInput(enabled = !systemInput, onAction = {
-            when (it) {
+        ControllerInput(enabled = true, onAction = {
+            if (systemInput) {
+                when (it) {
+                    GameAction.Back -> { leaveSystemInput(); true }
+                    GameAction.Menu, GameAction.Search -> true
+                    GameAction.Up -> if (inputFocused) { keyboardEntry.requestFocus(); true } else false
+                    GameAction.Down -> if (inputFocused) { keyboardSettings.requestFocus(); true } else false
+                    else -> false
+                }
+            } else when (it) {
                 GameAction.Back -> { dismiss(); true }
                 GameAction.Menu, GameAction.Search -> { submit(); true }
+                GameAction.Confirm -> if (inputFocused) { enterSystemInput(); true } else false
                 else -> false
             }
-        }, modifier = Modifier.padding(12.dp).widthIn(max = 720.dp).fillMaxWidth()
-            .onPreviewKeyEvent {
-                if (systemInput && it.type == KeyEventType.KeyDown && (it.key == Key.ButtonB || it.key == Key.Back)) {
-                    leaveSystemInput()
-                    true
-                } else false
-            }) {
+        }, modifier = Modifier.padding(12.dp).widthIn(max = 720.dp).fillMaxWidth()) {
             Column(Modifier.background(colors.surface).border(2.dp, colors.focusBorder)
                 .verticalScroll(rememberScrollState()).padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text(searchLabel, Modifier.weight(1f), color = colors.textPrimary, style = MaterialTheme.typography.titleLarge)
                     NeonActionButton(stringResource(if (systemInput) R.string.search_controller_keyboard else R.string.search_system_input),
-                        { if (systemInput) leaveSystemInput() else systemInput = true }, Modifier.weight(1f),
+                        { if (systemInput) leaveSystemInput() else enterSystemInput() }, Modifier.weight(1f),
                         focusRequester = keyboardEntry, right = input,
-                        down = if (systemInput) input else keys.first(), up = FocusRequester.Cancel)
+                        down = if (systemInput) input else keys.first(), up = FocusRequester.Cancel,
+                        onFocused = { markFocus("keyboard") })
                 }
                 BasicTextField(state = query, lineLimits = TextFieldLineLimits.SingleLine,
                     inputTransformation = InputTransformation.maxLength(120),
@@ -128,8 +162,18 @@ fun GameSearchDialog(initialQuery: String, onSearch: (String) -> Unit, onDismiss
                         showKeyboardOnFocus = systemInput, hintLocales = LocaleList(Locale("zh-CN"), Locale("en-US"))),
                     onKeyboardAction = { submit() },
                     modifier = Modifier.fillMaxWidth().focusRequester(input)
-                        .focusProperties { down = if (systemInput) keyboardSettings else keys.first(); up = keyboardEntry }
-                        .onFocusChanged { inputFocused = it.isFocused; if (it.isFocused) systemInput = true }
+                        .focusProperties {
+                            down = if (systemInput) keyboardSettings else keys.first()
+                            up = keyboardEntry
+                            if (systemInput) { left = FocusRequester.Cancel; right = FocusRequester.Cancel }
+                        }
+                        .onFocusChanged { inputFocused = it.isFocused; if (it.isFocused) markFocus("input") }
+                        .pointerInput(systemInput) {
+                            awaitEachGesture {
+                                awaitFirstDown(requireUnconsumed = false, pass = PointerEventPass.Initial)
+                                if (!systemInput) enterSystemInput()
+                            }
+                        }
                         .semantics { contentDescription = searchLabel }
                         .border(if (inputFocused) 2.dp else 1.dp, if (inputFocused) colors.focusBorder else colors.outline)
                         .padding(10.dp),
@@ -144,16 +188,19 @@ fun GameSearchDialog(initialQuery: String, onSearch: (String) -> Unit, onDismiss
                     Text(stringResource(if (settingsUnavailable) R.string.search_keyboard_unavailable else R.string.search_system_input_hint),
                         color = colors.textSecondary, style = MaterialTheme.typography.bodyMedium)
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        NeonActionButton(stringResource(R.string.search_keyboard_settings), {
-                            keyboard?.hide()
-                            try { context.startActivity(Intent(Settings.ACTION_INPUT_METHOD_SETTINGS)) }
-                            catch (_: ActivityNotFoundException) { settingsUnavailable = true }
-                            catch (_: SecurityException) { settingsUnavailable = true }
-                        }, Modifier.weight(1f), focusRequester = keyboardSettings, up = input, right = actions[3])
+                        NeonActionButton(stringResource(R.string.search_keyboard_settings),
+                            { openKeyboardSettings(Settings.ACTION_INPUT_METHOD_SETTINGS) }, Modifier.weight(1f),
+                            focusRequester = keyboardSettings, up = input, right = screenKeyboardSettings,
+                            onFocused = { markFocus("settings") })
+                        NeonActionButton(stringResource(R.string.search_screen_keyboard_settings),
+                            { openKeyboardSettings(Settings.ACTION_HARD_KEYBOARD_SETTINGS) }, Modifier.weight(1f),
+                            focusRequester = screenKeyboardSettings, up = input, left = keyboardSettings, right = actions[3],
+                            onFocused = { markFocus("screen-keyboard") })
                         NeonActionButton(stringResource(R.string.search_apply), ::submit, Modifier.weight(1f), primary = true,
-                            focusRequester = actions[3], up = input, left = keyboardSettings, right = actions[4])
+                            focusRequester = actions[3], up = input, left = screenKeyboardSettings, right = actions[4],
+                            onFocused = { markFocus("action:3") })
                         NeonActionButton(stringResource(R.string.search_cancel), ::dismiss, Modifier.weight(1f),
-                            focusRequester = actions[4], up = input, left = actions[3])
+                            focusRequester = actions[4], up = input, left = actions[3], onFocused = { markFocus("action:4") })
                     }
                 } else {
                     characters.chunked(10).forEachIndexed { row, entries ->
@@ -164,7 +211,8 @@ fun GameSearchDialog(initialQuery: String, onSearch: (String) -> Unit, onDismiss
                                     focusRequester = keys[index], left = if (column > 0) keys[index - 1] else null,
                                     right = if (column < entries.lastIndex) keys[index + 1] else null,
                                     up = keys.getOrNull(index - 10) ?: keyboardEntry,
-                                    down = keys.getOrNull(index + 10) ?: actions[column / 2])
+                                    down = keys.getOrNull(index + 10) ?: actions[column / 2],
+                                    onFocused = { markFocus("key:$index") })
                             }
                             repeat(10 - entries.size) { Spacer(Modifier.weight(1f)) }
                         }
@@ -191,7 +239,8 @@ fun GameSearchDialog(initialQuery: String, onSearch: (String) -> Unit, onDismiss
                                 }
                             }, Modifier.weight(1f), primary = index == 3, focusRequester = actions[index],
                                 left = actions.getOrNull(index - 1), right = actions.getOrNull(index + 1),
-                                up = keys[(30 + index).coerceAtMost(keys.lastIndex)])
+                                up = keys[(30 + index).coerceAtMost(keys.lastIndex)],
+                                onFocused = { markFocus("action:$index") })
                         }
                     }
                 }
