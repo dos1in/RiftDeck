@@ -15,6 +15,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
 import androidx.compose.material3.Text
@@ -40,8 +41,6 @@ import com.riftdeck.core.ui.theme.LocalReducedMotion
 import com.riftdeck.feature.game.GameDetailScreen
 import com.riftdeck.feature.home.HomeScreen
 import com.riftdeck.feature.home.HomeViewModel
-import com.riftdeck.feature.platform.LibraryFilter
-import com.riftdeck.feature.platform.PlatformScreen
 import com.riftdeck.feature.settings.SettingsScreen
 import com.riftdeck.feature.sharing.SharingViewModel
 import com.riftdeck.feature.sharing.SharingScreen
@@ -119,6 +118,7 @@ fun RiftDeckApp(homeViewModel: HomeViewModel, libraryViewModel: LibraryViewModel
     }
     val libraryError by libraryViewModel.error.collectAsStateWithLifecycle()
     var searchOpen by rememberSaveable { mutableStateOf(false) }
+    val searchDialogState = rememberSaveableStateHolder()
     var removeFolder by rememberSaveable { mutableStateOf<String?>(null) }
     val folderPicker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
         uri?.let(libraryViewModel::addFolder)
@@ -132,6 +132,7 @@ fun RiftDeckApp(homeViewModel: HomeViewModel, libraryViewModel: LibraryViewModel
         homeRequests.collect {
             removeFolder = null
             searchOpen = false
+            searchDialogState.removeState("search")
             emulatorViewModel.cancel()
             emulatorViewModel.dismissError()
             libraryViewModel.dismissError()
@@ -141,9 +142,16 @@ fun RiftDeckApp(homeViewModel: HomeViewModel, libraryViewModel: LibraryViewModel
     }
     fun navigate(route: String) { nav.navigate(route) { launchSingleTop = true } }
     fun back() { if (!nav.popBackStack()) onExit() }
-    val showUpdateNotice = currentEntry?.destination?.route == Route.Home && updateState.autoCheck && updateState.prompt && updateState.release != null && uiState.isReady &&
-        !updateAboutVisible && !preferenceError && !launcherError && !libraryError && removeFolder == null &&
-        !searchOpen && !launchBusy && launchError == null && !historyError
+    val updateNoticePending = currentEntry?.destination?.route == Route.Home && updateState.autoCheck &&
+        updateState.prompt && updateState.release != null && uiState.isReady && !updateAboutVisible
+    val modal = activeAppModal(
+        externalError = preferenceError || launcherError || libraryError,
+        preparingGame = launchBusy,
+        launchError = launchError != null || historyError,
+        removeFolder = removeFolder != null,
+        search = searchOpen,
+        update = updateNoticePending,
+    )
     val onNavigate: (DeckSection) -> Unit = navigateSection@{ section ->
         val currentSection = when (nav.currentDestination?.route) {
             Route.Home -> DeckSection.Home
@@ -166,10 +174,10 @@ fun RiftDeckApp(homeViewModel: HomeViewModel, libraryViewModel: LibraryViewModel
     CompositionLocalProvider(
         LocalPreviewDelayMs provides uiState.previewDelayMs,
         LocalLoopVideoPreviews provides uiState.loopVideoPreviews,
-        LocalVideoPreviews provides (uiState.videoPreviews && !launchBusy && launchError == null),
+        LocalVideoPreviews provides (uiState.videoPreviews && modal == null),
         LocalNavigationRail provides NavigationRailState(uiState.navigationRailExpanded, homeViewModel::setNavigationRailExpanded),
         LocalAnalogActions provides analogActions, LocalReducedMotion provides uiState.reducedMotion,
-        LocalControllerInputEnabled provides (!showUpdateNotice && !preferenceError && !launcherError && !libraryError && removeFolder == null && !searchOpen && !launchBusy && launchError == null && !historyError)) {
+        LocalControllerInputEnabled provides (modal == null)) {
         // Transient system bars overlay the immersive UI instead of resizing it as they hide.
         // Hardware cutouts and an explicitly opened keyboard still need safe space.
         val contentInsets = WindowInsets.displayCutout.union(WindowInsets.waterfall).union(WindowInsets.ime)
@@ -180,9 +188,12 @@ fun RiftDeckApp(homeViewModel: HomeViewModel, libraryViewModel: LibraryViewModel
                 enterTransition = { EnterTransition.None }, exitTransition = { ExitTransition.None },
                 popEnterTransition = { EnterTransition.None }, popExitTransition = { ExitTransition.None }) {
                 composable(Route.Home) {
-                    BackHandler(enabled = !preferenceError && !launcherError && !libraryError && removeFolder == null && !searchOpen && !launchBusy && launchError == null && !historyError, onBack = onExit)
+                    BackHandler(enabled = modal == null, onBack = onExit)
                     if (uiState.isReady) HomeScreen(uiState, homeViewModel::focusGame, homeViewModel::toggleFavorite, onOpenGame,
-                        onPlay, homeViewModel::toggleSort, onNavigate, onExit, onSearch = { searchOpen = true }, onAddFolder = ::addFolder)
+                        onPlay, homeViewModel::toggleSort, homeViewModel::setFilter,
+                        homeViewModel::changeCategory, homeViewModel::moveGame, homeViewModel::selectedGameId, onNavigate, onExit,
+                        onSearch = { searchOpen = true }, onAddFolder = ::addFolder,
+                        onClearSearch = { homeViewModel.setSearchQuery("") })
                 }
                 composable(Route.Platform) {
                     LaunchedEffect(Unit) {
@@ -193,7 +204,7 @@ fun RiftDeckApp(homeViewModel: HomeViewModel, libraryViewModel: LibraryViewModel
                     val gameId = entry.arguments?.getLong("gameId")
                     val game = gameId?.let { id -> uiState.games.firstOrNull { it.matchesId(id) } }
                     if (game != null) GameDetailScreen(game, { homeViewModel.toggleFavorite(game.id) }, { onPlay(game.id) }, onNavigate, ::back)
-                    else if (uiState.isReady) DeckNoticeDialog(
+                    else if (uiState.isReady && modal == null) DeckNoticeDialog(
                         title = stringResource(R.string.game_removed_title),
                         message = stringResource(R.string.game_removed_message),
                         primaryLabel = stringResource(R.string.return_to_library),
@@ -223,7 +234,7 @@ fun RiftDeckApp(homeViewModel: HomeViewModel, libraryViewModel: LibraryViewModel
                         })
                 }
                 composable(Route.Sharing) {
-                    BackHandler(onBack = ::back)
+                    BackHandler(enabled = modal == null, onBack = ::back)
                     SharingScreen(sharingState, ::setSharingEnabled,
                         onChooseRomFolder = { chooseSharedFolder(false) }, onChooseSaveFolder = { chooseSharedFolder(true) },
                         onAutoSync = sharingViewModel::setAutoSync, onPairingEnabled = sharingViewModel::setPairing,
@@ -235,10 +246,11 @@ fun RiftDeckApp(homeViewModel: HomeViewModel, libraryViewModel: LibraryViewModel
             }
             if (!uiState.isReady) Text(stringResource(R.string.loading_library), color = colors.textSecondary,
                 style = MaterialTheme.typography.bodyLarge, modifier = Modifier.align(Alignment.Center))
-            if (launchBusy) DeckNoticeDialog(title = stringResource(R.string.preparing_game),
+            when (modal) {
+            AppModal.PreparingGame -> DeckNoticeDialog(title = stringResource(R.string.preparing_game),
                 message = stringResource(R.string.preparing_game_message), primaryLabel = stringResource(R.string.search_cancel),
                 onConfirm = emulatorViewModel::cancel, onDismiss = emulatorViewModel::cancel, showBackButton = false)
-            if (!launchBusy && (launchError != null || historyError)) {
+            AppModal.LaunchError -> {
                 val choose = launchError == LaunchResult.NotConfigured || launchError == LaunchResult.NotInstalled || launchError == LaunchResult.InvalidConfiguration
                 val errorMessage = when (val error = launchError) {
                     LaunchResult.NotConfigured -> R.string.emulator_not_selected
@@ -257,24 +269,27 @@ fun RiftDeckApp(homeViewModel: HomeViewModel, libraryViewModel: LibraryViewModel
                     onConfirm = { emulatorViewModel.dismissError(); if (choose) navigate(Route.settings("emulators")) },
                     onDismiss = emulatorViewModel::dismissError)
             }
-            if (searchOpen) GameSearchDialog(uiState.searchQuery, onSearch = {
-                homeViewModel.setSearchQuery(it)
-                searchOpen = false
-                if (nav.currentDestination?.route != Route.Home) {
-                    if (!nav.popBackStack(Route.Home, false)) navigate(Route.Home)
-                }
-            }, onDismiss = { searchOpen = false })
-            if (removeFolder != null) {
+            AppModal.Search -> searchDialogState.SaveableStateProvider("search") {
+                GameSearchDialog(uiState.searchQuery, onSearch = {
+                    homeViewModel.setSearchQuery(it)
+                    searchOpen = false
+                    searchDialogState.removeState("search")
+                    if (nav.currentDestination?.route != Route.Home) {
+                        if (!nav.popBackStack(Route.Home, false)) navigate(Route.Home)
+                    }
+                }, onDismiss = { searchOpen = false; searchDialogState.removeState("search") })
+            }
+            AppModal.RemoveFolder -> {
                 DeckNoticeDialog(title = stringResource(R.string.remove_folder_title),
                     message = stringResource(R.string.remove_folder_message, folderLabel(removeFolder!!)),
                     primaryLabel = stringResource(R.string.remove_folder_confirm),
                     onConfirm = { removeFolder?.let(libraryViewModel::removeFolder); removeFolder = null },
                     onDismiss = { removeFolder = null }, focusCancel = true)
             }
-            if (showUpdateNotice) UpdateAvailableDialog(updateState,
+            AppModal.Update -> UpdateAvailableDialog(updateState,
                 onOpenSettings = { updateViewModel.dismissPrompt(); navigate(Route.settings("about")) },
                 onLater = updateViewModel::dismissPrompt)
-            if (preferenceError || launcherError || libraryError) {
+            AppModal.ExternalError -> {
                 DeckNoticeDialog(
                     title = stringResource(when {
                         libraryError -> R.string.library_error_title
@@ -290,6 +305,8 @@ fun RiftDeckApp(homeViewModel: HomeViewModel, libraryViewModel: LibraryViewModel
                     onConfirm = { libraryViewModel.dismissError(); onDismissLauncherError(); homeViewModel.dismissPreferenceError() },
                     onDismiss = { libraryViewModel.dismissError(); onDismissLauncherError(); homeViewModel.dismissPreferenceError() },
                 )
+            }
+            null -> Unit
             }
         }
     }

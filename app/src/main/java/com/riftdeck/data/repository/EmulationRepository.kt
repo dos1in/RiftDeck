@@ -15,6 +15,7 @@ import kotlinx.coroutines.Dispatchers
 import com.riftdeck.data.database.GameDao
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -41,6 +42,7 @@ class EmulationRepository(
     val historyError = mutableHistoryError.asStateFlow()
     private val mutablePlaying = MutableStateFlow(false)
     val isPlaying = mutablePlaying.asStateFlow()
+    @Volatile private var launchGeneration = 0L
     private fun bootCount() = Settings.Global.getInt(context.contentResolver, Settings.Global.BOOT_COUNT, -1)
 
     fun refreshTargets() { scope.launch { mutableTargets.value = catalog.installedFor(1L) } }
@@ -58,9 +60,12 @@ class EmulationRepository(
             val result = launcher.launchWithCopies(config, game)
             started = result == LaunchResult.Started
             if (started) {
+                val startedWallTime = System.currentTimeMillis()
+                val startedElapsed = SystemClock.elapsedRealtime()
+                launchGeneration++
                 // Complete the history transaction even if Android recreates the frontend on departure.
                 withContext(NonCancellable) {
-                    try { dao.beginSession(game.id, System.currentTimeMillis(), SystemClock.elapsedRealtime(), bootCount()) }
+                    try { dao.beginSession(game.id, startedWallTime, startedElapsed, bootCount()) }
                     catch (_: android.database.sqlite.SQLiteException) { mutableHistoryError.value = true }
                 }
             }
@@ -70,11 +75,14 @@ class EmulationRepository(
         }
     }
 
-    fun onFrontendResumed() {
+    fun onFrontendResumed(): Job {
+        val resumedGeneration = launchGeneration
         val elapsed = SystemClock.elapsedRealtime()
         val boot = bootCount()
-        scope.launch {
+        val resumed = scope.launch {
             sessionLock.withLock {
+                // A callback received during ROM preparation belongs to the preceding foreground.
+                if (resumedGeneration != launchGeneration) return@withLock
                 try { dao.finishSession(elapsed, boot) }
                 catch (cancelled: CancellationException) { throw cancelled }
                 catch (_: android.database.sqlite.SQLiteException) { mutableHistoryError.value = true }
@@ -84,5 +92,6 @@ class EmulationRepository(
             roms.clearExpiredFiles()
         }
         refreshTargets()
+        return resumed
     }
 }

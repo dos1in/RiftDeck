@@ -22,6 +22,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 
 class HomeViewModel(
     private val gameRepository: GameRepository,
@@ -29,15 +31,26 @@ class HomeViewModel(
     private val savedState: SavedStateHandle,
 ) : ViewModel() {
     private val focusedGameId = savedState.getStateFlow<Long?>("focused_game", null)
-    private val filter = savedState.getStateFlow("library_filter", LibraryFilter.All.name)
+    private val focusedIndex = savedState.getStateFlow("focused_index", 0)
+    private val filter = savedState.getStateFlow<String?>("library_filter", null)
     private val searchQuery = savedState.getStateFlow("search_query", "")
     private val mutablePreferenceError = MutableStateFlow(false)
     val preferenceError = mutablePreferenceError.asStateFlow()
 
     private val preferences = preferencesRepository.preferences.shareIn(viewModelScope, SharingStarted.Eagerly, replay = 1)
 
+    init {
+        viewModelScope.launch {
+            val prefs = preferences.first()
+            // Apply the start category once. A settings change must not replace the current shelf.
+            if (LibraryFilter.entries.none { it.name == filter.value }) {
+                savedState["library_filter"] = prefs.defaultHomeCategory
+            }
+        }
+    }
+
     // Focus and appearance changes do not repeat filtering or sorting a large library.
-    private val library = combine(gameRepository.games, filter, searchQuery,
+    private val library = combine(gameRepository.games, filter.filterNotNull(), searchQuery,
         preferences.map { it.sortDescending }.distinctUntilChanged()) { games, filterName, query, descending ->
         val selectedFilter = LibraryFilter.entries.firstOrNull { it.name == filterName } ?: LibraryFilter.All
         HomeUiState(
@@ -49,10 +62,9 @@ class HomeViewModel(
             searchQuery = query,
         )
     }.flowOn(Dispatchers.Default)
-    val uiState = combine(library, focusedGameId, preferences) { state, focusedId, prefs ->
+    val uiState = combine(library, focusedGameId, focusedIndex, preferences) { state, focusedId, index, prefs ->
         state.copy(
-            focusedGameId = focusedId?.let { id -> state.games.firstOrNull { it.matchesId(id) }?.id }
-                ?: state.recentGame?.id ?: state.games.firstOrNull()?.id,
+            focusedGameId = librarySelection(state.libraryGames, focusedId ?: state.recentGame?.id, index)?.id,
             navigationRailExpanded = prefs.navigationRailExpanded,
             language = prefs.language,
             defaultHomeCategory = prefs.defaultHomeCategory,
@@ -61,12 +73,64 @@ class HomeViewModel(
             previewDelayMs = prefs.previewDelayMs,
             loopVideoPreviews = prefs.loopVideoPreviews,
         )
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, HomeUiState())
+    }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.Eagerly, HomeUiState())
 
-    fun focusGame(gameId: Long) { savedState["focused_game"] = gameId }
-    fun setSearchQuery(value: String) { savedState["search_query"] = value.take(120) }
-    fun setFilter(value: LibraryFilter) { savedState["library_filter"] = value.name }
-    fun toggleFavorite(gameId: Long) = updatePreference { gameRepository.toggleFavorite(gameId) }
+    init {
+        viewModelScope.launch {
+            uiState.collect { state ->
+                if (!state.isReady || state.filter.name != filter.value || state.searchQuery != searchQuery.value) return@collect
+                val selected = librarySelection(state.libraryGames, focusedGameId.value ?: state.focusedGameId, focusedIndex.value)
+                // A newer input may already be queued; never replace it with an older Flow emission.
+                if (selected != null && selected.id == state.focusedGameId) {
+                    savedState["focused_index"] = state.libraryGames.indexOfFirst { it.id == selected.id }
+                    savedState["focused_game"] = selected.id
+                }
+            }
+        }
+    }
+
+    fun focusGame(gameId: Long) {
+        val index = uiState.value.libraryGames.indexOfFirst { it.matchesId(gameId) }
+        if (index >= 0) savedState["focused_index"] = index
+        savedState["focused_game"] = gameId
+    }
+    fun setSearchQuery(value: String) {
+        savedState["focused_index"] = 0
+        savedState["search_query"] = value.take(120)
+    }
+    fun setFilter(value: LibraryFilter) {
+        savedState["focused_index"] = 0
+        savedState["library_filter"] = value.name
+    }
+    fun changeCategory(delta: Int): LibraryFilter {
+        val categories = listOf(LibraryFilter.All, LibraryFilter.Recent, LibraryFilter.Favorites)
+        val current = LibraryFilter.entries.firstOrNull { it.name == filter.value } ?: LibraryFilter.All
+        val next = categories[Math.floorMod(categories.indexOf(current) + delta, categories.size)]
+        setFilter(next)
+        return next
+    }
+
+    // Read the input cursor directly so repeated presses and a following A/X/Y do not wait for Flow.
+    fun selectedGameId(): Long? {
+        val state = uiState.value
+        if (state.filter.name != filter.value || state.searchQuery != searchQuery.value) return null
+        return librarySelection(state.libraryGames, focusedGameId.value ?: state.focusedGameId, focusedIndex.value)?.id
+    }
+
+    fun moveGame(delta: Int, wrap: Boolean): Boolean {
+        val games = uiState.value.libraryGames
+        val current = selectedGameId() ?: return true
+        val index = games.indexOfFirst { it.id == current }
+        if (delta < 0 && index == 0 && !wrap) return false
+        val next = if (wrap) Math.floorMod(index + delta, games.size)
+            else (index + delta).coerceIn(0, games.lastIndex)
+        focusGame(games[next].id)
+        return true
+    }
+    fun toggleFavorite(gameId: Long) {
+        focusGame(gameId)
+        updatePreference { gameRepository.toggleFavorite(gameId) }
+    }
     fun setNavigationRailExpanded(expanded: Boolean) = updatePreference { preferencesRepository.setNavigationRailExpanded(expanded) }
     fun setPreviewDelay(delayMs: Int) = updatePreference { preferencesRepository.setPreviewDelay(delayMs) }
     fun setLoopVideoPreviews(loop: Boolean) = updatePreference { preferencesRepository.setLoopVideoPreviews(loop) }
@@ -74,7 +138,7 @@ class HomeViewModel(
     fun setLanguage(value: String) = updatePreference { preferencesRepository.setLanguage(value) }
     fun setDefaultHomeCategory(value: String) = updatePreference { preferencesRepository.setDefaultHomeCategory(value) }
     fun setReducedMotion(enabled: Boolean) = updatePreference { preferencesRepository.setReducedMotion(enabled) }
-    fun toggleSort() = updatePreference { preferencesRepository.setSortDescending(!uiState.value.sortDescending) }
+    fun toggleSort() = updatePreference { preferencesRepository.toggleSortDescending() }
     fun dismissPreferenceError() { mutablePreferenceError.value = false }
     private fun updatePreference(update: suspend () -> Unit) {
         viewModelScope.launch {

@@ -8,6 +8,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -68,6 +70,16 @@ class UiPreferencesRepositoryTest {
         withRepository { repository ->
             assertEquals(UiPreferences(true, true), repository.preferences.first())
         }
+    }
+
+    @Test fun rapidSortTogglesApplyEveryPressAtomically() = runBlocking {
+        withRepository { repository ->
+            coroutineScope { repeat(20) { launch { repository.toggleSortDescending() } } }
+            assertEquals(false, repository.preferences.first().sortDescending)
+            repository.toggleSortDescending()
+            assertEquals(true, repository.preferences.first().sortDescending)
+        }
+        withRepository { assertEquals(true, it.preferences.first().sortDescending) }
     }
 
     @Test fun removedThemePreferencesAreIgnoredWithoutLosingOtherPreferences() = runBlocking {

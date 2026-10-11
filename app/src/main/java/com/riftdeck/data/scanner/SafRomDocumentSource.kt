@@ -1,6 +1,7 @@
 package com.riftdeck.data.scanner
 
 import android.content.ContentResolver
+import android.database.Cursor
 import android.net.Uri
 import android.provider.DocumentsContract
 import android.provider.DocumentsContract.Document
@@ -32,7 +33,7 @@ class SafRomDocumentSource(private val resolver: ContentResolver) : RomDocumentS
             val cursor = resolver.query(childrenUri, projection, null, null, null)
                 ?: throw IOException("Document provider returned no cursor")
             cursor.use {
-                if (it.extras.getBoolean(DocumentsContract.EXTRA_LOADING)) throw IOException("Document provider is still loading")
+                requireCompleteListing(it)
                 val images = ArrayList<CoverFile>()
                 while (it.moveToNext()) {
                     currentCoroutineContext().ensureActive()
@@ -85,20 +86,30 @@ class SafRomDocumentSource(private val resolver: ContentResolver) : RomDocumentS
                             (PegasusArtwork.paths(text, video = true).toList() + PegasusArtwork.paths(text, preferExplicit = false, video = true).toList()).map { (key, path) -> Triple(key, path, true) }
                     } else emptyList()
                     val directoryCache = mutableMapOf<String, List<Entry>>()
-                    for ((key, path, isVideo) in paths) {
+
+                    suspend fun findRom(key: String): Entry? {
                         val romSegments = key.split('/')
                         var romDirectory = parent
-                        var romExists = true
                         for (segment in romSegments.dropLast(1)) {
                             val entries = directoryCache[romDirectory] ?: children(tree, romDirectory).also { result -> directoryCache[romDirectory] = result }
                             val next = entries.firstOrNull { entry -> entry.directory && CoverFiles.key(entry.name + ".gba") == segment }
-                            if (next == null) { romExists = false; break }
+                            if (next == null) {
+                                return null
+                            }
                             romDirectory = next.id
                         }
-                        if (!romExists) continue
                         val romEntries = directoryCache[romDirectory] ?: children(tree, romDirectory).also { result -> directoryCache[romDirectory] = result }
-                        val rom = romEntries.firstOrNull { entry -> !entry.directory && RomFileNames.platform(entry.name) != null && CoverFiles.key(entry.name) == romSegments.last() } ?: continue
-                        metadataDescriptions[key]?.let { value -> descriptions[rom.id] = value }
+                        return romEntries.firstOrNull { entry -> !entry.directory && RomFileNames.platform(entry.name) != null && CoverFiles.key(entry.name) == romSegments.last() }
+                    }
+
+                    // A description is useful even when the game has no usable artwork path.
+                    for ((key, description) in metadataDescriptions) {
+                        val rom = findRom(key) ?: continue
+                        descriptions[rom.id] = description
+                    }
+
+                    for ((key, path, isVideo) in paths) {
+                        val rom = findRom(key) ?: continue
                         if (if (isVideo) rom.id in mappedVideos else rom.id in mappedCovers) continue
                         var directory = parent
                         val segments = path.split('/')
@@ -131,7 +142,7 @@ class SafRomDocumentSource(private val resolver: ContentResolver) : RomDocumentS
                     val id = it.getString(0) ?: throw IOException("Missing document id")
                     val name = it.getString(1) ?: continue
                     if (it.getString(2) == Document.MIME_TYPE_DIR) {
-                        if (id !in mediaIds) pending.add(id)
+                        pending.add(id)
                     } else {
                         val platform = RomFileNames.platform(name) ?: continue
                         val uri = DocumentsContract.buildDocumentUriUsingTree(tree, id)
@@ -150,7 +161,7 @@ class SafRomDocumentSource(private val resolver: ContentResolver) : RomDocumentS
         val projection = arrayOf(Document.COLUMN_DOCUMENT_ID, Document.COLUMN_DISPLAY_NAME,
             Document.COLUMN_MIME_TYPE, Document.COLUMN_SIZE, Document.COLUMN_LAST_MODIFIED)
         return resolver.query(uri, projection, null, null, null)?.use { cursor ->
-            if (cursor.extras.getBoolean(DocumentsContract.EXTRA_LOADING)) throw IOException("Document provider is still loading")
+            requireCompleteListing(cursor)
             buildList {
                 while (cursor.moveToNext()) {
                     currentCoroutineContext().ensureActive()
@@ -160,6 +171,12 @@ class SafRomDocumentSource(private val resolver: ContentResolver) : RomDocumentS
                 }
             }
         } ?: throw IOException("Document provider returned no cursor")
+    }
+
+    private fun requireCompleteListing(cursor: Cursor) {
+        val extras = cursor.extras
+        if (extras.getBoolean(DocumentsContract.EXTRA_LOADING)) throw IOException("Document provider is still loading")
+        if (extras.getString(DocumentsContract.EXTRA_ERROR) != null) throw IOException("Document provider could not list the directory")
     }
 
 }

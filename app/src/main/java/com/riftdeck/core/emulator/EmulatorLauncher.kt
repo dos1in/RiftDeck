@@ -76,8 +76,7 @@ class AndroidEmulatorLauncher(
                 }
                 config.extras.forEach { (key, value) -> putExtra(key, value) }
             }
-            withContext(Dispatchers.Main.immediate) { context.startActivity(intent) }
-            LaunchResult.Started
+            startEmulatorActivity { context.startActivity(intent) }
         } catch (cancelled: CancellationException) {
             throw cancelled
         } catch (error: ArchiveException) {

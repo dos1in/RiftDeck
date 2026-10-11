@@ -103,6 +103,9 @@ class UiPreferencesRepository internal constructor(private val store: DataStore<
     }
     suspend fun setReducedMotion(enabled: Boolean) { store.edit { it[reducedMotionKey] = enabled } }
     suspend fun setSortDescending(enabled: Boolean) { store.edit { it[sortDescendingKey] = enabled } }
+    suspend fun toggleSortDescending() {
+        store.edit { it[sortDescendingKey] = !(it[sortDescendingKey] ?: false) }
+    }
 }
 
 /** Length-prefix keys so colons, Unicode and newlines round-trip without delimiter escaping. */

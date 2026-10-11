@@ -27,6 +27,7 @@ public final class SharingTestDocumentsProvider extends DocumentsProvider {
     private static final String[] COLUMNS = {Document.COLUMN_DOCUMENT_ID, Document.COLUMN_DISPLAY_NAME,
             Document.COLUMN_MIME_TYPE, Document.COLUMN_SIZE, Document.COLUMN_LAST_MODIFIED, Document.COLUMN_FLAGS};
     private boolean failIncomingRename, failRestoreRename, failHiddenDelete, unavailable;
+    private String listingErrorPath;
     private int reads;
 
     public static Uri treeUri() { return DocumentsContract.buildTreeDocumentUri(AUTHORITY, ROOT_ID); }
@@ -52,6 +53,7 @@ public final class SharingTestDocumentsProvider extends DocumentsProvider {
                 case "test:reset":
                     removeTree(root()); root().mkdirs();
                     failIncomingRename = failRestoreRename = failHiddenDelete = unavailable = false;
+                    listingErrorPath = null;
                     reads = 0;
                     break;
                 case "test:write":
@@ -71,6 +73,7 @@ public final class SharingTestDocumentsProvider extends DocumentsProvider {
                     failRestoreRename = extras != null && extras.getBoolean("failRestoreRename");
                     failHiddenDelete = extras != null && extras.getBoolean("failHiddenDelete");
                     unavailable = extras != null && extras.getBoolean("unavailable");
+                    listingErrorPath = extras != null ? extras.getString("listingErrorPath") : null;
                     break;
                 case "test:stats":
                     Bundle stats = new Bundle(); stats.putInt("reads", reads);
@@ -107,6 +110,13 @@ public final class SharingTestDocumentsProvider extends DocumentsProvider {
         if (!parent.isDirectory()) throw new FileNotFoundException();
         String[] columns = projection != null ? projection : COLUMNS;
         MatrixCursor result = new MatrixCursor(columns);
+        String errorId = listingErrorPath == null ? null : listingErrorPath.isEmpty() ? ROOT_ID : ROOT_ID + "/" + listingErrorPath;
+        if (parentDocumentId.equals(errorId)) {
+            Bundle extras = new Bundle();
+            extras.putString(DocumentsContract.EXTRA_ERROR, "Injected directory listing failure");
+            result.setExtras(extras);
+            return result;
+        }
         File[] files = parent.listFiles();
         if (files != null) {
             Arrays.sort(files, (a, b) -> a.getName().compareTo(b.getName()));

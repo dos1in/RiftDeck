@@ -27,7 +27,6 @@ import com.riftdeck.core.input.GameAction
 import com.riftdeck.core.ui.components.*
 import com.riftdeck.core.ui.theme.LocalFrontendTheme
 import com.riftdeck.feature.platform.LibraryFilter
-import com.riftdeck.feature.platform.libraryGames
 
 @Composable
 fun HomeScreen(
@@ -37,18 +36,21 @@ fun HomeScreen(
     onOpenGame: (Long) -> Unit,
     onPlayGame: (Long) -> Unit,
     onSort: () -> Unit,
+    onFilter: (LibraryFilter) -> Unit,
+    onChangeCategory: (Int) -> LibraryFilter,
+    onMoveGame: (Int, Boolean) -> Boolean,
+    selectedGameId: () -> Long?,
     onNavigate: (DeckSection) -> Unit,
     onExit: () -> Unit,
     onSearch: () -> Unit,
     onAddFolder: () -> Unit,
+    onClearSearch: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = LocalFrontendTheme.current
     val categories = remember { listOf(LibraryFilter.All, LibraryFilter.Recent, LibraryFilter.Favorites) }
-    var filter by rememberSaveable { mutableStateOf(LibraryFilter.entries.firstOrNull { it.name == uiState.defaultHomeCategory } ?: LibraryFilter.All) }
-    val games = remember(uiState.games, filter, uiState.sortDescending, uiState.searchQuery) {
-        libraryGames(uiState.games, filter, uiState.sortDescending, uiState.searchQuery)
-    }
+    val filter = uiState.filter
+    val games = uiState.libraryGames
     var alphabetOpen by rememberSaveable { mutableStateOf(false) }
     var pendingJump by remember { mutableStateOf<Long?>(null) }
     val letters = remember(games) { alphabetPositions(games) }
@@ -56,9 +58,7 @@ fun HomeScreen(
         .associateWith { FocusRequester() } }
     var focusedKey by rememberSaveable { mutableStateOf("list") }
     var listFocused by remember { mutableStateOf(false) }
-    var selectedId by rememberSaveable { mutableStateOf(uiState.focusedGameId) }
-    val game = selectedId?.let { id -> games.firstOrNull { it.matchesId(id) } }
-        ?: games.firstOrNull { it.id == uiState.focusedGameId } ?: games.firstOrNull()
+    val game = games.firstOrNull { it.id == uiState.focusedGameId }
     val index = games.indexOfFirst { it.id == game?.id }.coerceAtLeast(0)
     val listState = rememberLazyListState(initialFirstVisibleItemIndex = index)
     fun select(id: Long) {
@@ -69,7 +69,6 @@ fun HomeScreen(
                 target.offset + target.size > info.viewportEndOffset)) {
             listState.requestScrollToItem(targetIndex)
         }
-        selectedId = id
         onFocusGame(id)
     }
     LaunchedEffect(pendingJump) {
@@ -81,17 +80,16 @@ fun HomeScreen(
         }
     }
     fun changeCategory(delta: Int) {
-        filter = categories[(categories.indexOf(filter) + delta + categories.size) % categories.size]
-        if (!listFocused && categories.any { it.name == focusedKey }) focus.getValue(filter.name).requestFocus()
+        val category = onChangeCategory(delta)
+        if (!listFocused && categories.any { it.name == focusedKey }) focus.getValue(category.name).requestFocus()
     }
     LaunchedEffect(filter) {
         if (filter == LibraryFilter.Recent && focusedKey in listOf("sort", "alphabet")) {
             focus.getValue("search").requestFocus()
         }
     }
-    LaunchedEffect(game?.id, filter) {
+    LaunchedEffect(game?.id, filter, index) {
         if (game != null) {
-            if (selectedId != game.id) { selectedId = game.id; onFocusGame(game.id) }
             val info = listState.layoutInfo
             val target = info.visibleItemsInfo.firstOrNull { it.index == index }
             if (target == null || target.offset < info.viewportStartOffset ||
@@ -108,21 +106,16 @@ fun HomeScreen(
         onAction = { action ->
             when (action) {
                 GameAction.Back -> { onExit(); true }
-                GameAction.Details -> { game?.let { onOpenGame(it.id) }; true }
-                GameAction.Favorite -> { game?.let { onToggleFavorite(it.id) }; true }
+                GameAction.Details -> { selectedGameId()?.let(onOpenGame); true }
+                GameAction.Favorite -> { selectedGameId()?.let(onToggleFavorite); true }
                 GameAction.PreviousCategory -> { changeCategory(-1); true }
                 GameAction.NextCategory -> { changeCategory(1); true }
                 GameAction.Up, GameAction.Down -> if (listFocused && game != null) {
-                    if (action == GameAction.Up && index == 0) false
-                    else {
-                        val nextIndex = if (action == GameAction.Up) index - 1 else (index + 1) % games.size
-                        select(games[nextIndex].id)
-                        true
-                    }
+                    onMoveGame(if (action == GameAction.Up) -1 else 1, action == GameAction.Down)
                 } else false
-                GameAction.Confirm -> if (listFocused) { game?.let { onPlayGame(it.id) }; true } else false
+                GameAction.Confirm -> if (listFocused) { selectedGameId()?.let(onPlayGame); true } else false
                 GameAction.PreviousPage, GameAction.NextPage -> {
-                    if (games.isNotEmpty()) select(games[(index + if (action == GameAction.NextPage) 7 else -7).coerceIn(0, games.lastIndex)].id)
+                    onMoveGame(if (action == GameAction.NextPage) 7 else -7, false)
                     true
                 }
                 GameAction.Search -> { onSearch(); true }
@@ -136,7 +129,7 @@ fun HomeScreen(
                         LibraryFilter.Recent -> R.string.recent_title
                         LibraryFilter.All -> R.string.all_games
                         LibraryFilter.Favorites -> R.string.favorites_title
-                    }), { filter = category }, Modifier.width(if (compact) 104.dp else 116.dp),
+                    }), { onFilter(category) }, Modifier.width(if (compact) 104.dp else 116.dp),
                         selected = filter == category, emphasizeSelection = true, focusRequester = focus.getValue(category.name),
                         left = categories.getOrNull(i - 1)?.let { focus.getValue(it.name) } ?: rail,
                         right = categories.getOrNull(i + 1)?.let { focus.getValue(it.name) } ?: rail, up = FocusRequester.Cancel,
@@ -176,8 +169,8 @@ fun HomeScreen(
                         stringResource(if (emptyLibrary) R.string.empty_library_message else R.string.empty_filter_message),
                         stringResource(if (emptyLibrary) R.string.add_rom_folder else R.string.all_games),
                         focus.getValue("empty"), { if (emptyLibrary) onAddFolder() else {
-                            filter = LibraryFilter.All
-                            if (uiState.searchQuery.isNotBlank()) onSearch()
+                            onFilter(LibraryFilter.All)
+                            onClearSearch()
                         } }, left = rail, up = focus.getValue(filter.name))
                 }
             } else {
@@ -230,7 +223,7 @@ fun HomeScreen(
                     Column(Modifier.weight(0.6f).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         GameStageCover(game, Modifier.weight(1f).fillMaxWidth(), focus.getValue("cover"),
                             left = focus.getValue("list"), up = focus.getValue(filter.name), showLabel = false,
-                            onFocused = { focusedKey = "cover" }, onClick = { onOpenGame(game.id) },
+                            onFocused = { focusedKey = "cover" }, onClick = { selectedGameId()?.let(onOpenGame) },
                             positionLabel = stringResource(R.string.game_position, index + 1, games.size))
                         Text(game.title, color = colors.textPrimary, style = MaterialTheme.typography.titleLarge,
                             maxLines = 3, overflow = TextOverflow.Ellipsis, modifier = Modifier.fillMaxWidth())

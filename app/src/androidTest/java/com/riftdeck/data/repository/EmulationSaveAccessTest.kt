@@ -9,6 +9,7 @@ import com.riftdeck.core.emulator.EmulatorConfig
 import com.riftdeck.core.emulator.EmulatorLauncher
 import com.riftdeck.core.emulator.LaunchResult
 import com.riftdeck.core.emulator.RomLaunchPreparer
+import com.riftdeck.core.emulator.startEmulatorActivity
 import com.riftdeck.core.model.Game
 import com.riftdeck.core.sharing.SaveAccessGate
 import com.riftdeck.data.database.GameEntity
@@ -20,9 +21,13 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -115,7 +120,7 @@ class EmulationSaveAccessTest {
         try { gate.write { fail("An active emulator must deny save writes") }; fail("Expected save-access denial") }
         catch (_: IOException) { }
 
-        repository.onFrontendResumed()
+        repository.onFrontendResumed().join()
         withTimeout(5000) { repository.isPlaying.first { !it } }
         withTimeout(5000) {
             while (true) {
@@ -127,14 +132,61 @@ class EmulationSaveAccessTest {
         assertFalse(repository.historyError.value)
     }
 
+    @Test fun resumeQueuedDuringPreparationDoesNotReleaseTheNewSessionOrItsSaveBarrier() = runBlocking {
+        val preparing = CompletableDeferred<Unit>()
+        val release = CompletableDeferred<Unit>()
+        launcher.handoff = {
+            preparing.complete(Unit)
+            release.await()
+            LaunchResult.Started
+        }
+        val launching = scope.async { repository.launch(game) }
+        withTimeout(5000) { preparing.await() }
+        val staleResume = repository.onFrontendResumed()
+        release.complete(Unit)
+        assertEquals(LaunchResult.Started, withTimeout(5000) { launching.await() })
+        withTimeout(5000) { staleResume.join() }
+
+        assertTrue(repository.isPlaying.value)
+        assertEquals(game.id, database.games().session()!!.gameId)
+        try { gate.write { }; fail("A stale resume cannot release save writes") }
+        catch (_: IOException) { }
+
+        withTimeout(5000) { repository.onFrontendResumed().join() }
+        assertFalse(repository.isPlaying.value)
+        assertNull(database.games().session())
+        assertEquals("writable", gate.write { "writable" })
+    }
+
+    @Test fun cancellationAfterExternalHandoffStillRecordsHistoryAndBlocksSaveWrites() = runBlocking {
+        launcher.handoff = {
+            val caller = currentCoroutineContext()
+            startEmulatorActivity(Dispatchers.Unconfined) { caller.cancel() }
+        }
+        val launching = scope.launch { repository.launch(game) }
+        withTimeout(5000) { launching.join() }
+
+        assertTrue(launching.isCancelled)
+        assertTrue(repository.isPlaying.value)
+        assertEquals(game.id, database.games().session()!!.gameId)
+        assertEquals(1, database.games().findById(game.id)!!.playCount)
+        try { gate.write { }; fail("The launched emulator must keep exclusive save access") }
+        catch (_: IOException) { }
+
+        withTimeout(5000) { repository.onFrontendResumed().join() }
+        assertFalse(repository.isPlaying.value)
+        assertNull(database.games().session())
+    }
+
     private class FakeLauncher : EmulatorLauncher {
         val calls = AtomicInteger()
         @Volatile var result: LaunchResult = LaunchResult.NotInstalled
         @Volatile var lastConfig: EmulatorConfig? = null
+        @Volatile var handoff: (suspend () -> LaunchResult)? = null
         override suspend fun launch(config: EmulatorConfig, game: Game): LaunchResult {
             calls.incrementAndGet()
             lastConfig = config
-            return result
+            return handoff?.invoke() ?: result
         }
     }
 }
